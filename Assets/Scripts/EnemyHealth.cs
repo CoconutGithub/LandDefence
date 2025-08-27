@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// 적의 체력과 관련된 모든 것을 관리하는 스크립트입니다.
 public class EnemyHealth : MonoBehaviour
 {
     [SerializeField]
@@ -28,12 +27,12 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
+        // (수정) 적이 죽었을 때 사운드를 재생합니다.
+        SoundManager.instance.PlayDeathSound();
+
         GameManager.instance.AddGold(goldValue);
         Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
-
-        // (수정) 적이 죽었음을 GameManager에 알립니다.
         GameManager.instance.EnemyDefeated();
-
         Destroy(gameObject);
     }
 }
