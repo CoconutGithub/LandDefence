@@ -8,4 +8,5 @@ public class TowerBlueprint
 {
     public GameObject prefab;
     public int cost;
+    public string towerName; // (추가) UI에 표시될 타워의 이름입니다.
 }
