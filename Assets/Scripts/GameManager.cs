@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI experienceText;
     [SerializeField]
     private TextMeshProUGUI livesText;
+    [SerializeField]
+    private GameObject resultUIPanel; // (수정) 다시 하나의 결과 UI 패널로 통합합니다.
+    [SerializeField]
+    private TextMeshProUGUI resultText; // (수정) 결과 패널 안의 텍스트입니다.
 
     [Header("Player Stats")]
     [SerializeField]
@@ -33,7 +38,7 @@ public class GameManager : MonoBehaviour
     private int waveIndex = 0;
     private float countdown = 2f;
     private bool isGameOver = false;
-    private int enemiesAlive = 0; // 현재 살아있는 적의 수를 저장하는 변수입니다.
+    private int enemiesAlive = 0;
 
     void Awake()
     {
@@ -49,6 +54,7 @@ public class GameManager : MonoBehaviour
         UpdateGoldText();
         UpdateExperienceText();
         UpdateLivesText();
+        resultUIPanel.SetActive(false); // (수정) 게임 시작 시 결과 패널을 숨깁니다.
     }
 
     void Update()
@@ -56,14 +62,12 @@ public class GameManager : MonoBehaviour
         if (isGameOver)
             return;
 
-        // 모든 웨이브가 끝나고 살아있는 적이 없다면 승리 처리
         if (waveIndex >= waves.Length && enemiesAlive <= 0)
         {
             WinGame();
-            return; // 승리 후에는 더 이상 Update를 실행하지 않습니다.
+            return;
         }
 
-        // 마지막 웨이브가 진행 중이면 더 이상 다음 웨이브 카운트다운을 하지 않습니다.
         if (waveIndex >= waves.Length) { return; }
 
         if (countdown <= 0f)
@@ -74,7 +78,6 @@ public class GameManager : MonoBehaviour
         countdown -= Time.deltaTime;
     }
     
-    // 적이 처치되거나 도착했을 때 호출되는 함수입니다.
     public void EnemyDefeated()
     {
         enemiesAlive--;
@@ -85,7 +88,7 @@ public class GameManager : MonoBehaviour
         currentLives--;
         UpdateLivesText();
 
-        if (currentLives <= 0 && !isGameOver) // 게임오버가 아닐 때만 실행
+        if (currentLives <= 0 && !isGameOver)
         {
             GameOver();
         }
@@ -94,14 +97,22 @@ public class GameManager : MonoBehaviour
     void GameOver()
     {
         isGameOver = true;
-        Debug.Log("게임 오버!");
+        resultUIPanel.SetActive(true); // (수정) 결과 패널을 보여줍니다.
+        resultText.text = "패배!"; // (수정) 패배 메시지를 설정합니다.
     }
 
-    // 게임 승리 처리 함수입니다.
     void WinGame()
     {
         isGameOver = true;
-        Debug.Log("승리!");
+        resultUIPanel.SetActive(true); // (수정) 결과 패널을 보여줍니다.
+        resultText.text = "승리!"; // (수정) 승리 메시지를 설정합니다.
+    }
+
+    // "다시 시작" 버튼에 연결될 함수입니다.
+    public void RestartGame()
+    {
+        // 현재 활성화된 씬을 다시 로드합니다.
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void AddGold(int amount)
@@ -136,6 +147,8 @@ public class GameManager : MonoBehaviour
         goldText.text = "Gold: " + currentGold;
     }
 
+
+
     void UpdateExperienceText()
     {
         experienceText.text = "EXP: " + currentExperience;
@@ -148,7 +161,6 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SpawnWave()
     {
-        // 마지막 웨이브인지 확인
         if (waveIndex >= waves.Length)
         {
             yield break;
@@ -169,7 +181,6 @@ public class GameManager : MonoBehaviour
 
     void SpawnEnemy(GameObject enemyPrefab)
     {
-        // 적을 생성할 때마다 살아있는 적의 수를 1 증가시킵니다.
         enemiesAlive++;
         GameObject enemyGO = Instantiate(enemyPrefab, waypointHolder.GetChild(0).position, Quaternion.identity);
         enemyGO.GetComponent<EnemyMovement>().SendMessage("SetWaypointHolder", waypointHolder);
