@@ -45,5 +45,8 @@ TagManager:
   - name: Path
     uniqueID: 2788584857
     locked: 0
+  - name: UI
+    uniqueID: 375785925
+    locked: 0
   m_RenderingLayers:
   - Default
