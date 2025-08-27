@@ -8,7 +8,7 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField]
     private int goldValue = 10;
     [SerializeField]
-    private GameObject experienceOrbPrefab; // (수정) 드랍할 경험치 구슬 프리팹입니다.
+    private GameObject experienceOrbPrefab;
 
     private float currentHealth;
 
@@ -29,9 +29,10 @@ public class EnemyHealth : MonoBehaviour
     void Die()
     {
         GameManager.instance.AddGold(goldValue);
-
-        // (수정) 경험치 구슬을 현재 위치에 생성합니다. Quaternion.identity는 회전 없음을 의미합니다.
         Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
+
+        // (수정) 적이 죽었음을 GameManager에 알립니다.
+        GameManager.instance.EnemyDefeated();
 
         Destroy(gameObject);
     }
