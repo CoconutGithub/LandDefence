@@ -18,15 +18,21 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI goldText;
     [SerializeField]
     private TextMeshProUGUI experienceText;
+    [SerializeField]
+    private TextMeshProUGUI livesText; // (수정) 생명력을 표시할 UI 텍스트입니다.
 
     [Header("Player Stats")]
     [SerializeField]
     private int startGold = 100;
+    [SerializeField]
+    private int startLives = 20; // (수정) 게임 시작 시 주어지는 생명력입니다.
     private int currentGold;
     private int currentExperience = 0;
+    private int currentLives; // (수정) 현재 생명력을 저장하는 변수입니다.
 
     private int waveIndex = 0;
     private float countdown = 2f;
+    private bool isGameOver = false; // (수정) 게임오버 상태를 확인하는 변수입니다.
 
     void Awake()
     {
@@ -35,13 +41,20 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        isGameOver = false;
         currentGold = startGold;
+        currentLives = startLives; // (수정) 생명력 초기화
         UpdateGoldText();
         UpdateExperienceText();
+        UpdateLivesText(); // (수정) 생명력 UI 업데이트
     }
 
     void Update()
     {
+        // (수정) 게임오버 상태이면 아무것도 실행하지 않습니다.
+        if (isGameOver)
+            return;
+
         if (waveIndex >= waves.Length) { return; }
 
         if (countdown <= 0f)
@@ -50,6 +63,26 @@ public class GameManager : MonoBehaviour
             countdown = timeBetweenWaves;
         }
         countdown -= Time.deltaTime;
+    }
+
+    // (수정) 적이 길 끝에 도달했을 때 EnemyMovement에서 호출하는 함수입니다.
+    public void EnemyReachedEnd()
+    {
+        currentLives--;
+        UpdateLivesText();
+
+        if (currentLives <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    // (수정) 게임오버 처리 함수입니다.
+    void GameOver()
+    {
+        isGameOver = true;
+        Debug.Log("게임 오버!");
+        // Time.timeScale = 0f; // (선택) 게임 시간을 멈춰 모든 움직임을 정지시킵니다.
     }
 
     public void AddGold(int amount)
@@ -89,7 +122,12 @@ public class GameManager : MonoBehaviour
         experienceText.text = "EXP: " + currentExperience;
     }
 
-    // (수정) 새로운 Wave 구조에 맞춰 웨이브 생성 로직을 변경합니다.
+    // (수정) 생명력 UI 텍스트를 업데이트하는 함수입니다.
+    void UpdateLivesText()
+    {
+        livesText.text = "Lives: " + currentLives;
+    }
+
     IEnumerator SpawnWave()
     {
         if (waveIndex >= waves.Length)
@@ -100,21 +138,15 @@ public class GameManager : MonoBehaviour
         }
 
         Wave wave = waves[waveIndex];
-
-        // 현재 웨이브에 포함된 모든 '적 그룹'을 순서대로 실행합니다.
         foreach (EnemyGroup group in wave.enemyGroups)
         {
-            // 현재 그룹에 포함된 적들을 생성합니다.
             for (int i = 0; i < group.count; i++)
             {
                 SpawnEnemy(group.enemyPrefab);
                 yield return new WaitForSeconds(group.rate);
             }
-
-            // 이 그룹이 끝나고 다음 그룹이 시작되기 전까지 대기합니다.
             yield return new WaitForSeconds(wave.timeBetweenGroups);
         }
-
         waveIndex++;
     }
 
