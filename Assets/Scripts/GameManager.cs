@@ -22,9 +22,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI livesText;
     [SerializeField]
-    private GameObject resultUIPanel; // (수정) 다시 하나의 결과 UI 패널로 통합합니다.
+    private GameObject resultUIPanel;
     [SerializeField]
-    private TextMeshProUGUI resultText; // (수정) 결과 패널 안의 텍스트입니다.
+    private TextMeshProUGUI resultText;
 
     [Header("Player Stats")]
     [SerializeField]
@@ -34,6 +34,9 @@ public class GameManager : MonoBehaviour
     private int currentGold;
     private int currentExperience = 0;
     private int currentLives;
+
+    // (수정) 누락되었던 archerExperience 변수를 여기에 선언합니다.
+    private int archerExperience = 0;
 
     private int waveIndex = 0;
     private float countdown = 2f;
@@ -51,25 +54,73 @@ public class GameManager : MonoBehaviour
         enemiesAlive = 0;
         currentGold = startGold;
         currentLives = startLives;
+        archerExperience = 0; 
         UpdateGoldText();
         UpdateExperienceText();
         UpdateLivesText();
-        resultUIPanel.SetActive(false); // (수정) 게임 시작 시 결과 패널을 숨깁니다.
+        resultUIPanel.SetActive(false);
+    }
+    
+    void WinGame()
+    {
+        isGameOver = true;
+        resultUIPanel.SetActive(true);
+        resultText.text = "승리!";
+
+        int totalArcherExp = DataManager.LoadArcherExperience();
+        totalArcherExp += archerExperience;
+        DataManager.SaveArcherExperience(totalArcherExp);
+    }
+    
+    void GameOver()
+    {
+        isGameOver = true;
+        resultUIPanel.SetActive(true);
+        resultText.text = "패배!";
     }
 
+    // "다시 시작" 버튼에 연결될 함수입니다.
+    public void RestartGame()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // "메인 메뉴로" 버튼에 연결될 새로운 함수입니다.
+    public void GoToMainMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    
+    public void AddExperience(int amount, TowerType type)
+    {
+        switch (type)
+        {
+            case TowerType.Archer:
+                archerExperience += amount;
+                break;
+            case TowerType.Mage:
+                break;
+            case TowerType.Barracks:
+                break;
+        }
+        UpdateExperienceText();
+    }
+
+    void UpdateExperienceText()
+    {
+        experienceText.text = "궁수 EXP: " + archerExperience;
+    }
+    
     void Update()
     {
         if (isGameOver)
             return;
-
         if (waveIndex >= waves.Length && enemiesAlive <= 0)
         {
             WinGame();
             return;
         }
-
         if (waveIndex >= waves.Length) { return; }
-
         if (countdown <= 0f)
         {
             StartCoroutine(SpawnWave());
@@ -77,50 +128,24 @@ public class GameManager : MonoBehaviour
         }
         countdown -= Time.deltaTime;
     }
-    
     public void EnemyDefeated()
     {
         enemiesAlive--;
     }
-
     public void EnemyReachedEnd()
     {
         currentLives--;
         UpdateLivesText();
-
         if (currentLives <= 0 && !isGameOver)
         {
             GameOver();
         }
     }
-    
-    void GameOver()
-    {
-        isGameOver = true;
-        resultUIPanel.SetActive(true); // (수정) 결과 패널을 보여줍니다.
-        resultText.text = "패배!"; // (수정) 패배 메시지를 설정합니다.
-    }
-
-    void WinGame()
-    {
-        isGameOver = true;
-        resultUIPanel.SetActive(true); // (수정) 결과 패널을 보여줍니다.
-        resultText.text = "승리!"; // (수정) 승리 메시지를 설정합니다.
-    }
-
-    // "다시 시작" 버튼에 연결될 함수입니다.
-    public void RestartGame()
-    {
-        // 현재 활성화된 씬을 다시 로드합니다.
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
     public void AddGold(int amount)
     {
         currentGold += amount;
         UpdateGoldText();
     }
-    
     public bool SpendGold(int amount)
     {
         if (currentGold >= amount)
@@ -135,37 +160,20 @@ public class GameManager : MonoBehaviour
             return false;
         }
     }
-
-    public void AddExperience(int amount)
-    {
-        currentExperience += amount;
-        UpdateExperienceText();
-    }
-
     void UpdateGoldText()
     {
         goldText.text = "Gold: " + currentGold;
     }
-
-
-
-    void UpdateExperienceText()
-    {
-        experienceText.text = "EXP: " + currentExperience;
-    }
-    
     void UpdateLivesText()
     {
         livesText.text = "Lives: " + currentLives;
     }
-
     IEnumerator SpawnWave()
     {
         if (waveIndex >= waves.Length)
         {
             yield break;
         }
-
         Wave wave = waves[waveIndex];
         foreach (EnemyGroup group in wave.enemyGroups)
         {
@@ -178,7 +186,6 @@ public class GameManager : MonoBehaviour
         }
         waveIndex++;
     }
-
     void SpawnEnemy(GameObject enemyPrefab)
     {
         enemiesAlive++;

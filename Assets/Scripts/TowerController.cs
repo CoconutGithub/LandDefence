@@ -3,6 +3,9 @@ using UnityEngine.EventSystems;
 
 public class TowerController : MonoBehaviour, IPointerClickHandler
 {
+    [Header("타워 기본 정보")] // (수정) 헤더 이름 변경
+    public TowerType towerType = TowerType.Archer; // (수정) 이 타워의 종류를 설정합니다. 기본값은 궁수입니다.
+
     [Header("타워 능력치")]
     [SerializeField]
     private float attackRange = 3f;
@@ -46,6 +49,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         if (GameManager.instance.SpendGold(blueprint.cost))
         {
+            SoundManager.instance.PlayBuildSound(); // 업그레이드도 건설 사운드 사용
             GameObject newTowerGO = Instantiate(blueprint.prefab, transform.position, transform.rotation);
             newTowerGO.GetComponent<TowerController>().SetParentSpot(parentSpot);
             parentSpot.SetCurrentTower(newTowerGO);
@@ -67,15 +71,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Attack()
     {
-        // (수정) 공격 시 사운드를 재생합니다.
         SoundManager.instance.PlayAttackSound();
-
         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
 
         if (projectile != null)
         {
-            projectile.Setup(currentTarget, projectileDamage, projectileSpeed);
+            // (수정) 발사체에게 공격 정보와 함께 자신의 '타워 종류'도 알려줍니다.
+            projectile.Setup(currentTarget, projectileDamage, projectileSpeed, towerType);
         }
     }
 
@@ -84,7 +87,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         float closestDistance = Mathf.Infinity;
         GameObject closestEnemy = null;
-
         foreach (GameObject enemy in enemies)
         {
             float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
@@ -94,7 +96,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 closestEnemy = enemy;
             }
         }
-
         if (closestEnemy != null && closestDistance <= attackRange)
         {
             currentTarget = closestEnemy.transform;

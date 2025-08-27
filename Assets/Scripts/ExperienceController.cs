@@ -1,18 +1,21 @@
 using UnityEngine;
 
-// 경험치 구슬의 동작을 제어하는 스크립트입니다.
 public class ExperienceController : MonoBehaviour
 {
-    [SerializeField]
-    private int experienceValue = 5; // 이 구슬이 가진 경험치의 양입니다.
+    private int experienceValue;
+    private TowerType towerType; // (수정) 이 경험치의 종류
 
-    // OnMouseDown 함수는 이 오브젝트의 Collider가 마우스로 클릭되었을 때 호출됩니다.
+    // (수정) Setup 함수로 경험치 값과 종류를 설정합니다.
+    public void Setup(int value, TowerType type)
+    {
+        experienceValue = value;
+        towerType = type;
+    }
+
     private void OnMouseDown()
     {
-        // GameManager에 경험치를 추가하라고 알립니다.
-        GameManager.instance.AddExperience(experienceValue);
-
-        // 경험치를 전달했으므로 이 구슬 오브젝트는 파괴합니다.
+        // (수정) GameManager에 경험치를 추가할 때, 종류도 함께 알려줍니다.
+        GameManager.instance.AddExperience(experienceValue, towerType);
         Destroy(gameObject);
     }
 }
