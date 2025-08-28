@@ -1,26 +1,65 @@
+using System.Collections;
 using UnityEngine;
 
-// 이 스크립트는 Enemy 오브젝트에 부착되어 설정된 Waypoint들을 따라 이동시키는 역할을 합니다.
 public class EnemyMovement : MonoBehaviour
 {
+    [Header("이동 능력치")]
     [SerializeField]
     private float moveSpeed = 2f;
+
+    // (추가) 적의 공격 능력치입니다.
+    [Header("공격 능력치")]
+    [SerializeField]
+    private float attackDamage = 15f;
+    [SerializeField]
+    private float timeBetweenAttacks = 1f;
 
     private Transform waypointHolder;
     private Transform[] waypoints;
     private int currentWaypointIndex = 0;
+    private float originalSpeed;
+    private bool isBlockedBySoldier = false;
+    private SoldierController blockingSoldier;
+    private float attackCountdown = 0f; // (추가) 공격 쿨타임을 계산하기 위한 변수
+
+    void Start()
+    {
+        originalSpeed = moveSpeed;
+    }
 
     void Update()
     {
-        if (waypoints == null)
-            return;
+        attackCountdown -= Time.deltaTime;
 
-        if (currentWaypointIndex >= waypoints.Length)
+        // (수정) 병사에게 막혔을 때의 행동을 추가합니다.
+        if (isBlockedBySoldier)
         {
-            // (수정) 적이 도착했음을 GameManager에 알리는 동시에, 적이 사라졌음도 알립니다.
-            GameManager.instance.EnemyReachedEnd();
-            GameManager.instance.EnemyDefeated(); // 도착한 적도 처치된 것으로 간주
-            Destroy(gameObject);
+            // 나를 막던 병사가 죽었는지 확인합니다.
+            if (blockingSoldier == null)
+            {
+                ResumeMovement();
+                return; // 즉시 이동을 재개하도록 함수를 종료합니다.
+            }
+
+            // 공격할 준비가 되었다면 공격합니다.
+            if (attackCountdown <= 0f)
+            {
+                Attack();
+                attackCountdown = timeBetweenAttacks;
+            }
+            return; // 공격 중에는 이동하지 않도록 함수를 여기서 종료합니다.
+        }
+
+        // (이하 이동 로직은 동일)
+        if (waypoints == null || currentWaypointIndex >= waypoints.Length)
+        {
+            // 길 끝에 도달했는지 확인
+            if (waypoints != null && currentWaypointIndex >= waypoints.Length)
+            {
+                GameManager.instance.EnemyReachedEnd();
+                GameManager.instance.EnemyDefeated();
+                Destroy(gameObject);
+            }
             return;
         }
 
@@ -32,7 +71,46 @@ public class EnemyMovement : MonoBehaviour
             currentWaypointIndex++;
         }
     }
+
+    // (추가) 병사를 공격하는 함수입니다.
+    void Attack()
+    {
+        if (blockingSoldier != null)
+        {
+            blockingSoldier.TakeDamage(attackDamage);
+        }
+    }
     
+    public void ApplySlow(float amount, float duration)
+    {
+        StopAllCoroutines();
+        StartCoroutine(SlowDown(amount, duration));
+    }
+
+    IEnumerator SlowDown(float amount, float duration)
+    {
+        moveSpeed = originalSpeed * (1 - amount);
+        yield return new WaitForSeconds(duration);
+        moveSpeed = originalSpeed;
+    }
+    
+    public void BlockMovement(SoldierController soldier)
+    {
+        isBlockedBySoldier = true;
+        blockingSoldier = soldier;
+    }
+    
+    public void ResumeMovement()
+    {
+        isBlockedBySoldier = false;
+        blockingSoldier = null;
+    }
+    
+    public bool IsBlocked()
+    {
+        return isBlockedBySoldier;
+    }
+
     public void SetWaypointHolder(Transform _waypointHolder)
     {
         waypointHolder = _waypointHolder;

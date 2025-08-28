@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 8941207430269203735}
   - component: {fileID: 1883572114609059514}
-  - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
+  - component: {fileID: 1060728875990397637}
   m_Layer: 0
-  m_Name: Tower_Archer
+  m_Name: Tower_Barracks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.7122476, g: 1, b: 0.6924528, a: 1}
+  m_Color: {r: 0.5924529, g: 0.4518794, b: 0.34764683, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -93,36 +93,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &52103331461806457
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266319913433617465}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  towerType: 0
-  damageType: 0
-  attackRange: 5
-  timeBetweenAttacks: 0.5
-  baseProjectileDamage: 15
-  projectileSpeed: 10
-  slowAmount: 0
-  slowDuration: 0
-  upgradeKR_Blueprint:
-    prefab: {fileID: 266319913433617465, guid: 70fb4f679f1c49c468f063d12f0fd9fc, type: 3}
-    cost: 50
-    towerName: "\uD55C\uAD6D \uD65C \uD0C0\uC6CC"
-  upgradeJP_Blueprint:
-    prefab: {fileID: 266319913433617465, guid: 9a53f3383d9e71b4f9eddfc46d1fdec4, type: 3}
-    cost: 75
-    towerName: "\uC77C\uBCF8 \uD65C \uD0C0\uC6CC"
-  projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
-  firePoint: {fileID: 8832208381610958432}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -169,6 +139,23 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1060728875990397637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 081f463a9241c604fa08e33bbc801a77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BarracksController
+  maxSoldiers: 3
+  spawnRate: 3
+  spreadRadius: 0.5
+  soldierPrefab: {fileID: 1852670417170501071, guid: d3c49df4d4ef02e4ebff096c83f33bd3, type: 3}
+  rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0

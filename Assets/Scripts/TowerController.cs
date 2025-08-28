@@ -5,7 +5,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 {
     [Header("타워 기본 정보")]
     public TowerType towerType = TowerType.Archer;
-    public DamageType damageType = DamageType.Physical; // 이 타워의 공격 타입
+    public DamageType damageType = DamageType.Physical;
 
     [Header("타워 능력치")]
     [SerializeField]
@@ -18,6 +18,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float baseProjectileDamage = 25f;
     [SerializeField]
     private float projectileSpeed = 10f;
+    
+    // (추가) 마법사 타워의 특수 효과를 위한 변수들입니다.
+    [Header("특수 효과 (마법사 전용)")]
+    [SerializeField]
+    private float slowAmount = 0.5f; // 0.5 = 50% 감속
+    [SerializeField]
+    private float slowDuration = 2f; // 감속 지속 시간 (초)
     
     private float finalProjectileDamage;
 
@@ -86,8 +93,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         if (projectile != null)
         {
-            // (수정) 발사체에게 자신의 '데미지 타입'도 함께 전달합니다.
-            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType);
+            // (수정) 발사체에게 감속 효과 정보도 함께 전달합니다.
+            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration);
         }
     }
 

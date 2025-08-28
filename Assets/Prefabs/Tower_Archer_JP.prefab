@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.90943396, g: 0, b: 0.14096159, a: 1}
+  m_Color: {r: 0.6164196, g: 0.9622642, b: 0.1797436, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -106,10 +106,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
   towerType: 0
+  damageType: 0
   attackRange: 7
   timeBetweenAttacks: 1.5
   baseProjectileDamage: 40
   projectileSpeed: 20
+  slowAmount: 0
+  slowDuration: 0
   upgradeKR_Blueprint:
     prefab: {fileID: 0}
     cost: 0
