@@ -105,9 +105,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
+  towerType: 0
   attackRange: 5
   timeBetweenAttacks: 0.5
-  projectileDamage: 15
+  baseProjectileDamage: 15
   projectileSpeed: 10
   upgradeKR_Blueprint:
     prefab: {fileID: 266319913433617465, guid: 70fb4f679f1c49c468f063d12f0fd9fc, type: 3}

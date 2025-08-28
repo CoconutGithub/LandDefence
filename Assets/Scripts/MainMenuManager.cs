@@ -31,6 +31,13 @@ public class MainMenuManager : MonoBehaviour
         techTreePanel.SetActive(true);
     }
 
+    // "뒤로가기" 버튼에 연결되어 모든 패널을 숨기는 새로운 함수입니다.
+    public void HideAllPanels()
+    {
+        stageSelectPanel.SetActive(false);
+        techTreePanel.SetActive(false);
+    }
+
     // "게임 시작" 버튼 (StageSelectPanel 안에 있음)에 연결될 함수입니다.
     public void StartGame()
     {

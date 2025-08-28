@@ -3,8 +3,8 @@ using UnityEngine.EventSystems;
 
 public class TowerController : MonoBehaviour, IPointerClickHandler
 {
-    [Header("타워 기본 정보")] // (수정) 헤더 이름 변경
-    public TowerType towerType = TowerType.Archer; // (수정) 이 타워의 종류를 설정합니다. 기본값은 궁수입니다.
+    [Header("타워 기본 정보")]
+    public TowerType towerType = TowerType.Archer;
 
     [Header("타워 능력치")]
     [SerializeField]
@@ -14,9 +14,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     [Header("발사체 정보")]
     [SerializeField]
-    private float projectileDamage = 25f;
+    private float baseProjectileDamage = 25f; // (수정) '기본' 공격력으로 이름 변경
     [SerializeField]
     private float projectileSpeed = 10f;
+    
+    private float finalProjectileDamage; // (추가) 업그레이드가 적용된 최종 공격력
 
     [Header("업그레이드 정보")]
     public TowerBlueprint upgradeKR_Blueprint;
@@ -31,6 +33,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private Transform currentTarget;
     private float attackCountdown = 0f;
     private TowerSpotController parentSpot;
+
+    // (추가) Start 함수: 게임 시작 시 한 번만 호출됩니다.
+    void Start()
+    {
+        // 저장된 업그레이드 레벨을 불러옵니다.
+        int damageLevel = DataManager.LoadArcherDamageLevel();
+        // 최종 공격력을 계산합니다. (예: 1레벨당 10%씩 증가)
+        finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
+    }
 
     public void SetParentSpot(TowerSpotController spot)
     {
@@ -49,7 +60,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         if (GameManager.instance.SpendGold(blueprint.cost))
         {
-            SoundManager.instance.PlayBuildSound(); // 업그레이드도 건설 사운드 사용
+            SoundManager.instance.PlayBuildSound();
             GameObject newTowerGO = Instantiate(blueprint.prefab, transform.position, transform.rotation);
             newTowerGO.GetComponent<TowerController>().SetParentSpot(parentSpot);
             parentSpot.SetCurrentTower(newTowerGO);
@@ -77,8 +88,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         if (projectile != null)
         {
-            // (수정) 발사체에게 공격 정보와 함께 자신의 '타워 종류'도 알려줍니다.
-            projectile.Setup(currentTarget, projectileDamage, projectileSpeed, towerType);
+            // (수정) 발사체에게 '기본' 공격력이 아닌 '최종' 공격력을 전달합니다.
+            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType);
         }
     }
 
