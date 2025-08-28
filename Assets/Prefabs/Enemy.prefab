@@ -306,6 +306,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 100
   goldValue: 10
+  physicalDefense: 0
+  magicalDefense: 0
   experienceOrbPrefab: {fileID: 4162431200698289360, guid: 926623f091a5d6442b9f66deb74f4c61, type: 3}
   healthBarSlider: {fileID: 3504107941573625506}
   healthBarCanvas: {fileID: 8834925864248864035}

@@ -5,15 +5,17 @@ public class ProjectileController : MonoBehaviour
     private float moveSpeed;
     private float damage;
     private Transform target;
-    private TowerType ownerTowerType; // (수정) 이 발사체를 쏜 타워의 종류를 저장할 변수
+    private TowerType ownerTowerType;
+    private DamageType damageType; // 이 발사체의 데미지 타입
 
-    // (수정) Setup 함수에서 타워 종류(TowerType)도 함께 전달받습니다.
-    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType)
+    // Setup 함수에서 데미지 타입도 함께 전달받습니다.
+    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType)
     {
         target = _target;
         damage = _damage;
         moveSpeed = _speed;
         ownerTowerType = _ownerType;
+        damageType = _damageType;
     }
 
     void Update()
@@ -38,8 +40,8 @@ public class ProjectileController : MonoBehaviour
         EnemyHealth enemyHealth = target.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
         {
-            // (수정) 적에게 데미지를 줄 때, 어떤 종류의 타워가 공격했는지도 알려줍니다.
-            enemyHealth.TakeDamage(damage, ownerTowerType);
+            // 적에게 데미지를 줄 때, 데미지 타입도 함께 알려줍니다.
+            enemyHealth.TakeDamage(damage, ownerTowerType, damageType);
         }
         Destroy(gameObject);
     }

@@ -5,6 +5,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 {
     [Header("타워 기본 정보")]
     public TowerType towerType = TowerType.Archer;
+    public DamageType damageType = DamageType.Physical; // 이 타워의 공격 타입
 
     [Header("타워 능력치")]
     [SerializeField]
@@ -14,11 +15,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     [Header("발사체 정보")]
     [SerializeField]
-    private float baseProjectileDamage = 25f; // (수정) '기본' 공격력으로 이름 변경
+    private float baseProjectileDamage = 25f;
     [SerializeField]
     private float projectileSpeed = 10f;
     
-    private float finalProjectileDamage; // (추가) 업그레이드가 적용된 최종 공격력
+    private float finalProjectileDamage;
 
     [Header("업그레이드 정보")]
     public TowerBlueprint upgradeKR_Blueprint;
@@ -34,12 +35,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float attackCountdown = 0f;
     private TowerSpotController parentSpot;
 
-    // (추가) Start 함수: 게임 시작 시 한 번만 호출됩니다.
     void Start()
     {
-        // 저장된 업그레이드 레벨을 불러옵니다.
         int damageLevel = DataManager.LoadArcherDamageLevel();
-        // 최종 공격력을 계산합니다. (예: 1레벨당 10%씩 증가)
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
     }
 
@@ -88,8 +86,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         if (projectile != null)
         {
-            // (수정) 발사체에게 '기본' 공격력이 아닌 '최종' 공격력을 전달합니다.
-            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType);
+            // (수정) 발사체에게 자신의 '데미지 타입'도 함께 전달합니다.
+            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType);
         }
     }
 
