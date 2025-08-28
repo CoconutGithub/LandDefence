@@ -19,12 +19,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float projectileSpeed = 10f;
     
-    // (추가) 마법사 타워의 특수 효과를 위한 변수들입니다.
-    [Header("특수 효과 (마법사 전용)")]
+    [Header("특수 효과 (마법사/폭탄 전용)")]
     [SerializeField]
-    private float slowAmount = 0.5f; // 0.5 = 50% 감속
+    private float slowAmount = 0.5f;
     [SerializeField]
-    private float slowDuration = 2f; // 감속 지속 시간 (초)
+    private float slowDuration = 2f;
+    [SerializeField]
+    private float explosionRadius = 2f; // (추가) 폭탄 타워의 폭발 반경
     
     private float finalProjectileDamage;
 
@@ -44,8 +45,16 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        int damageLevel = DataManager.LoadArcherDamageLevel();
-        finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
+        // (수정) 타워 종류에 따라 다른 업그레이드 데이터를 불러오도록 개선이 필요하지만, 지금은 궁수만 적용합니다.
+        if (towerType == TowerType.Archer)
+        {
+            int damageLevel = DataManager.LoadArcherDamageLevel();
+            finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
+        }
+        else
+        {
+            finalProjectileDamage = baseProjectileDamage;
+        }
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -89,12 +98,23 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         SoundManager.instance.PlayAttackSound();
         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
-        ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
 
-        if (projectile != null)
+        // (수정) 타워 종류에 따라 다른 발사체 스크립트를 제어합니다.
+        if (towerType == TowerType.Bomb)
         {
-            // (수정) 발사체에게 감속 효과 정보도 함께 전달합니다.
-            projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration);
+            BombProjectileController bomb = projectileGO.GetComponent<BombProjectileController>();
+            if (bomb != null)
+            {
+                bomb.Setup(currentTarget, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType);
+            }
+        }
+        else // 궁수, 마법사 타워
+        {
+            ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+            if (projectile != null)
+            {
+                projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration);
+            }
         }
     }
 

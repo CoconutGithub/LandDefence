@@ -113,6 +113,7 @@ MonoBehaviour:
   projectileSpeed: 10
   slowAmount: 0
   slowDuration: 0
+  explosionRadius: 0
   upgradeKR_Blueprint:
     prefab: {fileID: 266319913433617465, guid: 70fb4f679f1c49c468f063d12f0fd9fc, type: 3}
     cost: 50

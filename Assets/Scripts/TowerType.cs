@@ -4,5 +4,6 @@ public enum TowerType
 {
     Archer,
     Mage,
-    Barracks
+    Barracks,
+    Bomb
 }
