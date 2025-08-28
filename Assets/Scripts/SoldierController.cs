@@ -13,6 +13,10 @@ public class SoldierController : MonoBehaviour
     private float timeBetweenAttacks = 1.5f;
     [SerializeField]
     private float moveSpeed = 3f;
+    [SerializeField]
+    private float healthRegenRate = 5f; // (추가) 초당 체력 회복량
+    [SerializeField]
+    private float timeToStartRegen = 3f; // (추가) 전투 후 회복 시작까지 걸리는 시간
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -23,8 +27,9 @@ public class SoldierController : MonoBehaviour
     private float currentHealth;
     private float attackCountdown = 0f;
     private EnemyMovement currentTarget;
-    private Vector3 rallyPointPosition; // (수정) Transform 대신 Vector3 위치 값을 목표로 삼습니다.
+    private Vector3 rallyPointPosition;
     private BarracksController ownerBarracks;
+    private float timeSinceLastCombat = 0f; // (추가) 마지막 전투 후 지난 시간
 
     void Start()
     {
@@ -48,9 +53,22 @@ public class SoldierController : MonoBehaviour
     {
         attackCountdown -= Time.deltaTime;
         
+        // (수정) 전투 중이 아닐 때의 로직
         if (currentTarget == null)
         {
             MoveToRallyPoint();
+
+            // (추가) 체력 회복 로직
+            timeSinceLastCombat += Time.deltaTime;
+            if (timeSinceLastCombat >= timeToStartRegen && currentHealth < maxHealth)
+            {
+                RegenerateHealth();
+            }
+        }
+        else
+        {
+            // (추가) 전투 중일 때는 회복 타이머를 리셋합니다.
+            timeSinceLastCombat = 0f;
         }
 
         if (currentTarget != null && attackCountdown <= 0f)
@@ -60,16 +78,27 @@ public class SoldierController : MonoBehaviour
         }
     }
     
+    // (추가) 체력을 회복하고 체력바를 업데이트하는 함수
+    void RegenerateHealth()
+    {
+        currentHealth += healthRegenRate * Time.deltaTime;
+        // 체력이 최대 체력을 넘지 않도록 합니다.
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        
+        if (healthBarSlider != null)
+        {
+            healthBarSlider.value = currentHealth / maxHealth;
+        }
+    }
+
     void MoveToRallyPoint()
     {
-        // (수정) Vector3 위치로 이동합니다.
         if (Vector3.Distance(transform.position, rallyPointPosition) > 0.1f)
         {
             transform.position = Vector3.MoveTowards(transform.position, rallyPointPosition, moveSpeed * Time.deltaTime);
         }
     }
     
-    // (수정) 외부에서 Vector3 위치 값을 받아 목표를 설정하는 함수입니다. (이전 SetRallyPoint 함수를 대체합니다)
     public void SetRallyPointPosition(Vector3 newPosition)
     {
         rallyPointPosition = newPosition;
@@ -91,6 +120,8 @@ public class SoldierController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+        timeSinceLastCombat = 0f; // (추가) 피해를 입으면 회복 타이머를 리셋합니다.
+
         if (healthBarSlider != null)
         {
             healthBarSlider.value = currentHealth / maxHealth;
@@ -131,7 +162,6 @@ public class SoldierController : MonoBehaviour
     
     void FixedUpdate()
     {
-        // 목표가 있는데, 그 목표가 죽었거나 범위를 벗어났는지 확인
         if (currentTarget != null && !currentTarget.gameObject.activeInHierarchy)
         {
              currentTarget = null;

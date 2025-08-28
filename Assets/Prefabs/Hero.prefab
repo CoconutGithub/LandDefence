@@ -285,6 +285,8 @@ MonoBehaviour:
   maxHealth: 500
   attackDamage: 30
   timeBetweenAttacks: 1
+  healthRegenRate: 50
+  timeToStartRegen: 3
   healthBarSlider: {fileID: 3619236416454428086}
   healthBarCanvas: {fileID: 5059071414994923818}
 --- !u!58 &-3344491319371381218

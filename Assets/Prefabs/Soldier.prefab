@@ -337,6 +337,8 @@ MonoBehaviour:
   attackDamage: 30
   timeBetweenAttacks: 0.3
   moveSpeed: 3
+  healthRegenRate: 30
+  timeToStartRegen: 3
   healthBarSlider: {fileID: 4979688441236379191}
   healthBarCanvas: {fileID: 6356077035225273916}
 --- !u!1 &2974342527480028504

@@ -13,6 +13,10 @@ public class HeroController : MonoBehaviour
     private float attackDamage = 30f;
     [SerializeField]
     private float timeBetweenAttacks = 1f;
+    [SerializeField]
+    private float healthRegenRate = 10f; // (추가) 초당 체력 회복량
+    [SerializeField]
+    private float timeToStartRegen = 3f; // (추가) 전투 후 회복 시작까지 걸리는 시간
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -25,6 +29,7 @@ public class HeroController : MonoBehaviour
     private float currentHealth;
     private float attackCountdown = 0f;
     private EnemyMovement currentTarget;
+    private float timeSinceLastCombat = 0f; // (추가) 마지막 전투 후 지난 시간
 
     void Start()
     {
@@ -47,12 +52,27 @@ public class HeroController : MonoBehaviour
 
     void Update()
     {
-        // (수정) 전투 여부와 상관없이 항상 이동 입력을 받습니다.
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         movementInput = new Vector2(moveX, moveY).normalized;
 
         attackCountdown -= Time.deltaTime;
+
+        // (수정) 전투 중이 아닐 때의 로직
+        if (currentTarget == null)
+        {
+            // (추가) 체력 회복 로직
+            timeSinceLastCombat += Time.deltaTime;
+            if (timeSinceLastCombat >= timeToStartRegen && currentHealth < maxHealth)
+            {
+                RegenerateHealth();
+            }
+        }
+        else
+        {
+            // (추가) 전투 중일 때는 회복 타이머를 리셋합니다.
+            timeSinceLastCombat = 0f;
+        }
 
         if (currentTarget != null && attackCountdown <= 0f)
         {
@@ -60,15 +80,25 @@ public class HeroController : MonoBehaviour
             attackCountdown = timeBetweenAttacks;
         }
 
-        // 목표가 있는데, 그 목표가 죽었거나 범위를 벗어났는지 확인하는 로직
         if (currentTarget != null)
         {
-            // 목표가 죽었거나, 너무 멀어졌다면 전투를 해제합니다.
             if (!currentTarget.gameObject.activeInHierarchy || Vector3.Distance(transform.position, currentTarget.transform.position) > GetComponent<CircleCollider2D>().radius)
             {
-                currentTarget.ResumeMovement(); // 적의 이동을 재개시킵니다.
-                currentTarget = null;           // 공격 목표를 초기화합니다.
+                currentTarget.ResumeMovement();
+                currentTarget = null;
             }
+        }
+    }
+
+    // (추가) 체력을 회복하고 체력바를 업데이트하는 함수
+    void RegenerateHealth()
+    {
+        currentHealth += healthRegenRate * Time.deltaTime;
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        
+        if (healthBarSlider != null)
+        {
+            healthBarSlider.value = currentHealth / maxHealth;
         }
     }
 
@@ -88,6 +118,8 @@ public class HeroController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+        timeSinceLastCombat = 0f; // (추가) 피해를 입으면 회복 타이머를 리셋합니다.
+
         if (healthBarSlider != null)
         {
             healthBarSlider.value = currentHealth / maxHealth;
@@ -108,10 +140,8 @@ public class HeroController : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    // Is Trigger가 켜졌으므로, OnTriggerEnter2D로 모든 것을 감지합니다.
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // 감지된 것이 경험치 구슬이라면
         if (other.CompareTag("ExperienceOrb"))
         {
             ExperienceController orb = other.GetComponent<ExperienceController>();
@@ -119,17 +149,16 @@ public class HeroController : MonoBehaviour
             {
                 orb.Collect();
             }
-            return; // 경험치를 먹었으면 아래 로직은 실행하지 않습니다.
+            return;
         }
 
-        // 감지된 것이 적이고, 아직 공격 목표가 없다면
         if (other.CompareTag("Enemy") && currentTarget == null)
         {
             EnemyMovement enemy = other.GetComponent<EnemyMovement>();
             if (enemy != null && !enemy.IsBlocked())
             {
-                enemy.BlockMovement(null, this); // 적의 이동을 멈추고
-                currentTarget = enemy;           // 내 공격 목표로 설정합니다.
+                enemy.BlockMovement(null, this);
+                currentTarget = enemy;
             }
         }
     }
