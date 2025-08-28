@@ -22,7 +22,8 @@ public class TowerBuildUI : MonoBehaviour
     public TowerBlueprint archerBlueprint;
     public TowerBlueprint mageBlueprint;
     public TowerBlueprint barracksBlueprint;
-    public TowerBlueprint bombBlueprint; // (추가) 폭탄 타워의 설계도입니다.
+    public TowerBlueprint bombBlueprint;
+    public TowerBlueprint gunBlueprint; // (추가) 총 타워의 설계도입니다.
 
     private TowerSpotController currentSpot;
 
@@ -73,12 +74,22 @@ public class TowerBuildUI : MonoBehaviour
         Hide();
     }
 
-    // (추가) 폭탄 타워를 건설하는 새로운 함수입니다.
+    // 폭탄 타워를 건설하는 함수입니다.
     public void BuildBombTower()
     {
         if (currentSpot != null)
         {
             currentSpot.BuildTower(bombBlueprint);
+        }
+        Hide();
+    }
+
+    // (추가) 총 타워를 건설하는 새로운 함수입니다.
+    public void BuildGunTower()
+    {
+        if (currentSpot != null)
+        {
+            currentSpot.BuildTower(gunBlueprint);
         }
         Hide();
     }

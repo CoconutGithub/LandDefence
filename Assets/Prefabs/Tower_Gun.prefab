@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 8941207430269203735}
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
-  - component: {fileID: -4101450617855879121}
+  - component: {fileID: -3492042215985664023}
   m_Layer: 7
-  m_Name: Tower_Archer_KR
+  m_Name: Tower_Gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0, g: 1, b: 0.5152302, a: 1}
+  m_Color: {r: 1, g: 0.5869013, b: 0.5264151, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,12 +105,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  towerType: 0
+  towerType: 4
   damageType: 0
-  attackRange: 5
-  timeBetweenAttacks: 0.3
-  baseProjectileDamage: 25
-  projectileSpeed: 10
+  attackRange: 6
+  timeBetweenAttacks: 1
+  baseProjectileDamage: 35
+  projectileSpeed: 50
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
     towerName: 
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
---- !u!61 &-4101450617855879121
+--- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

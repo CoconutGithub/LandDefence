@@ -5,5 +5,6 @@ public enum TowerType
     Archer,
     Mage,
     Barracks,
-    Bomb
+    Bomb,
+    Gun
 }
