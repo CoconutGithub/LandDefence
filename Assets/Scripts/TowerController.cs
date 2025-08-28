@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,19 +20,23 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float projectileSpeed = 10f;
     
-    [Header("특수 효과 (마법사/폭탄 전용)")]
+    [Header("특수 효과")]
     [SerializeField]
     private float slowAmount = 0.5f;
     [SerializeField]
     private float slowDuration = 2f;
     [SerializeField]
     private float explosionRadius = 2f;
+    [SerializeField]
+    private int bulletsPerBurst = 1;
+    [SerializeField]
+    private float timeBetweenShots = 0.1f;
     
     private float finalProjectileDamage;
 
+    // (수정) 업그레이드 정보를 여러 개 가질 수 있는 배열로 변경합니다.
     [Header("업그레이드 정보")]
-    public TowerBlueprint upgradeKR_Blueprint;
-    public TowerBlueprint upgradeJP_Blueprint;
+    public TowerBlueprint[] upgradePaths;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -45,7 +50,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        // (수정) DataManager의 새로운 함수를 호출하여, '이 타워의 종류(towerType)'에 맞는 업그레이드 레벨을 불러옵니다.
+        // 타워 종류에 따라 다른 업그레이드 데이터를 불러오도록 개선
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
     }
@@ -57,7 +62,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (upgradeKR_Blueprint.prefab != null || upgradeJP_Blueprint.prefab != null)
+        // (수정) 업그레이드 경로가 하나라도 있을 때만 UI를 엽니다.
+        if (upgradePaths != null && upgradePaths.Length > 0)
         {
             TowerUpgradeUI.instance.Show(this);
         }
@@ -82,12 +88,25 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         if (currentTarget != null && attackCountdown <= 0f)
         {
-            Attack();
+            StartCoroutine(AttackBurst());
             attackCountdown = timeBetweenAttacks;
         }
     }
 
-    void Attack()
+    IEnumerator AttackBurst()
+    {
+        for (int i = 0; i < bulletsPerBurst; i++)
+        {
+            if (currentTarget == null)
+            {
+                yield break;
+            }
+            Shoot();
+            yield return new WaitForSeconds(timeBetweenShots);
+        }
+    }
+
+    void Shoot()
     {
         SoundManager.instance.PlayAttackSound();
         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
