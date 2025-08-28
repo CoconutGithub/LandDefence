@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic; // (추가) Dictionary를 사용하기 위해 추가합니다.
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
@@ -18,7 +19,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI goldText;
     [SerializeField]
-    private TextMeshProUGUI experienceText;
+    private TextMeshProUGUI experienceText; // 이 텍스트는 이제 모든 경험치를 요약해서 보여줍니다.
     [SerializeField]
     private TextMeshProUGUI livesText;
     [SerializeField]
@@ -32,11 +33,10 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int startLives = 20;
     private int currentGold;
-    private int currentExperience = 0;
     private int currentLives;
 
-    // (수정) 누락되었던 archerExperience 변수를 여기에 선언합니다.
-    private int archerExperience = 0;
+    // (수정) 인게임에서 얻은 경험치를 타워 종류별로 저장하는 Dictionary입니다.
+    private Dictionary<TowerType, int> inGameExperience;
 
     private int waveIndex = 0;
     private float countdown = 2f;
@@ -54,7 +54,10 @@ public class GameManager : MonoBehaviour
         enemiesAlive = 0;
         currentGold = startGold;
         currentLives = startLives;
-        archerExperience = 0; 
+        
+        // (수정) 인게임 경험치 Dictionary를 초기화합니다.
+        inGameExperience = new Dictionary<TowerType, int>();
+
         UpdateGoldText();
         UpdateExperienceText();
         UpdateLivesText();
@@ -67,50 +70,51 @@ public class GameManager : MonoBehaviour
         resultUIPanel.SetActive(true);
         resultText.text = "승리!";
 
-        int totalArcherExp = DataManager.LoadArcherExperience();
-        totalArcherExp += archerExperience;
-        DataManager.SaveArcherExperience(totalArcherExp);
+        // (수정) 게임 승리 시, 이번 판에서 얻은 모든 종류의 경험치를 영구 저장합니다.
+        foreach (var expPair in inGameExperience)
+        {
+            TowerType type = expPair.Key;
+            int gainedExp = expPair.Value;
+
+            int totalExp = DataManager.LoadExperience(type);
+            totalExp += gainedExp;
+            DataManager.SaveExperience(type, totalExp);
+        }
+    }
+
+    // AddExperience 함수가 타워 종류를 받아서 처리합니다.
+    public void AddExperience(int amount, TowerType type)
+    {
+        // (수정) Dictionary에 경험치를 누적합니다.
+        if (!inGameExperience.ContainsKey(type))
+        {
+            inGameExperience[type] = 0;
+        }
+        inGameExperience[type] += amount;
+
+        UpdateExperienceText();
+    }
+
+    // UpdateExperienceText 함수가 모든 경험치를 요약해서 보여주도록 변경합니다.
+    void UpdateExperienceText()
+    {
+        string expString = "";
+        foreach (var expPair in inGameExperience)
+        {
+            expString += $"{expPair.Key}: {expPair.Value} EXP\n";
+        }
+        experienceText.text = expString;
     }
     
-    void GameOver()
-    {
-        isGameOver = true;
-        resultUIPanel.SetActive(true);
-        resultText.text = "패배!";
-    }
-
-    // "다시 시작" 버튼에 연결될 함수입니다.
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    // "메인 메뉴로" 버튼에 연결될 새로운 함수입니다.
+    // ... (이하 다른 함수들은 기존과 동일) ...
     public void GoToMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
     }
-    
-    public void AddExperience(int amount, TowerType type)
+    public void RestartGame()
     {
-        switch (type)
-        {
-            case TowerType.Archer:
-                archerExperience += amount;
-                break;
-            case TowerType.Mage:
-                break;
-            case TowerType.Barracks:
-                break;
-        }
-        UpdateExperienceText();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
-
-    void UpdateExperienceText()
-    {
-        experienceText.text = "궁수 EXP: " + archerExperience;
-    }
-    
     void Update()
     {
         if (isGameOver)
@@ -140,6 +144,12 @@ public class GameManager : MonoBehaviour
         {
             GameOver();
         }
+    }
+    void GameOver()
+    {
+        isGameOver = true;
+        resultUIPanel.SetActive(true);
+        resultText.text = "패배!";
     }
     public void AddGold(int amount)
     {

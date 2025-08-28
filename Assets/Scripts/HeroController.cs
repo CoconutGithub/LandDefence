@@ -16,7 +16,7 @@ public class HeroController : MonoBehaviour
     [SerializeField]
     private float healthRegenRate = 10f; // (추가) 초당 체력 회복량
     [SerializeField]
-    private float timeToStartRegen = 3f; // (추가) 전투 후 회복 시작까지 걸리는 시간
+    private float timeToStartRegen = 5f; // (추가) 전투 후 회복 시작까지 걸리는 시간
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -111,7 +111,8 @@ public class HeroController : MonoBehaviour
     {
         if (currentTarget != null)
         {
-            currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, DamageType.Physical);
+            // 이제 영웅이 공격할 때 자신의 타입을 TowerType.Hero로 올바르게 전달합니다.
+            currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Hero, DamageType.Physical);
         }
     }
 

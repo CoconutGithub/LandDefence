@@ -25,7 +25,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float slowDuration = 2f;
     [SerializeField]
-    private float explosionRadius = 2f; // (추가) 폭탄 타워의 폭발 반경
+    private float explosionRadius = 2f;
     
     private float finalProjectileDamage;
 
@@ -45,16 +45,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Start()
     {
-        // (수정) 타워 종류에 따라 다른 업그레이드 데이터를 불러오도록 개선이 필요하지만, 지금은 궁수만 적용합니다.
-        if (towerType == TowerType.Archer)
-        {
-            int damageLevel = DataManager.LoadArcherDamageLevel();
-            finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
-        }
-        else
-        {
-            finalProjectileDamage = baseProjectileDamage;
-        }
+        // (수정) DataManager의 새로운 함수를 호출하여, '이 타워의 종류(towerType)'에 맞는 업그레이드 레벨을 불러옵니다.
+        int damageLevel = DataManager.LoadDamageLevel(towerType);
+        finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -99,7 +92,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         SoundManager.instance.PlayAttackSound();
         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
-        // (수정) 타워 종류에 따라 다른 발사체 스크립트를 제어합니다.
         if (towerType == TowerType.Bomb)
         {
             BombProjectileController bomb = projectileGO.GetComponent<BombProjectileController>();
@@ -108,7 +100,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 bomb.Setup(currentTarget, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType);
             }
         }
-        else // 궁수, 마법사 타워
+        else
         {
             ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
             if (projectile != null)

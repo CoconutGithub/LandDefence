@@ -3,34 +3,40 @@ using UnityEngine;
 // 게임 데이터를 영구적으로 저장하고 불러오는 역할을 하는 클래스입니다.
 public static class DataManager
 {
-    // 데이터를 저장할 때 사용할 키(Key)입니다.
-    private const string ArcherExpKey = "ArcherExperience";
-    private const string ArcherDamageLevelKey = "ArcherDamageLevel"; // (추가) 궁수 공격력 레벨 키
-
-    // --- 궁수 경험치 관련 ---
-    public static void SaveArcherExperience(int totalExp)
+    // (수정) 각 데이터 종류별로 키를 생성하는 헬퍼 함수들을 만듭니다.
+    private static string GetExpKey(TowerType type)
     {
-        PlayerPrefs.SetInt(ArcherExpKey, totalExp);
+        return type.ToString() + "Experience"; // 예: "ArcherExperience", "MageExperience"
+    }
+
+    private static string GetDamageLevelKey(TowerType type)
+    {
+        return type.ToString() + "DamageLevel"; // 예: "ArcherDamageLevel"
+    }
+
+    // --- 경험치 저장 및 불러오기 (타워 타입별) ---
+    public static void SaveExperience(TowerType type, int totalExp)
+    {
+        PlayerPrefs.SetInt(GetExpKey(type), totalExp);
         PlayerPrefs.Save();
-        Debug.Log("궁수 경험치 저장 완료: " + totalExp);
+        Debug.Log($"{type} 경험치 저장 완료: {totalExp}");
     }
 
-    public static int LoadArcherExperience()
+    public static int LoadExperience(TowerType type)
     {
-        return PlayerPrefs.GetInt(ArcherExpKey, 0);
+        return PlayerPrefs.GetInt(GetExpKey(type), 0);
     }
 
-    // --- (추가) 궁수 공격력 레벨 관련 ---
-    public static void SaveArcherDamageLevel(int level)
+    // --- 공격력 레벨 저장 및 불러오기 (타워 타입별) ---
+    public static void SaveDamageLevel(TowerType type, int level)
     {
-        PlayerPrefs.SetInt(ArcherDamageLevelKey, level);
+        PlayerPrefs.SetInt(GetDamageLevelKey(type), level);
         PlayerPrefs.Save();
-        Debug.Log("궁수 공격력 레벨 저장 완료: " + level);
+        Debug.Log($"{type} 공격력 레벨 저장 완료: {level}");
     }
 
-    public static int LoadArcherDamageLevel()
+    public static int LoadDamageLevel(TowerType type)
     {
-        // 저장된 레벨이 없으면 기본값으로 0레벨을 반환합니다.
-        return PlayerPrefs.GetInt(ArcherDamageLevelKey, 0);
+        return PlayerPrefs.GetInt(GetDamageLevelKey(type), 0);
     }
 }

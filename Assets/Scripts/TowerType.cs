@@ -6,5 +6,6 @@ public enum TowerType
     Mage,
     Barracks,
     Bomb,
-    Gun
+    Gun,
+    Hero
 }
