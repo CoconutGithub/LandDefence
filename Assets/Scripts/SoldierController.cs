@@ -69,7 +69,7 @@ public class SoldierController : MonoBehaviour
         }
     }
     
-    // (수정) 외부에서 Vector3 위치 값을 받아 목표를 설정합니다.
+    // (수정) 외부에서 Vector3 위치 값을 받아 목표를 설정하는 함수입니다. (이전 SetRallyPoint 함수를 대체합니다)
     public void SetRallyPointPosition(Vector3 newPosition)
     {
         rallyPointPosition = newPosition;
@@ -123,7 +123,7 @@ public class SoldierController : MonoBehaviour
             EnemyMovement enemy = other.GetComponent<EnemyMovement>();
             if (enemy != null && !enemy.IsBlocked())
             {
-                enemy.BlockMovement(this);
+                enemy.BlockMovement(this, null);
                 currentTarget = enemy;
             }
         }
@@ -131,10 +131,10 @@ public class SoldierController : MonoBehaviour
     
     void FixedUpdate()
     {
-        if (currentTarget != null && Vector3.Distance(transform.position, currentTarget.transform.position) > GetComponent<CircleCollider2D>().radius)
+        // 목표가 있는데, 그 목표가 죽었거나 범위를 벗어났는지 확인
+        if (currentTarget != null && !currentTarget.gameObject.activeInHierarchy)
         {
-            currentTarget.ResumeMovement();
-            currentTarget = null;
+             currentTarget = null;
         }
     }
 }

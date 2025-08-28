@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
   - component: {fileID: -4101450617855879121}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tower_Archer_KR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -178,7 +178,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8832208381610958432}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

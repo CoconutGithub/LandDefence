@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: -3492042215985664023}
   - component: {fileID: 1060728875990397637}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tower_Barracks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -165,7 +165,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8832208381610958432}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}

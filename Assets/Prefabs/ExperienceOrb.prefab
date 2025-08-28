@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 1232797025490395619}
   - component: {fileID: 4739043355531625344}
   - component: {fileID: 687445165235197613}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ExperienceOrb
-  m_TagString: Untagged
+  m_TagString: ExperienceOrb
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -140,4 +140,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c83c887676e1284d9199512eb14ae8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExperienceController
-  experienceValue: 5

@@ -7,7 +7,6 @@ public class EnemyMovement : MonoBehaviour
     [SerializeField]
     private float moveSpeed = 2f;
 
-    // (추가) 적의 공격 능력치입니다.
     [Header("공격 능력치")]
     [SerializeField]
     private float attackDamage = 15f;
@@ -18,9 +17,10 @@ public class EnemyMovement : MonoBehaviour
     private Transform[] waypoints;
     private int currentWaypointIndex = 0;
     private float originalSpeed;
-    private bool isBlockedBySoldier = false;
+    private bool isBlocked = false;
     private SoldierController blockingSoldier;
-    private float attackCountdown = 0f; // (추가) 공격 쿨타임을 계산하기 위한 변수
+    private HeroController blockingHero;
+    private float attackCountdown = 0f;
 
     void Start()
     {
@@ -31,29 +31,25 @@ public class EnemyMovement : MonoBehaviour
     {
         attackCountdown -= Time.deltaTime;
 
-        // (수정) 병사에게 막혔을 때의 행동을 추가합니다.
-        if (isBlockedBySoldier)
+        if (isBlocked)
         {
-            // 나를 막던 병사가 죽었는지 확인합니다.
-            if (blockingSoldier == null)
+            if ((blockingSoldier != null && !blockingSoldier.gameObject.activeInHierarchy) || 
+                (blockingHero != null && !blockingHero.gameObject.activeInHierarchy))
             {
                 ResumeMovement();
-                return; // 즉시 이동을 재개하도록 함수를 종료합니다.
+                return;
             }
 
-            // 공격할 준비가 되었다면 공격합니다.
             if (attackCountdown <= 0f)
             {
                 Attack();
                 attackCountdown = timeBetweenAttacks;
             }
-            return; // 공격 중에는 이동하지 않도록 함수를 여기서 종료합니다.
+            return;
         }
 
-        // (이하 이동 로직은 동일)
         if (waypoints == null || currentWaypointIndex >= waypoints.Length)
         {
-            // 길 끝에 도달했는지 확인
             if (waypoints != null && currentWaypointIndex >= waypoints.Length)
             {
                 GameManager.instance.EnemyReachedEnd();
@@ -72,12 +68,15 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    // (추가) 병사를 공격하는 함수입니다.
     void Attack()
     {
         if (blockingSoldier != null)
         {
             blockingSoldier.TakeDamage(attackDamage);
+        }
+        else if (blockingHero != null)
+        {
+            blockingHero.TakeDamage(attackDamage);
         }
     }
     
@@ -94,21 +93,23 @@ public class EnemyMovement : MonoBehaviour
         moveSpeed = originalSpeed;
     }
     
-    public void BlockMovement(SoldierController soldier)
+    public void BlockMovement(SoldierController soldier, HeroController hero)
     {
-        isBlockedBySoldier = true;
-        blockingSoldier = soldier;
+        isBlocked = true;
+        if (soldier != null) blockingSoldier = soldier;
+        if (hero != null) blockingHero = hero;
     }
     
     public void ResumeMovement()
     {
-        isBlockedBySoldier = false;
+        isBlocked = false;
         blockingSoldier = null;
+        blockingHero = null;
     }
     
     public bool IsBlocked()
     {
-        return isBlockedBySoldier;
+        return isBlocked;
     }
 
     public void SetWaypointHolder(Transform _waypointHolder)
