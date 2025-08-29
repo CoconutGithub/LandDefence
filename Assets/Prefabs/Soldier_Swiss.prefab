@@ -178,7 +178,7 @@ GameObject:
   - component: {fileID: 5835908562457066811}
   - component: {fileID: 8514670505802456664}
   m_Layer: 0
-  m_Name: Soldier _Swiss
+  m_Name: Soldier_Swiss
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -336,7 +336,7 @@ MonoBehaviour:
   maxHealth: 350
   attackDamage: 70
   timeBetweenAttacks: 1
-  moveSpeed: 2
+  moveSpeed: 3
   healthRegenRate: 50
   timeToStartRegen: 3
   damageType: 0

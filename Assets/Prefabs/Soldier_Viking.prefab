@@ -336,7 +336,7 @@ MonoBehaviour:
   maxHealth: 100
   attackDamage: 50
   timeBetweenAttacks: 0.3
-  moveSpeed: 5
+  moveSpeed: 3
   healthRegenRate: 30
   timeToStartRegen: 5
   damageType: 0

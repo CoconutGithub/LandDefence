@@ -2,6 +2,7 @@
 // 앞으로 마법사, 병영 등 새로운 타워가 추가될 때마다 여기에 추가하면 됩니다.
 public enum TowerType
 {
+    None,//플레이어
     Archer,
     Mage,
     Barracks,

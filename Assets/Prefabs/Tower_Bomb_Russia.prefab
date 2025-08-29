@@ -111,8 +111,8 @@ MonoBehaviour:
   timeBetweenAttacks: 5
   baseProjectileDamage: 70
   projectileSpeed: 3
-  slowAmount: 0
-  slowDuration: 0
+  slowAmount: 0.4
+  slowDuration: 3
   explosionRadius: 4
   bulletsPerBurst: 1
   timeBetweenShots: 0.1

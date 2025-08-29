@@ -335,18 +335,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoldierController
   maxHealth: 200
   attackDamage: 20
+  damageType: 1
   timeBetweenAttacks: 0.5
-  moveSpeed: 3
   healthRegenRate: 30
   timeToStartRegen: 3
-  damageType: 1
-  isAreaOfEffect: 0
-  aoeRadius: 1.5
-  healthBarSlider: {fileID: 4979688441236379191}
-  healthBarCanvas: {fileID: 6356077035225273916}
+  pursuitRange: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  isAoEAttacker: 0
+  aoeRadius: 1.5
+  healthBarSlider: {fileID: 4979688441236379191}
+  healthBarCanvas: {fileID: 6356077035225273916}
 --- !u!1 &2974342527480028504
 GameObject:
   m_ObjectHideFlags: 0
