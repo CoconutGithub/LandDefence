@@ -24,6 +24,10 @@ public class EnemyMovement : MonoBehaviour
     private bool isSlowed = false;
     private float slowTimer = 0f;
 
+        // (추가) 속박 상태를 위한 변수들입니다.
+    private bool isRooted = false;
+    private float rootTimer = 0f;
+
     void Start()
     {
         originalSpeed = moveSpeed;
@@ -41,6 +45,17 @@ public class EnemyMovement : MonoBehaviour
 
     void Update()
     {
+        // (수정) 속박 상태일 때는 아무것도 하지 않고 타이머만 감소시킵니다.
+        if (isRooted)
+        {
+            rootTimer -= Time.deltaTime;
+            if (rootTimer <= 0)
+            {
+                isRooted = false;
+            }
+            return; // 속박 중에는 아래 로직을 실행하지 않습니다.
+        }
+
         HandleEffects();
         
         if (blockingSoldiers.Count == 0 && blockingHero == null)
@@ -73,6 +88,13 @@ public class EnemyMovement : MonoBehaviour
         slowTimer = duration;
     }
 
+        // (추가) 외부(SkillManager)에서 호출하여 적을 속박시키는 함수입니다.
+    public void ApplyRoot(float duration)
+    {
+        isRooted = true;
+        rootTimer = duration;
+    }
+
     void Attack()
     {
         attackCountdown -= Time.deltaTime;
@@ -90,9 +112,13 @@ public class EnemyMovement : MonoBehaviour
         }
     }
     
+    // (수정) 이동 함수에서, 속박 상태가 아닐 때만 이동하도록 조건을 추가합니다.
     void Move()
     {
-        if (currentWaypointIndex >= waypoints.Length) return;
+        if (currentWaypointIndex >= waypoints.Length || isRooted)
+        {
+            return;
+        }
 
         Transform targetWaypoint = waypoints[currentWaypointIndex];
         transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, moveSpeed * Time.deltaTime);

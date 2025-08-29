@@ -1,9 +1,8 @@
 using UnityEngine;
-using UnityEngine.UI; // Image, Button을 사용하기 위해 필요합니다.
-using TMPro; // TextMeshPro를 사용하기 위해 필요합니다.
-using System.Collections.Generic; // List를 사용하기 위해 필요합니다.
+using UnityEngine.UI;
+using System.Collections.Generic;
 
-// (수정) 각 스킬의 정보를 하나로 묶어 관리하는 클래스를 새로 정의합니다.
+// 각 스킬의 정보를 하나로 묶어 관리하는 클래스입니다.
 [System.Serializable]
 public class Skill
 {
@@ -19,8 +18,15 @@ public class SkillManager : MonoBehaviour
 {
     public static SkillManager instance;
 
+    private enum TargetingSkill
+    {
+        None,
+        Lightning,
+        Vine
+    }
+    private TargetingSkill currentTargetingSkill = TargetingSkill.None;
+
     [Header("스킬 목록")]
-    // (수정) 여러 스킬을 관리하기 위해 List를 사용합니다.
     [SerializeField]
     private List<Skill> skills = new List<Skill>();
 
@@ -31,10 +37,18 @@ public class SkillManager : MonoBehaviour
     private float lightningRadius = 2f;
     [SerializeField]
     private float lightningStunDuration = 2f;
+
+    [Header("나무 덩굴 스킬 설정")]
+    [SerializeField]
+    private float vineRadius = 2.5f;
+    [SerializeField]
+    private float vineDuration = 4f;
+
+    [Header("공통 설정")]
     [SerializeField]
     private LayerMask enemyLayer;
-
-    private bool isSelectingTarget = false;
+    [SerializeField] // (추가) 스킬 범위 표시기로 사용할 프리팹 또는 게임 오브젝트입니다.
+    private GameObject rangeIndicator;
 
     void Awake()
     {
@@ -44,7 +58,6 @@ public class SkillManager : MonoBehaviour
 
     void Start()
     {
-        // 모든 스킬의 쿨다운 UI를 초기화합니다.
         foreach (Skill skill in skills)
         {
             if (skill.cooldownImage != null)
@@ -53,11 +66,16 @@ public class SkillManager : MonoBehaviour
             }
             skill.currentCooldown = 0;
         }
+
+        // (추가) 게임 시작 시 범위 표시기는 보이지 않도록 합니다.
+        if (rangeIndicator != null)
+        {
+            rangeIndicator.SetActive(false);
+        }
     }
 
     void Update()
     {
-        // (수정) 모든 스킬의 쿨다운을 한 번에 관리합니다.
         foreach (Skill skill in skills)
         {
             if (skill.currentCooldown > 0)
@@ -79,31 +97,60 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        if (isSelectingTarget)
+        if (currentTargetingSkill != TargetingSkill.None)
         {
+            // (수정) 타겟팅 중일 때 범위 표시기가 마우스를 따라다니도록 합니다.
+            if (rangeIndicator != null)
+            {
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                rangeIndicator.transform.position = new Vector3(mousePos.x, mousePos.y, 0);
+            }
+            
+            // 왼쪽 마우스 클릭으로 스킬 시전
             if (Input.GetMouseButtonDown(0))
             {
-                CastLightning(Input.mousePosition);
-                isSelectingTarget = false;
+                if (currentTargetingSkill == TargetingSkill.Lightning)
+                {
+                    CastLightning(Input.mousePosition);
+                }
+                else if (currentTargetingSkill == TargetingSkill.Vine)
+                {
+                    CastVines(Input.mousePosition);
+                }
+                CancelTargeting();
+            }
+            // (추가) 오른쪽 마우스 클릭으로 스킬 선택 취소
+            else if (Input.GetMouseButtonDown(1))
+            {
+                CancelTargeting();
             }
         }
     }
-    
-    // --- 각 버튼에 연결될 함수들 ---
 
     public void OnLightningSkillButton()
     {
-        // (수정) "Lightning" 이라는 이름의 스킬을 찾아 쿨다운을 확인합니다.
         Skill lightningSkill = FindSkill("Lightning");
         if (lightningSkill != null && lightningSkill.currentCooldown <= 0)
         {
-            isSelectingTarget = true;
+            currentTargetingSkill = TargetingSkill.Lightning;
+            // (추가) 범위 표시기를 활성화하고 번개 스킬의 반경에 맞게 크기를 조절합니다.
+            ShowRangeIndicator(lightningRadius);
+        }
+    }
+
+    public void OnVineSkillButton()
+    {
+        Skill vineSkill = FindSkill("Vine");
+        if (vineSkill != null && vineSkill.currentCooldown <= 0)
+        {
+            currentTargetingSkill = TargetingSkill.Vine;
+            // (추가) 범위 표시기를 활성화하고 나무 덩굴 스킬의 반경에 맞게 크기를 조절합니다.
+            ShowRangeIndicator(vineRadius);
         }
     }
 
     public void OnHealLivesButton()
     {
-        // (수정) "HealLives" 라는 이름의 스킬을 찾아 쿨다운을 확인하고 사용합니다.
         Skill healSkill = FindSkill("HealLives");
         if (healSkill != null && healSkill.currentCooldown <= 0)
         {
@@ -114,7 +161,6 @@ public class SkillManager : MonoBehaviour
 
     public void OnHealLivesPlusButton()
     {
-        // (수정) "HealLivesPlus" 라는 이름의 스킬을 찾아 쿨다운을 확인하고 사용합니다.
         Skill healPlusSkill = FindSkill("HealLivesPlus");
         if (healPlusSkill != null && healPlusSkill.currentCooldown <= 0)
         {
@@ -122,8 +168,6 @@ public class SkillManager : MonoBehaviour
             StartCooldown(healPlusSkill);
         }
     }
-    
-    // --- 내부 로직 함수들 ---
 
     void CastLightning(Vector3 mousePosition)
     {
@@ -145,7 +189,6 @@ public class SkillManager : MonoBehaviour
             EnemyMovement enemyMovement = enemyCollider.GetComponent<EnemyMovement>();
             if (enemyMovement != null)
             {
-                // 기절 효과 (둔화 100%)
                 enemyMovement.ApplySlow(1f, lightningStunDuration);
             }
         }
@@ -153,19 +196,58 @@ public class SkillManager : MonoBehaviour
         StartCooldown(lightningSkill);
     }
 
-    // (추가) 스킬 이름을 통해 리스트에서 특정 스킬을 찾는 헬퍼 함수
+    void CastVines(Vector3 mousePosition)
+    {
+        Skill vineSkill = FindSkill("Vine");
+        if (vineSkill == null) return;
+
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        worldPosition.z = 0;
+
+        Collider2D[] enemiesToRoot = Physics2D.OverlapCircleAll(worldPosition, vineRadius, enemyLayer);
+        foreach (Collider2D enemyCollider in enemiesToRoot)
+        {
+            EnemyMovement enemyMovement = enemyCollider.GetComponent<EnemyMovement>();
+            if (enemyMovement != null)
+            {
+                enemyMovement.ApplyRoot(vineDuration);
+            }
+        }
+        
+        StartCooldown(vineSkill);
+    }
+
     private Skill FindSkill(string name)
     {
         return skills.Find(skill => skill.skillName == name);
     }
-    
-    // (추가) 스킬 사용 후 쿨다운을 시작하는 헬퍼 함수
+
     private void StartCooldown(Skill skill)
     {
         skill.currentCooldown = skill.cooldown;
         if (skill.skillButton != null)
         {
             skill.skillButton.interactable = false;
+        }
+    }
+    
+    // --- (추가) 범위 표시기 관련 함수들 ---
+    private void ShowRangeIndicator(float radius)
+    {
+        if (rangeIndicator != null)
+        {
+            rangeIndicator.SetActive(true);
+            // 원의 반경(radius)은 지름(scale)의 절반이므로, 2를 곱해줍니다.
+            rangeIndicator.transform.localScale = new Vector3(radius * 2, radius * 2, 1f);
+        }
+    }
+
+    private void CancelTargeting()
+    {
+        currentTargetingSkill = TargetingSkill.None;
+        if (rangeIndicator != null)
+        {
+            rangeIndicator.SetActive(false);
         }
     }
 }
