@@ -107,7 +107,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
   towerType: 3
   damageType: 0
-  attackRange: 12
+  attackRange: 10
   timeBetweenAttacks: 3
   baseProjectileDamage: 35
   projectileSpeed: 3
@@ -116,6 +116,9 @@ MonoBehaviour:
   explosionRadius: 2
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
+  isLaserTower: 0
+  laserDps: 30
+  laserDpsRamp: 10
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 5d918d782e3049e4cb7187e3cb707379, type: 3}
     cost: 70
@@ -125,6 +128,7 @@ MonoBehaviour:
     towerName: "\uB7EC\uC2DC\uC544 \uD3ED\uD0C4 \uD0C0\uC6CC"
   projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
   firePoint: {fileID: 8832208381610958432}
+  laserLineRenderer: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
