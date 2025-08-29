@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// 적의 체력과 관련된 모든 것을 관리하는 스크립트입니다.
+// 적의 체력과 방어력을 관리하는 스크립트입니다.
 public class EnemyHealth : MonoBehaviour
 {
     [Header("능력치")]
@@ -10,9 +10,11 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField]
     private int goldValue = 10;
     [SerializeField]
-    private float physicalDefense = 10f;
+    private int experienceValue = 5;
     [SerializeField]
-    private float magicalDefense = 5f;
+    private float physicalDefense = 0f;
+    [SerializeField]
+    private float magicalDefense = 0f;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -22,62 +24,87 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField]
     private GameObject healthBarCanvas;
 
+    public float MaxHealth { get { return maxHealth; } }
+    
     private float currentHealth;
-    private TowerType lastAttackerType;
+    private TowerType lastAttackerType = TowerType.None;
 
     void Start()
     {
         currentHealth = maxHealth;
-        healthBarSlider.maxValue = 1f;
-        healthBarSlider.value = 1f;
+        if (healthBarSlider != null)
+        {
+            healthBarCanvas.SetActive(false);
+            healthBarSlider.maxValue = 1f;
+            healthBarSlider.value = 1f;
+        }
     }
 
     void LateUpdate()
     {
-        if (healthBarCanvas != null)
+        if (healthBarCanvas != null && healthBarCanvas.activeInHierarchy)
         {
             healthBarCanvas.transform.rotation = Camera.main.transform.rotation;
         }
     }
 
-    public void TakeDamage(float damageAmount, TowerType attackerType, DamageType damageType)
+    public void TakeDamage(float rawDamage, TowerType attackerType, DamageType damageType)
     {
+        if (currentHealth <= 0) return;
+
         lastAttackerType = attackerType;
 
-        float finalDamage = 0f;
+        float defense = 0;
         if (damageType == DamageType.Physical)
         {
-            float damageReduction = Mathf.Clamp(physicalDefense / 100f, 0f, 0.9f);
-            finalDamage = damageAmount * (1 - damageReduction);
+            defense = physicalDefense;
         }
         else if (damageType == DamageType.Magical)
         {
-            float damageReduction = Mathf.Clamp(magicalDefense / 100f, 0f, 0.9f);
-            finalDamage = damageAmount * (1 - damageReduction);
+            defense = magicalDefense;
         }
 
-        currentHealth -= finalDamage;
-        healthBarSlider.value = currentHealth / maxHealth;
+        float finalDamage = rawDamage * (1 - defense / 100);
+        finalDamage = Mathf.Max(finalDamage, 1);
 
+        currentHealth -= finalDamage;
+        UpdateHealthBar();
+        
         if (currentHealth <= 0)
         {
             Die();
         }
     }
+    
+    public void InstantKill()
+    {
+        currentHealth = 0;
+        UpdateHealthBar();
+        Die();
+    }
 
     void Die()
     {
-        SoundManager.instance.PlayDeathSound();
-        GameManager.instance.AddGold(goldValue);
-        
-        // (수정) 마지막 공격자가 영웅(Hero)이 아닐 경우에만 경험치 구슬을 드랍합니다.
-        if (lastAttackerType != TowerType.Hero)
+        if (lastAttackerType != TowerType.None && lastAttackerType != TowerType.Hero)
         {
-            GameObject orbGO = Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
-            orbGO.GetComponent<ExperienceController>().Setup(5, lastAttackerType);
+            GameObject orb = Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
+            // (수정) Setup 함수의 인자 순서를 (경험치 양, 타워 종류)로 올바르게 수정합니다.
+            orb.GetComponent<ExperienceController>().Setup(experienceValue, lastAttackerType);
         }
-
+        
+        GameManager.instance.AddGold(goldValue);
         GameManager.instance.EnemyDefeated();
+        SoundManager.instance.PlayDeathSound();
         Destroy(gameObject);
     }
+    
+    void UpdateHealthBar()
+    {
+        if (healthBarSlider != null)
+        {
+            healthBarCanvas.SetActive(currentHealth < maxHealth && currentHealth > 0);
+            healthBarSlider.value = currentHealth / maxHealth;
+        }
+    }
 }
+

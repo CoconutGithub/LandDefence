@@ -18,11 +18,13 @@ public class SkillManager : MonoBehaviour
 {
     public static SkillManager instance;
 
+    // 어떤 스킬이 타겟팅 중인지 구분하기 위해 enum을 사용합니다.
     private enum TargetingSkill
     {
         None,
         Lightning,
-        Vine
+        Vine,
+        SkullMagic // (추가) 해골 마법 타겟팅 상태
     }
     private TargetingSkill currentTargetingSkill = TargetingSkill.None;
 
@@ -37,17 +39,21 @@ public class SkillManager : MonoBehaviour
     private float lightningRadius = 2f;
     [SerializeField]
     private float lightningStunDuration = 2f;
-
+    
     [Header("나무 덩굴 스킬 설정")]
     [SerializeField]
     private float vineRadius = 2.5f;
     [SerializeField]
     private float vineDuration = 4f;
+    
+    [Header("해골 마법 스킬 설정")] // (추가)
+    [SerializeField]
+    private float skullMagicHealthThreshold = 500f; // 이 체력 이하의 적만 즉사시킬 수 있습니다.
 
     [Header("공통 설정")]
     [SerializeField]
     private LayerMask enemyLayer;
-    [SerializeField] // (추가) 스킬 범위 표시기로 사용할 프리팹 또는 게임 오브젝트입니다.
+    [SerializeField]
     private GameObject rangeIndicator;
 
     void Awake()
@@ -67,7 +73,6 @@ public class SkillManager : MonoBehaviour
             skill.currentCooldown = 0;
         }
 
-        // (추가) 게임 시작 시 범위 표시기는 보이지 않도록 합니다.
         if (rangeIndicator != null)
         {
             rangeIndicator.SetActive(false);
@@ -99,33 +104,37 @@ public class SkillManager : MonoBehaviour
 
         if (currentTargetingSkill != TargetingSkill.None)
         {
-            // (수정) 타겟팅 중일 때 범위 표시기가 마우스를 따라다니도록 합니다.
-            if (rangeIndicator != null)
+            if (rangeIndicator != null && (currentTargetingSkill == TargetingSkill.Lightning || currentTargetingSkill == TargetingSkill.Vine))
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 rangeIndicator.transform.position = new Vector3(mousePos.x, mousePos.y, 0);
             }
             
-            // 왼쪽 마우스 클릭으로 스킬 시전
             if (Input.GetMouseButtonDown(0))
             {
-                if (currentTargetingSkill == TargetingSkill.Lightning)
+                // (수정) 어떤 스킬이냐에 따라 다른 캐스팅 함수를 호출합니다.
+                switch (currentTargetingSkill)
                 {
-                    CastLightning(Input.mousePosition);
-                }
-                else if (currentTargetingSkill == TargetingSkill.Vine)
-                {
-                    CastVines(Input.mousePosition);
+                    case TargetingSkill.Lightning:
+                        CastLightning(Input.mousePosition);
+                        break;
+                    case TargetingSkill.Vine:
+                        CastVines(Input.mousePosition);
+                        break;
+                    case TargetingSkill.SkullMagic:
+                        CastSkullMagic(Input.mousePosition);
+                        break;
                 }
                 CancelTargeting();
             }
-            // (추가) 오른쪽 마우스 클릭으로 스킬 선택 취소
             else if (Input.GetMouseButtonDown(1))
             {
                 CancelTargeting();
             }
         }
     }
+    
+    // --- 각 버튼에 연결될 함수들 ---
 
     public void OnLightningSkillButton()
     {
@@ -133,18 +142,16 @@ public class SkillManager : MonoBehaviour
         if (lightningSkill != null && lightningSkill.currentCooldown <= 0)
         {
             currentTargetingSkill = TargetingSkill.Lightning;
-            // (추가) 범위 표시기를 활성화하고 번개 스킬의 반경에 맞게 크기를 조절합니다.
             ShowRangeIndicator(lightningRadius);
         }
     }
-
+    
     public void OnVineSkillButton()
     {
         Skill vineSkill = FindSkill("Vine");
         if (vineSkill != null && vineSkill.currentCooldown <= 0)
         {
             currentTargetingSkill = TargetingSkill.Vine;
-            // (추가) 범위 표시기를 활성화하고 나무 덩굴 스킬의 반경에 맞게 크기를 조절합니다.
             ShowRangeIndicator(vineRadius);
         }
     }
@@ -168,6 +175,20 @@ public class SkillManager : MonoBehaviour
             StartCooldown(healPlusSkill);
         }
     }
+    
+    // (추가) 해골 마법 버튼에 연결될 함수입니다.
+    public void OnSkullMagicButton()
+    {
+        Skill skullMagicSkill = FindSkill("SkullMagic");
+        if (skullMagicSkill != null && skullMagicSkill.currentCooldown <= 0)
+        {
+            // 이 스킬은 범위 표시기가 필요 없으므로 바로 타겟팅 모드로 들어갑니다.
+            currentTargetingSkill = TargetingSkill.SkullMagic;
+            Debug.Log("즉사시킬 적을 선택하세요!");
+        }
+    }
+    
+    // --- 내부 로직 함수들 ---
 
     void CastLightning(Vector3 mousePosition)
     {
@@ -216,12 +237,40 @@ public class SkillManager : MonoBehaviour
         
         StartCooldown(vineSkill);
     }
+    
+    // (추가) 해골 마법 시전 로직입니다.
+    void CastSkullMagic(Vector3 mousePosition)
+    {
+        Skill skullMagicSkill = FindSkill("SkullMagic");
+        if (skullMagicSkill == null) return;
+
+        // 마우스 클릭 위치에 있는 적을 찾습니다.
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePosition), Vector2.zero, Mathf.Infinity, enemyLayer);
+
+        if (hit.collider != null)
+        {
+            EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                // 적의 최대 체력이 설정된 한계치 이하일 때만 즉사시킵니다.
+                if (enemyHealth.MaxHealth <= skullMagicHealthThreshold)
+                {
+                    enemyHealth.InstantKill();
+                    StartCooldown(skullMagicSkill);
+                }
+                else
+                {
+                    Debug.Log("이 적은 너무 강해서 즉사시킬 수 없습니다!");
+                }
+            }
+        }
+    }
 
     private Skill FindSkill(string name)
     {
         return skills.Find(skill => skill.skillName == name);
     }
-
+    
     private void StartCooldown(Skill skill)
     {
         skill.currentCooldown = skill.cooldown;
@@ -231,13 +280,11 @@ public class SkillManager : MonoBehaviour
         }
     }
     
-    // --- (추가) 범위 표시기 관련 함수들 ---
     private void ShowRangeIndicator(float radius)
     {
         if (rangeIndicator != null)
         {
             rangeIndicator.SetActive(true);
-            // 원의 반경(radius)은 지름(scale)의 절반이므로, 2를 곱해줍니다.
             rangeIndicator.transform.localScale = new Vector3(radius * 2, radius * 2, 1f);
         }
     }
