@@ -16,6 +16,14 @@ public class SoldierController : MonoBehaviour
     private float healthRegenRate = 5f;
     [SerializeField]
     private float timeToStartRegen = 3f;
+    [SerializeField]
+    private DamageType damageType = DamageType.Physical;
+
+    [Header("광역 공격 (바이킹 전용)")]
+    [SerializeField]
+    private bool isAreaOfEffect = false;
+    [SerializeField]
+    private float aoeRadius = 1.5f;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -104,9 +112,23 @@ public class SoldierController : MonoBehaviour
 
     void Attack()
     {
-        if (currentTarget != null)
+        if (isAreaOfEffect)
         {
-            currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, DamageType.Physical);
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+            foreach (Collider2D hit in colliders)
+            {
+                if (hit.CompareTag("Enemy"))
+                {
+                    hit.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+                }
+            }
+        }
+        else
+        {
+            if (currentTarget != null)
+            {
+                currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+            }
         }
     }
 
@@ -128,7 +150,7 @@ public class SoldierController : MonoBehaviour
 
     void Die()
     {
-        ReleaseEnemyBeforeDeath(); // (수정) 죽을 때도 적을 풀어줍니다.
+        ReleaseEnemyBeforeDeath(); // 죽을 때도 적을 풀어줍니다.
         if (ownerBarracks != null)
         {
             ownerBarracks.RemoveSoldier(this);
