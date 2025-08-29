@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 8941207430269203735}
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
-  - component: {fileID: -3492042215985664023}
+  - component: {fileID: -4101450617855879121}
   m_Layer: 7
-  m_Name: Tower_Bomb
+  m_Name: Tower_Archer_Korea
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.4566037, g: 0.4566037, b: 0.4566037, a: 1}
+  m_Color: {r: 0, g: 1, b: 0.5152302, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,27 +105,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  towerType: 3
+  towerType: 0
   damageType: 0
-  attackRange: 12
-  timeBetweenAttacks: 3
-  baseProjectileDamage: 35
-  projectileSpeed: 3
+  attackRange: 10
+  timeBetweenAttacks: 0.3
+  baseProjectileDamage: 25
+  projectileSpeed: 10
   slowAmount: 0
   slowDuration: 0
-  explosionRadius: 2
+  explosionRadius: 0
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
-  upgradePaths:
-  - prefab: {fileID: 266319913433617465, guid: 5d918d782e3049e4cb7187e3cb707379, type: 3}
-    cost: 70
-    towerName: "\uD504\uB791\uC2A4 \uD3ED\uD0C4 \uD0C0\uC6CC"
-  - prefab: {fileID: 266319913433617465, guid: b544f5d68e7cf914bac946924f6220b0, type: 3}
-    cost: 90
-    towerName: "\uB7EC\uC2DC\uC544 \uD3ED\uD0C4 \uD0C0\uC6CC"
-  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
+  upgradePaths: []
+  projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
---- !u!61 &-3492042215985664023
+--- !u!61 &-4101450617855879121
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

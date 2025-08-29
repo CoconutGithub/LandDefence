@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
   m_Layer: 7
-  m_Name: Tower_Mage_GR
+  m_Name: Tower_Bomb_France
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.8415094, g: 0.33501595, b: 0.71282786, a: 1}
+  m_Color: {r: 0.13930221, g: 0.33417973, b: 0.3433962, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -105,24 +105,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  towerType: 1
-  damageType: 1
-  attackRange: 5
-  timeBetweenAttacks: 1
-  baseProjectileDamage: 35
-  projectileSpeed: 50
-  slowAmount: 0.7
-  slowDuration: 2
-  explosionRadius: 1
+  towerType: 3
+  damageType: 0
+  attackRange: 7
+  timeBetweenAttacks: 0.7
+  baseProjectileDamage: 25
+  projectileSpeed: 5
+  slowAmount: 0
+  slowDuration: 0
+  explosionRadius: 1.5
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
-  isLaserTower: 0
-  laserDps: 30
-  laserDpsRamp: 10
   upgradePaths: []
-  projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
+  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
   firePoint: {fileID: 8832208381610958432}
-  laserLineRenderer: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
