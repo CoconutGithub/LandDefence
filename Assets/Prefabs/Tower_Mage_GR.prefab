@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
   m_Layer: 7
-  m_Name: Tower_Mage
+  m_Name: Tower_Mage_GR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.9150123, g: 0.64228547, b: 0.9924528, a: 1}
+  m_Color: {r: 0.8415094, g: 0.33501595, b: 0.71282786, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -109,23 +109,17 @@ MonoBehaviour:
   damageType: 1
   attackRange: 5
   timeBetweenAttacks: 1
-  baseProjectileDamage: 25
-  projectileSpeed: 5
-  slowAmount: 0.3
-  slowDuration: 1
-  explosionRadius: 0
+  baseProjectileDamage: 35
+  projectileSpeed: 50
+  slowAmount: 0.7
+  slowDuration: 2
+  explosionRadius: 1
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 0
   laserDps: 30
   laserDpsRamp: 10
-  upgradePaths:
-  - prefab: {fileID: 266319913433617465, guid: 4cbd02ac260a46345933cfac49c1a0d3, type: 3}
-    cost: 100
-    towerName: "\uC601\uAD6D \uB9C8\uBC95\uC0AC \uD0C0\uC6CC"
-  - prefab: {fileID: 266319913433617465, guid: c519ad598e9bca643981bf1455387849, type: 3}
-    cost: 70
-    towerName: "\uADF8\uB9AC\uC2A4 \uB9C8\uBC95\uC0AC \uD0C0\uC6CC"
+  upgradePaths: []
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 0}

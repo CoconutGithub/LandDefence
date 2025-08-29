@@ -12,7 +12,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float attackRange = 3f;
     [SerializeField]
-    private float timeBetweenAttacks = 1f;
+    private float timeBetweenAttacks = 1f; // 점사 타워의 재장전 시간
 
     [Header("발사체 정보")]
     [SerializeField]
@@ -31,10 +31,17 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private int bulletsPerBurst = 1;
     [SerializeField]
     private float timeBetweenShots = 0.1f;
+
+    // (추가) 레이저 타워 전용 설정입니다.
+    [Header("레이저 정보 (영국 마법사 전용)")]
+    public bool isLaserTower = false; // 이 타워가 레이저 타워인지 확인
+    [SerializeField]
+    private float laserDps = 30f; // 초당 데미지 (Damage Per Second)
+    [SerializeField]
+    private float laserDpsRamp = 10f; // 초당 증가하는 추가 데미지
     
     private float finalProjectileDamage;
 
-    // (수정) 업그레이드 정보를 여러 개 가질 수 있는 배열로 변경합니다.
     [Header("업그레이드 정보")]
     public TowerBlueprint[] upgradePaths;
 
@@ -43,16 +50,25 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private GameObject projectilePrefab;
     [SerializeField]
     private Transform firePoint;
-
+    [SerializeField]
+    private LineRenderer laserLineRenderer; // (추가) 레이저를 그릴 Line Renderer
+    
     private Transform currentTarget;
     private float attackCountdown = 0f;
     private TowerSpotController parentSpot;
+    private float currentDpsRamp = 0f; // (추가) 현재 증가된 레이저 데미지
+    private Transform lastTarget; // (추가) 이전에 공격했던 목표
 
     void Start()
     {
-        // 타워 종류에 따라 다른 업그레이드 데이터를 불러오도록 개선
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
+
+        // (추가) 레이저 타워라면 시작할 때 레이저를 숨깁니다.
+        if (isLaserTower && laserLineRenderer != null)
+        {
+            laserLineRenderer.enabled = false;
+        }
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -62,7 +78,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        // (수정) 업그레이드 경로가 하나라도 있을 때만 UI를 엽니다.
         if (upgradePaths != null && upgradePaths.Length > 0)
         {
             TowerUpgradeUI.instance.Show(this);
@@ -86,10 +101,54 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         FindClosestEnemy();
         attackCountdown -= Time.deltaTime;
 
-        if (currentTarget != null && attackCountdown <= 0f)
+        // (수정) 레이저 타워일 경우의 로직을 추가합니다.
+        if (isLaserTower)
         {
-            StartCoroutine(AttackBurst());
-            attackCountdown = timeBetweenAttacks;
+            HandleLaserAttack();
+        }
+        else // 기존 발사체 타워 로직
+        {
+            if (currentTarget != null && attackCountdown <= 0f)
+            {
+                StartCoroutine(AttackBurst());
+                attackCountdown = timeBetweenAttacks;
+            }
+        }
+    }
+
+    // (추가) 레이저 공격을 처리하는 함수입니다.
+    void HandleLaserAttack()
+    {
+        if (currentTarget != null)
+        {
+            // 레이저를 켜고 위치를 설정합니다.
+            laserLineRenderer.enabled = true;
+            laserLineRenderer.SetPosition(0, firePoint.position);
+            laserLineRenderer.SetPosition(1, currentTarget.position);
+
+            // 목표가 이전과 같은지 확인하여 데미지 증가를 결정합니다.
+            if (currentTarget == lastTarget)
+            {
+                currentDpsRamp += laserDpsRamp * Time.deltaTime;
+            }
+            else // 목표가 바뀌었다면 데미지 증가량을 초기화합니다.
+            {
+                currentDpsRamp = 0f;
+            }
+            lastTarget = currentTarget;
+
+            // 최종 데미지를 계산하여 적용합니다.
+            float totalDps = laserDps + currentDpsRamp;
+            currentTarget.GetComponent<EnemyHealth>().TakeDamage(totalDps * Time.deltaTime, towerType, damageType);
+        }
+        else // 목표가 없으면 레이저를 끕니다.
+        {
+            if (laserLineRenderer.enabled)
+            {
+                laserLineRenderer.enabled = false;
+                currentDpsRamp = 0f;
+                lastTarget = null;
+            }
         }
     }
 
