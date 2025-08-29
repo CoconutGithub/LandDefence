@@ -1,25 +1,29 @@
-using System.Collections;
-using System.Collections.Generic; // (추가) Dictionary를 사용하기 위해 추가합니다.
 using UnityEngine;
-using TMPro;
 using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    [Header("Wave Settings")]
-    public Wave[] waves;
-    [SerializeField]
-    private float timeBetweenWaves = 5f;
+    void Awake()
+    {
+        if (instance != null) { return; }
+        instance = this;
+    }
 
-    [Header("Required Components")]
+    [Header("게임 설정")]
     [SerializeField]
-    private Transform waypointHolder;
+    private int startLives = 20;
+    [SerializeField]
+    private int startGold = 100;
+
+    [Header("UI 연결")]
     [SerializeField]
     private TextMeshProUGUI goldText;
     [SerializeField]
-    private TextMeshProUGUI experienceText; // 이 텍스트는 이제 모든 경험치를 요약해서 보여줍니다.
+    private TextMeshProUGUI experienceText;
     [SerializeField]
     private TextMeshProUGUI livesText;
     [SerializeField]
@@ -27,179 +31,190 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI resultText;
 
-    [Header("Player Stats")]
+    [Header("웨이브 설정")]
     [SerializeField]
-    private int startGold = 100;
+    private Wave[] waves;
     [SerializeField]
-    private int startLives = 20;
-    private int currentGold;
-    private int currentLives;
+    private Transform waypointHolder;
+    [SerializeField]
+    private float timeBetweenWaves = 5f;
 
-    // (수정) 인게임에서 얻은 경험치를 타워 종류별로 저장하는 Dictionary입니다.
-    private Dictionary<TowerType, int> inGameExperience;
-
-    private int waveIndex = 0;
-    private float countdown = 2f;
-    private bool isGameOver = false;
+    private int lives;
+    private int gold;
+    private Dictionary<TowerType, int> towerExperiences = new Dictionary<TowerType, int>();
+    private int currentWaveIndex = 0;
     private int enemiesAlive = 0;
-
-    void Awake()
-    {
-        if (instance == null) { instance = this; } else { Destroy(gameObject); }
-    }
+    private bool gameEnded = false;
 
     void Start()
     {
-        isGameOver = false;
-        enemiesAlive = 0;
-        currentGold = startGold;
-        currentLives = startLives;
-        
-        // (수정) 인게임 경험치 Dictionary를 초기화합니다.
-        inGameExperience = new Dictionary<TowerType, int>();
-
-        UpdateGoldText();
-        UpdateExperienceText();
-        UpdateLivesText();
+        lives = startLives;
+        gold = startGold;
+        UpdateGoldUI();
+        UpdateLivesUI();
+        UpdateExperienceUI();
         resultUIPanel.SetActive(false);
     }
-    
-    void WinGame()
-    {
-        isGameOver = true;
-        resultUIPanel.SetActive(true);
-        resultText.text = "승리!";
 
-        // (수정) 게임 승리 시, 이번 판에서 얻은 모든 종류의 경험치를 영구 저장합니다.
-        foreach (var expPair in inGameExperience)
-        {
-            TowerType type = expPair.Key;
-            int gainedExp = expPair.Value;
-
-            int totalExp = DataManager.LoadExperience(type);
-            totalExp += gainedExp;
-            DataManager.SaveExperience(type, totalExp);
-        }
-    }
-
-    // AddExperience 함수가 타워 종류를 받아서 처리합니다.
-    public void AddExperience(int amount, TowerType type)
-    {
-        // (수정) Dictionary에 경험치를 누적합니다.
-        if (!inGameExperience.ContainsKey(type))
-        {
-            inGameExperience[type] = 0;
-        }
-        inGameExperience[type] += amount;
-
-        UpdateExperienceText();
-    }
-
-    // UpdateExperienceText 함수가 모든 경험치를 요약해서 보여주도록 변경합니다.
-    void UpdateExperienceText()
-    {
-        string expString = "";
-        foreach (var expPair in inGameExperience)
-        {
-            expString += $"{expPair.Key}: {expPair.Value} EXP\n";
-        }
-        experienceText.text = expString;
-    }
-    
-    // ... (이하 다른 함수들은 기존과 동일) ...
-    public void GoToMainMenu()
-    {
-        SceneManager.LoadScene("MainMenu");
-    }
-    public void RestartGame()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
     void Update()
     {
-        if (isGameOver)
-            return;
-        if (waveIndex >= waves.Length && enemiesAlive <= 0)
+        if (gameEnded) return;
+
+        if (enemiesAlive > 0)
         {
-            WinGame();
             return;
         }
-        if (waveIndex >= waves.Length) { return; }
-        if (countdown <= 0f)
+
+        if (currentWaveIndex >= waves.Length)
+        {
+            if(!gameEnded) WinGame();
+            return;
+        }
+
+        if (timeBetweenWaves <= 0f)
         {
             StartCoroutine(SpawnWave());
-            countdown = timeBetweenWaves;
+            timeBetweenWaves = 5f; 
         }
-        countdown -= Time.deltaTime;
+        else
+        {
+            timeBetweenWaves -= Time.deltaTime;
+        }
     }
+
+    System.Collections.IEnumerator SpawnWave()
+    {
+        Wave wave = waves[currentWaveIndex];
+
+        foreach (Wave.EnemyGroup group in wave.enemyGroups)
+        {
+            enemiesAlive += group.count;
+            for (int i = 0; i < group.count; i++)
+            {
+                SpawnEnemy(group.enemyPrefab);
+                // (수정) 1f / rate 대신, 이제 spawnInterval 값을 직접 사용하여 대기합니다.
+                yield return new WaitForSeconds(group.spawnInterval);
+            }
+            yield return new WaitForSeconds(wave.timeBetweenGroups);
+        }
+        currentWaveIndex++;
+    }
+
+    void SpawnEnemy(GameObject enemyPrefab)
+    {
+        GameObject enemyGO = Instantiate(enemyPrefab, waypointHolder.GetChild(0).position, Quaternion.identity);
+        EnemyMovement enemy = enemyGO.GetComponent<EnemyMovement>();
+        enemy.SetWaypointHolder(waypointHolder);
+    }
+    
+    public void HealLives(int amount)
+    {
+        lives += amount;
+        UpdateLivesUI();
+        SoundManager.instance.PlayBuildSound();
+    }
+
+    public void AddGold(int amount)
+    {
+        gold += amount;
+        UpdateGoldUI();
+    }
+
+    public bool SpendGold(int amount)
+    {
+        if (gold >= amount)
+        {
+            gold -= amount;
+            UpdateGoldUI();
+            return true;
+        }
+        return false;
+    }
+    
+    public void AddExperience(int amount, TowerType type)
+    {
+        if (type == TowerType.None || type == TowerType.Hero) return;
+
+        if (!towerExperiences.ContainsKey(type))
+        {
+            towerExperiences[type] = 0;
+        }
+        towerExperiences[type] += amount;
+        UpdateExperienceUI();
+    }
+    
+    public void EnemyReachedEnd()
+    {
+        if (gameEnded) return;
+        lives--;
+        UpdateLivesUI();
+        if (lives <= 0)
+        {
+            EndGame(false);
+        }
+    }
+
     public void EnemyDefeated()
     {
         enemiesAlive--;
     }
-    public void EnemyReachedEnd()
+
+    void WinGame()
     {
-        currentLives--;
-        UpdateLivesText();
-        if (currentLives <= 0 && !isGameOver)
+        if (gameEnded) return;
+        gameEnded = true;
+
+        foreach (KeyValuePair<TowerType, int> entry in towerExperiences)
         {
-            GameOver();
+             int savedExp = DataManager.LoadExperience(entry.Key);
+             int totalExp = savedExp + entry.Value;
+             DataManager.SaveExperience(entry.Key, totalExp);
         }
+        
+        EndGame(true);
     }
-    void GameOver()
+
+    void EndGame(bool isWin)
     {
-        isGameOver = true;
+        gameEnded = true;
         resultUIPanel.SetActive(true);
-        resultText.text = "패배!";
-    }
-    public void AddGold(int amount)
-    {
-        currentGold += amount;
-        UpdateGoldText();
-    }
-    public bool SpendGold(int amount)
-    {
-        if (currentGold >= amount)
+        if (isWin)
         {
-            currentGold -= amount;
-            UpdateGoldText();
-            return true;
+            resultText.text = "승리!";
         }
         else
         {
-            Debug.Log("골드가 부족합니다!");
-            return false;
+            resultText.text = "패배!";
         }
     }
-    void UpdateGoldText()
+
+    public void RestartGame()
     {
-        goldText.text = "Gold: " + currentGold;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-    void UpdateLivesText()
+    
+    public void GoToMainMenu()
     {
-        livesText.text = "Lives: " + currentLives;
+        SceneManager.LoadScene("MainMenu");
     }
-    IEnumerator SpawnWave()
+
+    void UpdateGoldUI()
     {
-        if (waveIndex >= waves.Length)
+        goldText.text = "Gold: " + gold;
+    }
+
+    void UpdateLivesUI()
+    {
+        livesText.text = "Lives: " + lives;
+    }
+
+    void UpdateExperienceUI()
+    {
+        experienceText.text = "";
+        foreach (KeyValuePair<TowerType, int> entry in towerExperiences)
         {
-            yield break;
+            experienceText.text += $"{entry.Key} EXP: {entry.Value}\n";
         }
-        Wave wave = waves[waveIndex];
-        foreach (EnemyGroup group in wave.enemyGroups)
-        {
-            for (int i = 0; i < group.count; i++)
-            {
-                SpawnEnemy(group.enemyPrefab);
-                yield return new WaitForSeconds(group.rate);
-            }
-            yield return new WaitForSeconds(wave.timeBetweenGroups);
-        }
-        waveIndex++;
-    }
-    void SpawnEnemy(GameObject enemyPrefab)
-    {
-        enemiesAlive++;
-        GameObject enemyGO = Instantiate(enemyPrefab, waypointHolder.GetChild(0).position, Quaternion.identity);
-        enemyGO.GetComponent<EnemyMovement>().SendMessage("SetWaypointHolder", waypointHolder);
     }
 }
+
