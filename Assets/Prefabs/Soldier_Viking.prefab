@@ -339,10 +339,14 @@ MonoBehaviour:
   moveSpeed: 5
   healthRegenRate: 30
   timeToStartRegen: 5
+  damageType: 0
   isAreaOfEffect: 1
   aoeRadius: 1.5
   healthBarSlider: {fileID: 4979688441236379191}
   healthBarCanvas: {fileID: 6356077035225273916}
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!1 &2974342527480028504
 GameObject:
   m_ObjectHideFlags: 0
