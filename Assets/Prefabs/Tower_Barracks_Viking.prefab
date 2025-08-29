@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -3492042215985664023}
   - component: {fileID: 1060728875990397637}
   m_Layer: 7
-  m_Name: Tower_Barracks
+  m_Name: Tower_Barracks_Viking
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 2
   m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.5924529, g: 0.4518794, b: 0.34764683, a: 1}
+  m_Color: {r: 0.4415095, g: 0.3433186, b: 0.272403, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -155,11 +155,8 @@ MonoBehaviour:
   spawnRate: 3
   spreadRadius: 0.5
   rallyPointRange: 3
-  upgradePaths:
-  - prefab: {fileID: 266319913433617465, guid: 5065dff084035b242a776c4f68dd995d, type: 3}
-    cost: 50
-    towerName: "\uBC14\uC774\uD0B9 \uBCD1\uC601 \uD0C0\uC6CC"
-  soldierPrefab: {fileID: 1852670417170501071, guid: d3c49df4d4ef02e4ebff096c83f33bd3, type: 3}
+  upgradePaths: []
+  soldierPrefab: {fileID: 1852670417170501071, guid: 84667251823afba479ef3c6f128f5841, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458
 GameObject:

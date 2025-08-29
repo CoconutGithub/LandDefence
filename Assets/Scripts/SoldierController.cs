@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-// 병사의 모든 행동(이동, 공격, 죽음)과 능력치를 관리하는 스크립트입니다.
 public class SoldierController : MonoBehaviour
 {
     [Header("능력치")]
@@ -14,9 +13,9 @@ public class SoldierController : MonoBehaviour
     [SerializeField]
     private float moveSpeed = 3f;
     [SerializeField]
-    private float healthRegenRate = 5f; // (추가) 초당 체력 회복량
+    private float healthRegenRate = 5f;
     [SerializeField]
-    private float timeToStartRegen = 3f; // (추가) 전투 후 회복 시작까지 걸리는 시간
+    private float timeToStartRegen = 3f;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -29,7 +28,7 @@ public class SoldierController : MonoBehaviour
     private EnemyMovement currentTarget;
     private Vector3 rallyPointPosition;
     private BarracksController ownerBarracks;
-    private float timeSinceLastCombat = 0f; // (추가) 마지막 전투 후 지난 시간
+    private float timeSinceLastCombat = 0f;
 
     void Start()
     {
@@ -53,12 +52,9 @@ public class SoldierController : MonoBehaviour
     {
         attackCountdown -= Time.deltaTime;
         
-        // (수정) 전투 중이 아닐 때의 로직
         if (currentTarget == null)
         {
             MoveToRallyPoint();
-
-            // (추가) 체력 회복 로직
             timeSinceLastCombat += Time.deltaTime;
             if (timeSinceLastCombat >= timeToStartRegen && currentHealth < maxHealth)
             {
@@ -67,7 +63,6 @@ public class SoldierController : MonoBehaviour
         }
         else
         {
-            // (추가) 전투 중일 때는 회복 타이머를 리셋합니다.
             timeSinceLastCombat = 0f;
         }
 
@@ -78,11 +73,9 @@ public class SoldierController : MonoBehaviour
         }
     }
     
-    // (추가) 체력을 회복하고 체력바를 업데이트하는 함수
     void RegenerateHealth()
     {
         currentHealth += healthRegenRate * Time.deltaTime;
-        // 체력이 최대 체력을 넘지 않도록 합니다.
         currentHealth = Mathf.Min(currentHealth, maxHealth);
         
         if (healthBarSlider != null)
@@ -120,7 +113,7 @@ public class SoldierController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        timeSinceLastCombat = 0f; // (추가) 피해를 입으면 회복 타이머를 리셋합니다.
+        timeSinceLastCombat = 0f;
 
         if (healthBarSlider != null)
         {
@@ -135,16 +128,21 @@ public class SoldierController : MonoBehaviour
 
     void Die()
     {
-        if (currentTarget != null)
-        {
-            currentTarget.ResumeMovement();
-        }
-
+        ReleaseEnemyBeforeDeath(); // (수정) 죽을 때도 적을 풀어줍니다.
         if (ownerBarracks != null)
         {
             ownerBarracks.RemoveSoldier(this);
         }
         Destroy(gameObject);
+    }
+
+    // (추가) 병영이 업그레이드되거나, 병사가 죽기 직전에 호출되어 적을 풀어주는 함수입니다.
+    public void ReleaseEnemyBeforeDeath()
+    {
+        if (currentTarget != null)
+        {
+            currentTarget.ResumeMovement();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
