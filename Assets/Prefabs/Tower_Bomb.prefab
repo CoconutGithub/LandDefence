@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  towerType: 3
+  towerType: 4
   damageType: 0
   attackRange: 10
   timeBetweenAttacks: 3
