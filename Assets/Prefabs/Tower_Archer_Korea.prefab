@@ -120,6 +120,25 @@ MonoBehaviour:
   laserDps: 30
   laserDpsRamp: 10
   upgradePaths: []
+  towerSkills:
+  - skillName: "\uBD88\uD654\uC0B4"
+    skillDescription: "\uACF5\uACA9 \uC2DC \uC77C\uC815 \uD655\uB960\uB85C \uBD88\uD654\uC0B4\uC744
+      \uBC1C\uC0AC\uD558\uC5EC \uC801\uC5D0\uAC8C \uC9C0\uC18D \uD53C\uD574\uB97C
+      \uC785\uD799\uB2C8\uB2E4."
+    maxLevel: 3
+    costs: 460000004600000064000000
+    values1:
+    - 10
+    - 15
+    - 20
+    values2:
+    - 10
+    - 15
+    - 20
+    values3:
+    - 2
+    - 3
+    - 4
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 0}

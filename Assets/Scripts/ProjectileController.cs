@@ -7,11 +7,15 @@ public class ProjectileController : MonoBehaviour
     private Transform target;
     private TowerType ownerTowerType;
     private DamageType damageType;
-    private float slowAmount;   // (추가) 감속량
-    private float slowDuration; // (추가) 감속 지속 시간
+    private float slowAmount;
+    private float slowDuration;
 
-    // (수정) Setup 함수에서 감속 효과 정보도 함께 전달받습니다.
-    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration)
+    // (추가) 불화살 스킬을 위한 지속 데미지 정보 변수
+    private float dotDamagePerSecond;
+    private float dotDuration;
+
+    // (수정) Setup 함수에서 지속 데미지 정보를 선택적 파라미터로 함께 전달받습니다.
+    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration, float _dotDamage = 0, float _dotDuration = 0)
     {
         target = _target;
         damage = _damage;
@@ -20,6 +24,8 @@ public class ProjectileController : MonoBehaviour
         damageType = _damageType;
         slowAmount = _slowAmount;
         slowDuration = _slowDuration;
+        dotDamagePerSecond = _dotDamage;
+        dotDuration = _dotDuration;
     }
 
     void Update()
@@ -47,7 +53,6 @@ public class ProjectileController : MonoBehaviour
             enemyHealth.TakeDamage(damage, ownerTowerType, damageType);
         }
 
-        // (추가) 만약 감속 효과가 있는 공격이었다면, 적의 이동 스크립트에 감속을 요청합니다.
         if (slowAmount > 0f)
         {
             EnemyMovement enemyMovement = target.GetComponent<EnemyMovement>();
@@ -55,6 +60,12 @@ public class ProjectileController : MonoBehaviour
             {
                 enemyMovement.ApplySlow(slowAmount, slowDuration);
             }
+        }
+
+        // (추가) 만약 지속 데미지 효과가 있는 공격이었다면, 적의 체력 스크립트에 효과를 적용합니다.
+        if (dotDuration > 0 && enemyHealth != null)
+        {
+            enemyHealth.ApplyDot(dotDamagePerSecond, dotDuration);
         }
 
         Destroy(gameObject);
