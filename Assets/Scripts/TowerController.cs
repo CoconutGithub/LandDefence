@@ -69,7 +69,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private SoldierController spawnedHaetae; 
 
     private float originalTimeBetweenAttacks;
-    // (추가) 원본 점사 수를 저장할 변수
     private int originalBulletsPerBurst;
 
     void Start()
@@ -88,7 +87,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
 
         originalTimeBetweenAttacks = timeBetweenAttacks;
-        // (추가) 원본 점사 수 저장
         originalBulletsPerBurst = bulletsPerBurst;
     }
 
@@ -143,18 +141,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '기관총' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
-        // 모든 능력치를 원본 값으로 초기화
         timeBetweenAttacks = originalTimeBetweenAttacks;
         bulletsPerBurst = originalBulletsPerBurst;
         
-        // 데미지도 테크 트리 레벨만 적용된 상태로 초기화
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
 
-        // 습득한 모든 패시브 스킬 효과를 순차적으로 적용
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
@@ -169,7 +163,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
                     case "기관총":
                         bulletsPerBurst = (int)skill.values1[skillLevel - 1];
-                        float damageMultiplier = skill.values2[skillLevel - 1]; // e.g. 0.8f for 20% reduction
+                        float damageMultiplier = skill.values2[skillLevel - 1];
                         finalProjectileDamage *= damageMultiplier;
                         break;
                 }
@@ -353,6 +347,34 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
+        // (추가) '저격총' 스킬 확인
+        int sniperLevel = GetSkillLevel("저격총");
+        if (sniperLevel > 0)
+        {
+            TowerSkillBlueprint sniperSkill = System.Array.Find(towerSkills, skill => skill.skillName == "저격총");
+            if (sniperSkill != null)
+            {
+                float procChance = sniperSkill.values1[sniperLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    Transform specialTarget = FindHighestHealthEnemyOnMap(); // 사거리 무시 타겟팅
+                    if (specialTarget != null)
+                    {
+                        SoundManager.instance.PlayAttackSound(); // 또는 별도의 저격 발사음
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+
+                        if (projectile != null)
+                        {
+                            float specialDamage = sniperSkill.values2[sniperLevel - 1]; 
+                            projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
+                        }
+                        return; // 저격탄을 발사했으므로, 아래의 다른 스킬/공격 로직을 실행하지 않음
+                    }
+                }
+            }
+        }
+
         int missileLevel = GetSkillLevel("미사일");
         if (missileLevel > 0 && missilePrefab != null)
         {
@@ -485,6 +507,25 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     highestHealth = enemyHealth.MaxHealth;
                     bestTarget = enemy.transform;
                 }
+            }
+        }
+        return bestTarget;
+    }
+
+    // (추가) 맵 전체에서 가장 체력이 높은 적을 찾는 함수
+    private Transform FindHighestHealthEnemyOnMap()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Transform bestTarget = null;
+        float highestHealth = 0;
+
+        foreach (GameObject enemy in enemies)
+        {
+            EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+            if (enemyHealth != null && enemyHealth.MaxHealth > highestHealth)
+            {
+                highestHealth = enemyHealth.MaxHealth;
+                bestTarget = enemy.transform;
             }
         }
         return bestTarget;
