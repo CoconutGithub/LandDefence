@@ -122,7 +122,6 @@ public class EnemyMovement : MonoBehaviour
             blockingHero.ResumeMovement();
         }
         
-        // (수정) 리스트의 복사본을 만들어 순회함으로써, 순회 도중 원본 리스트가 변경되어도 에러가 발생하지 않도록 합니다.
         foreach(var soldier in new List<SoldierController>(blockingSoldiers))
         {
             if(soldier != null)
@@ -170,6 +169,7 @@ public class EnemyMovement : MonoBehaviour
         isBeingKnockedBack = false;
     }
 
+    // (수정) 공격 시 자신의 정보를 병사에게 전달하도록 변경
     void Attack()
     {
         attackCountdown -= Time.deltaTime;
@@ -177,7 +177,8 @@ public class EnemyMovement : MonoBehaviour
         {
             if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
             {
-                blockingSoldiers[0].TakeDamage(attackDamage);
+                // `this`를 추가하여 자신(공격자)의 정보를 전달합니다.
+                blockingSoldiers[0].TakeDamage(attackDamage, this);
             }
             else if (blockingHero != null)
             {

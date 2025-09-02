@@ -27,7 +27,7 @@ public class SoldierController : MonoBehaviour
 
     [Header("광역 공격")]
     [SerializeField]
-    private bool isAreaOfEffect = false; // 바이킹 전용: 항상 광역 공격
+    private bool isAreaOfEffect = false;
     [SerializeField]
     private float aoeRadius = 1.5f;
 
@@ -53,8 +53,13 @@ public class SoldierController : MonoBehaviour
     private float originalAttackDamage;
     private float lifeStealPercentage = 0f;
     private float originalRecognitionRadius;
-    // (추가) 스킬로 부여받는 광역 공격 확률
     private float aoeChance = 0f;
+
+    // (추가) 방패 공격 스킬 관련 변수
+    private float reflectionChance = 0f;
+    private float reflectionDuration = 0f;
+    private bool isReflectingDamage = false;
+    private float reflectionTimer = 0f;
 
     void Awake()
     {
@@ -89,6 +94,9 @@ public class SoldierController : MonoBehaviour
 
     void Update()
     {
+        // (추가) 피해 반사 지속 시간 관리
+        HandleReflection();
+
         switch (currentState)
         {
             case SoldierState.ReturningToRallyPoint:
@@ -134,6 +142,20 @@ public class SoldierController : MonoBehaviour
                     attackCountdown = timeBetweenAttacks;
                 }
                 break;
+        }
+    }
+
+    // (추가) 피해 반사 상태를 관리하는 함수
+    void HandleReflection()
+    {
+        if (isReflectingDamage)
+        {
+            reflectionTimer -= Time.deltaTime;
+            if (reflectionTimer <= 0f)
+            {
+                isReflectingDamage = false;
+                // (선택 사항) 반사 효과가 끝났음을 시각적으로 표시할 수 있습니다.
+            }
         }
     }
     
@@ -205,13 +227,15 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (수정) 광역 공격 확률도 함께 받도록 함수 확장
-    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus, float newAoeChance)
+    // (수정) 피해 반사 관련 능력치도 함께 받도록 함수 확장
+    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus, float newAoeChance, float newReflectionChance, float newReflectionDuration)
     {
         maxHealth = originalMaxHealth + healthModifier;
         attackDamage = originalAttackDamage + damageModifier;
         lifeStealPercentage = lifeSteal;
         aoeChance = newAoeChance;
+        reflectionChance = newReflectionChance;
+        reflectionDuration = newReflectionDuration;
 
         if (recognitionCollider != null)
         {
@@ -224,13 +248,11 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (수정) 확률적 광역 공격 로직 추가
     void Attack()
     {
         float totalDamageDealt = 0;
-        bool isAoeAttackThisTurn = isAreaOfEffect; // 바이킹의 기본 광역 공격
+        bool isAoeAttackThisTurn = isAreaOfEffect;
 
-        // 스킬로 광역 공격 확률을 부여받았는지 확인 (스위스 병사)
         if (!isAoeAttackThisTurn && aoeChance > 0)
         {
             if (Random.Range(0f, 100f) < aoeChance)
@@ -251,7 +273,7 @@ public class SoldierController : MonoBehaviour
                 }
             }
         }
-        else // 단일 공격
+        else
         {
             if (currentTarget != null)
             {
@@ -266,10 +288,29 @@ public class SoldierController : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    // (수정) 공격자의 정보를 받고, 피해 반사 로직을 추가
+    public void TakeDamage(float damage, EnemyMovement attacker)
     {
+        // 피해 반사 상태라면, 받은 피해를 공격자에게 되돌려줍니다.
+        if (isReflectingDamage && attacker != null)
+        {
+            attacker.GetComponent<EnemyHealth>().TakeDamage(damage, TowerType.Barracks, damageType);
+        }
+
         currentHealth -= damage;
         timeSinceLastCombat = 0f;
+
+        // 피해 반사 상태가 아닐 때, 확률적으로 피해 반사를 활성화합니다.
+        if (!isReflectingDamage && reflectionChance > 0)
+        {
+            if (Random.Range(0f, 100f) < reflectionChance)
+            {
+                isReflectingDamage = true;
+                reflectionTimer = reflectionDuration;
+                // (선택 사항) 반사 효과가 시작되었음을 시각적으로 표시할 수 있습니다. (예: 방패 아이콘 활성화)
+            }
+        }
+
         UpdateHealthBar();
         if (currentHealth <= 0)
         {

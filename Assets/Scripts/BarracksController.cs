@@ -171,7 +171,7 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '빛이 있으라' 스킬 효과를 계산하도록 로직 추가
+    // (수정) '방패 공격' 스킬 효과를 계산하도록 로직 추가
     void ApplyAllPassiveSkillEffectsToSoldier(SoldierController soldier)
     {
         float healthModifier = 0f;
@@ -179,6 +179,8 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         float lifeSteal = 0f;
         float recognitionRadiusBonus = 0f;
         float aoeChance = 0f;
+        float reflectionChance = 0f;
+        float reflectionDuration = 0f;
 
         foreach (var skill in towerSkills)
         {
@@ -200,10 +202,14 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
                     case "빛이 있으라":
                         aoeChance = skill.values1[skillLevel - 1];
                         break;
+                    case "방패 공격":
+                        reflectionChance = 10f; // 10% 고정 확률
+                        reflectionDuration = skill.values1[skillLevel - 1];
+                        break;
                 }
             }
         }
-        soldier.ApplyStatModification(healthModifier, damageModifier, lifeSteal, recognitionRadiusBonus, aoeChance);
+        soldier.ApplyStatModification(healthModifier, damageModifier, lifeSteal, recognitionRadiusBonus, aoeChance, reflectionChance, reflectionDuration);
     }
     
     public void SetParentSpot(TowerSpotController spot)
