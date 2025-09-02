@@ -135,6 +135,17 @@ MonoBehaviour:
     - 50
     - 100
     values3: []
+  - skillName: "\uD790"
+    skillDescription: "\uD0C0\uC6CC \uC8FC\uBCC0\uC758 \uC544\uAD70 \uC720\uB2DB\uB4E4\uC744
+      \uC9C0\uC18D\uC801\uC73C\uB85C \uCE58\uC720\uD569\uB2C8\uB2E4."
+    maxLevel: 3
+    costs: 640000009600000096000000
+    values1:
+    - 10
+    - 15
+    - 20
+    values2: []
+    values3: []
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 3708774722340164092}

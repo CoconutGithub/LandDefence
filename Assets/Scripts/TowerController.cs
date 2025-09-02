@@ -70,9 +70,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     private float originalTimeBetweenAttacks;
     private int originalBulletsPerBurst;
-    // (추가) 원본 레이저 능력치를 저장할 변수
     private float originalLaserDps;
     private float originalLaserDpsRamp;
+
+    // (추가) 힐 스킬의 성능 최적화를 위한 변수
+    private float healCheckTimer = 0f;
+    private const float HEAL_CHECK_INTERVAL = 0.5f; // 0.5초마다 주변 아군을 탐색
 
     void Start()
     {
@@ -91,7 +94,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         originalTimeBetweenAttacks = timeBetweenAttacks;
         originalBulletsPerBurst = bulletsPerBurst;
-        // (추가) 원본 레이저 능력치 저장
         originalLaserDps = laserDps;
         originalLaserDpsRamp = laserDpsRamp;
     }
@@ -147,10 +149,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '아브라카다브라!' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
-        // 모든 능력치를 원본 값으로 초기화
         timeBetweenAttacks = originalTimeBetweenAttacks;
         bulletsPerBurst = originalBulletsPerBurst;
         laserDps = originalLaserDps;
@@ -159,7 +159,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
 
-        // 습득한 모든 패시브 스킬 효과를 순차적으로 적용
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
@@ -225,7 +224,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             float health = haetaeSkill.values1[newLevel - 1];
             float damage = haetaeSkill.values2[newLevel - 1];
-            spawnedHaetae.SetupAsHaetae(health, damage);
+            //spawnedHaetae.SetupAsHaetae(health, damage);
         }
     }
 
@@ -260,6 +259,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Update()
     {
+        // (수정) '힐' 스킬을 배웠는지 확인하고, 배웠다면 치유 오라를 활성화합니다.
+        int healLevel = GetSkillLevel("힐");
+        if (healLevel > 0)
+        {
+            HandleHealingAura(healLevel);
+        }
+
         FindClosestEnemy();
         attackCountdown -= Time.deltaTime;
 
@@ -273,6 +279,41 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             {
                 StartCoroutine(AttackBurst());
                 attackCountdown = timeBetweenAttacks;
+            }
+        }
+    }
+    
+    // (추가) 주변 아군을 치유하는 새로운 함수
+    void HandleHealingAura(int skillLevel)
+    {
+        healCheckTimer -= Time.deltaTime;
+        if (healCheckTimer <= 0f)
+        {
+            healCheckTimer = HEAL_CHECK_INTERVAL;
+
+            TowerSkillBlueprint healSkill = System.Array.Find(towerSkills, skill => skill.skillName == "힐");
+            if (healSkill == null) return;
+            
+            float healPerSecond = healSkill.values1[skillLevel - 1];
+            float healAmount = healPerSecond * HEAL_CHECK_INTERVAL; // 0.5초마다 치유할 양
+
+            // 주변의 모든 콜라이더를 확인
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
+            foreach (var collider in colliders)
+            {
+                // 병사 또는 해치인 경우
+                SoldierController soldier = collider.GetComponent<SoldierController>();
+                if (soldier != null)
+                {
+                    soldier.Heal(healAmount);
+                }
+
+                // 영웅인 경우
+                HeroController hero = collider.GetComponent<HeroController>();
+                if (hero != null)
+                {
+                    hero.Heal(healAmount);
+                }
             }
         }
     }

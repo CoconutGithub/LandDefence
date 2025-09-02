@@ -98,7 +98,6 @@ public class HeroController : MonoBehaviour
         }
     }
     
-    // (추가) SkillManager가 호출할 분신술 스킬 활성화 함수
     public void ActivateCloneSkill(float duration)
     {
         StartCoroutine(CloneSkillCoroutine(duration));
@@ -106,14 +105,12 @@ public class HeroController : MonoBehaviour
     
     private IEnumerator CloneSkillCoroutine(float duration)
     {
-        // 기존 분신이 있다면 제거
         foreach(var clone in activeClones)
         {
             if (clone != null) Destroy(clone);
         }
         activeClones.Clear();
 
-        // 분신 생성
         GameObject clone1 = Instantiate(heroClonePrefab, cloneSpawnPointLeft.position, Quaternion.identity);
         GameObject clone2 = Instantiate(heroClonePrefab, cloneSpawnPointRight.position, Quaternion.identity);
 
@@ -126,10 +123,8 @@ public class HeroController : MonoBehaviour
         activeClones.Add(clone1);
         activeClones.Add(clone2);
 
-        // 지속시간만큼 대기
         yield return new WaitForSeconds(duration);
 
-        // 분신 제거
         foreach(var clone in activeClones)
         {
             if (clone != null) Destroy(clone);
@@ -137,6 +132,7 @@ public class HeroController : MonoBehaviour
         activeClones.Clear();
     }
     
+    // (추가) 외부에서 호출할 수 있는 '힐' 기능입니다.
     public void Heal(float amount)
     {
         if (currentHealth <= 0) return;

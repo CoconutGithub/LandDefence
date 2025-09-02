@@ -1,8 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections; // (추가) 코루틴 사용을 위해 추가
+using System.Collections; // 코루틴 사용을 위해 추가
 
-// 병사의 모든 행동(이동, 공격, 죽음)과 능력치를 관리하는 스크립트입니다.
 public class SoldierController : MonoBehaviour
 {
     private enum SoldierState { ReturningToRallyPoint, IdleAtRallyPoint, ChasingEnemy, Fighting }
@@ -23,8 +22,9 @@ public class SoldierController : MonoBehaviour
     private float timeToStartRegen = 3f;
     [SerializeField]
     private DamageType damageType = DamageType.Physical;
+    // (추가) 해치 전용 부활 시간
     [SerializeField]
-    private float respawnTime = 10f; // (추가) 해치 전용 부활 시간
+    private float respawnTime = 10f;
 
     [Header("광역 공격 (바이킹 전용)")]
     [SerializeField]
@@ -47,10 +47,12 @@ public class SoldierController : MonoBehaviour
     private BarracksController ownerBarracks;
     private float timeSinceLastCombat = 0f;
     private CircleCollider2D recognitionCollider;
-    private bool isHaetae = false; // (추가) 이 유닛이 해치인지 구분하는 플래그
-    private SpriteRenderer spriteRenderer; // (추가) 부활 시 모습을 감추기 위함
 
-    void Awake() // (수정) Start 대신 Awake에서 컴포넌트를 미리 찾아둡니다.
+    // (추가) 해치 관련 변수들
+    private bool isHaetae = false;
+    private SpriteRenderer spriteRenderer;
+
+    void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         recognitionCollider = GetComponent<CircleCollider2D>();
@@ -179,6 +181,11 @@ public class SoldierController : MonoBehaviour
             currentState = SoldierState.ReturningToRallyPoint;
         }
     }
+    
+    public void SetBarracks(BarracksController barracks)
+    {
+        ownerBarracks = barracks;
+    }
 
     // (추가) 해치로 설정하고 능력치를 부여하는 함수
     public void SetupAsHaetae(float newMaxHealth, float newAttackDamage)
@@ -187,12 +194,11 @@ public class SoldierController : MonoBehaviour
         maxHealth = newMaxHealth;
         attackDamage = newAttackDamage;
         currentHealth = maxHealth;
-        // 해치는 체력 회복 로직도 공유하므로, healthRegenRate도 설정할 수 있습니다 (필요 시).
-    }
-    
-    public void SetBarracks(BarracksController barracks)
-    {
-        ownerBarracks = barracks;
+        // 체력바를 다시 최대치로 업데이트합니다.
+        if (healthBarSlider != null)
+        {
+            healthBarSlider.value = 1f;
+        }
     }
 
     void Attack()
@@ -230,6 +236,19 @@ public class SoldierController : MonoBehaviour
             Die();
         }
     }
+    
+    public void Heal(float amount)
+    {
+        if (currentHealth <= 0) return;
+
+        currentHealth += amount;
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        
+        if (healthBarSlider != null)
+        {
+            healthBarSlider.value = currentHealth / maxHealth;
+        }
+    }
 
     void Die()
     {
@@ -257,14 +276,15 @@ public class SoldierController : MonoBehaviour
         spriteRenderer.enabled = false;
         GetComponent<Collider2D>().enabled = false;
         healthBarCanvas.SetActive(false);
+        // 상태를 변경하여 다른 행동을 하지 않도록 합니다.
+        currentState = SoldierState.IdleAtRallyPoint; // 임시 상태
 
         yield return new WaitForSeconds(respawnTime);
 
         // 부활 위치(고정된 집결지)로 이동하고 상태를 초기화합니다.
         transform.position = rallyPointPosition;
         currentHealth = maxHealth;
-        currentState = SoldierState.IdleAtRallyPoint;
-
+        
         // 다시 모습을 드러내고 충돌을 활성화합니다.
         spriteRenderer.enabled = true;
         GetComponent<Collider2D>().enabled = true;
@@ -281,3 +301,4 @@ public class SoldierController : MonoBehaviour
         }
     }
 }
+
