@@ -66,7 +66,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
     private SoldierController spawnedHaetae; 
 
-    // (추가) 패시브 스킬 계산을 위한 원본 능력치 저장 변수
     private float originalTimeBetweenAttacks;
 
     void Start()
@@ -84,7 +83,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             skillLevels[skill.skillName] = 0;
         }
 
-        // (추가) 스킬 효과가 적용되지 않은 순수 능력치를 저장합니다.
         originalTimeBetweenAttacks = timeBetweenAttacks;
     }
 
@@ -124,7 +122,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             int newLevel = skillLevels[skillToUpgrade.skillName];
             Debug.Log($"{skillToUpgrade.skillName} 스킬 레벨 업! -> {newLevel}");
 
-            // (수정) 스킬 업그레이드 시, 모든 패시브 효과를 다시 계산하여 적용합니다.
             ApplyAllPassiveSkillEffects();
 
             if (skillToUpgrade.skillName == "해치")
@@ -140,27 +137,21 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (추가) 모든 패시브 스킬 효과를 계산하고 적용하는 함수
     void ApplyAllPassiveSkillEffects()
     {
-        // 먼저 모든 능력치를 원본 값으로 초기화합니다.
         timeBetweenAttacks = originalTimeBetweenAttacks;
 
-        // 이 타워가 가진 모든 스킬을 순회하며 효과를 적용합니다.
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
             if (skillLevel > 0)
             {
-                // 스킬 이름에 따라 다른 효과를 적용합니다.
                 switch (skill.skillName)
                 {
                     case "빠른 재장전":
                         float reduction = skill.values1[skillLevel - 1];
-                        timeBetweenAttacks = originalTimeBetweenAttacks - reduction;
+                        timeBetweenAttacks = Mathf.Max(originalTimeBetweenAttacks - reduction, 0.1f); // 최소 재장전 시간 보장
                         break;
-                    
-                    // 나중에 다른 패시브 스킬이 추가되면 여기에 case를 추가합니다.
                 }
             }
         }
@@ -301,6 +292,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         int shotsToFire = bulletsPerBurst;
         
+        // '두발 사격' 스킬 확인
         int doubleShotLevel = GetSkillLevel("두발 사격");
         if (doubleShotLevel > 0)
         {
@@ -308,6 +300,21 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (doubleShotSkill != null)
             {
                 float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    shotsToFire *= 2; 
+                }
+            }
+        }
+        
+        // (추가) '쌍권총' 스킬 확인
+        int dualWieldLevel = GetSkillLevel("쌍권총");
+        if (dualWieldLevel > 0)
+        {
+            TowerSkillBlueprint dualWieldSkill = System.Array.Find(towerSkills, skill => skill.skillName == "쌍권총");
+            if (dualWieldSkill != null)
+            {
+                float procChance = dualWieldSkill.values1[dualWieldLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
                     shotsToFire *= 2; 
