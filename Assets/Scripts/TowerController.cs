@@ -72,12 +72,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private int originalBulletsPerBurst;
     private float originalLaserDps;
     private float originalLaserDpsRamp;
-    // (추가) 원본 둔화 능력치를 저장할 변수
     private float originalSlowAmount;
     private float originalSlowDuration;
 
     private float healCheckTimer = 0f;
     private const float HEAL_CHECK_INTERVAL = 0.5f;
+
+    // (추가) 빵 보급 스킬 관련 변수
+    private bool isSupplyBuffActive = false;
+    private float supplyBuffTimer = 0f;
 
     void Start()
     {
@@ -98,7 +101,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         originalBulletsPerBurst = bulletsPerBurst;
         originalLaserDps = laserDps;
         originalLaserDpsRamp = laserDpsRamp;
-        // (추가) 원본 둔화 능력치 저장
         originalSlowAmount = slowAmount;
         originalSlowDuration = slowDuration;
     }
@@ -154,7 +156,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '전선 구축' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
         timeBetweenAttacks = originalTimeBetweenAttacks;
@@ -275,6 +276,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Update()
     {
+        HandleSupplyBuff();
+        
         int healLevel = GetSkillLevel("힐");
         if (healLevel > 0)
         {
@@ -301,6 +304,21 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
+    // (추가) 빵 보급 버프의 지속시간을 관리하는 함수
+    void HandleSupplyBuff()
+    {
+        if (isSupplyBuffActive)
+        {
+            supplyBuffTimer -= Time.deltaTime;
+            if (supplyBuffTimer <= 0)
+            {
+                isSupplyBuffActive = false;
+                // 버프가 끝나면, 모든 패시브 효과를 다시 적용하여 공격 속도를 원래 값으로 되돌립니다.
+                ApplyAllPassiveSkillEffects();
+            }
+        }
+    }
+
     void HandleHealingAura(int skillLevel)
     {
         healCheckTimer -= Time.deltaTime;
@@ -416,9 +434,27 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) 폭탄 발사체 생성 시 둔화 정보를 함께 전달
     void Shoot()
     {
+        // (수정) 빵 보급 스킬 발동 로직을 일반 공격 이전에 추가
+        int supplyLevel = GetSkillLevel("빵 보급");
+        if (supplyLevel > 0 && !isSupplyBuffActive)
+        {
+            TowerSkillBlueprint supplySkill = System.Array.Find(towerSkills, skill => skill.skillName == "빵 보급");
+            if (supplySkill != null && supplySkill.values1.Length >= supplyLevel && supplySkill.values2.Length >= supplyLevel && supplySkill.values3.Length >= supplyLevel)
+            {
+                float procChance = supplySkill.values1[supplyLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    isSupplyBuffActive = true;
+                    float buffDuration = supplySkill.values2[supplyLevel - 1];
+                    float speedMultiplier = supplySkill.values3[supplyLevel - 1];
+                    supplyBuffTimer = buffDuration;
+                    timeBetweenAttacks /= speedMultiplier;
+                }
+            }
+        }
+
         int poseidonLevel = GetSkillLevel("포세이돈");
         if (poseidonLevel > 0)
         {
