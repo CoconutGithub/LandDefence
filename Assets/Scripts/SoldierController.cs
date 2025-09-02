@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections; // 코루틴 사용을 위해 추가
+using System.Collections;
 
 public class SoldierController : MonoBehaviour
 {
@@ -22,7 +22,6 @@ public class SoldierController : MonoBehaviour
     private float timeToStartRegen = 3f;
     [SerializeField]
     private DamageType damageType = DamageType.Physical;
-    // (추가) 해치 전용 부활 시간
     [SerializeField]
     private float respawnTime = 10f;
 
@@ -47,15 +46,20 @@ public class SoldierController : MonoBehaviour
     private BarracksController ownerBarracks;
     private float timeSinceLastCombat = 0f;
     private CircleCollider2D recognitionCollider;
-
-    // (추가) 해치 관련 변수들
     private bool isHaetae = false;
     private SpriteRenderer spriteRenderer;
+
+    // (추가) 스킬 효과 계산을 위한 원본 능력치
+    private float originalMaxHealth;
+    private float originalAttackDamage;
 
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         recognitionCollider = GetComponent<CircleCollider2D>();
+        // (추가) 스킬이 적용되기 전의 순수 능력치를 저장합니다.
+        originalMaxHealth = maxHealth;
+        originalAttackDamage = attackDamage;
     }
 
     void Start()
@@ -161,10 +165,7 @@ public class SoldierController : MonoBehaviour
         {
             currentHealth += healthRegenRate * Time.deltaTime;
             currentHealth = Mathf.Min(currentHealth, maxHealth);
-            if (healthBarSlider != null)
-            {
-                healthBarSlider.value = currentHealth / maxHealth;
-            }
+            UpdateHealthBar();
         }
     }
 
@@ -187,18 +188,28 @@ public class SoldierController : MonoBehaviour
         ownerBarracks = barracks;
     }
 
-    // (추가) 해치로 설정하고 능력치를 부여하는 함수
     public void SetupAsHaetae(float newMaxHealth, float newAttackDamage)
     {
         isHaetae = true;
+        originalMaxHealth = newMaxHealth; // 해치의 기본 스탯을 원본으로 저장
+        originalAttackDamage = newAttackDamage;
         maxHealth = newMaxHealth;
         attackDamage = newAttackDamage;
         currentHealth = maxHealth;
-        // 체력바를 다시 최대치로 업데이트합니다.
-        if (healthBarSlider != null)
-        {
-            healthBarSlider.value = 1f;
-        }
+        UpdateHealthBar();
+    }
+
+    // (추가) 병영에서 스킬 효과를 적용하기 위해 호출하는 함수
+    public void ApplyStatModification(float healthModifier, float damageModifier)
+    {
+        maxHealth = originalMaxHealth + healthModifier;
+        attackDamage = originalAttackDamage + damageModifier;
+
+        // 최대 체력이 변경되었으므로, 현재 체력도 비율에 맞게 조정하거나, 최대치를 넘지 않도록 보정
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        if (maxHealth <= 0) Die(); // 체력 감소로 인해 죽는 경우
+        
+        UpdateHealthBar();
     }
 
     void Attack()
@@ -227,10 +238,7 @@ public class SoldierController : MonoBehaviour
     {
         currentHealth -= damage;
         timeSinceLastCombat = 0f;
-        if (healthBarSlider != null)
-        {
-            healthBarSlider.value = currentHealth / maxHealth;
-        }
+        UpdateHealthBar();
         if (currentHealth <= 0)
         {
             Die();
@@ -240,10 +248,13 @@ public class SoldierController : MonoBehaviour
     public void Heal(float amount)
     {
         if (currentHealth <= 0) return;
-
         currentHealth += amount;
         currentHealth = Mathf.Min(currentHealth, maxHealth);
-        
+        UpdateHealthBar();
+    }
+    
+    private void UpdateHealthBar()
+    {
         if (healthBarSlider != null)
         {
             healthBarSlider.value = currentHealth / maxHealth;
@@ -254,7 +265,6 @@ public class SoldierController : MonoBehaviour
     {
         ReleaseEnemyBeforeDeath();
         
-        // (수정) 해치일 경우와 일반 병사일 경우를 분리합니다.
         if (isHaetae)
         {
             StartCoroutine(RespawnCoroutine());
@@ -269,26 +279,21 @@ public class SoldierController : MonoBehaviour
         }
     }
 
-    // (추가) 해치 전용 부활 코루틴
     IEnumerator RespawnCoroutine()
     {
-        // 모습을 감추고 충돌을 비활성화합니다.
         spriteRenderer.enabled = false;
         GetComponent<Collider2D>().enabled = false;
         healthBarCanvas.SetActive(false);
-        // 상태를 변경하여 다른 행동을 하지 않도록 합니다.
-        currentState = SoldierState.IdleAtRallyPoint; // 임시 상태
+        currentState = SoldierState.IdleAtRallyPoint;
 
         yield return new WaitForSeconds(respawnTime);
 
-        // 부활 위치(고정된 집결지)로 이동하고 상태를 초기화합니다.
         transform.position = rallyPointPosition;
         currentHealth = maxHealth;
         
-        // 다시 모습을 드러내고 충돌을 활성화합니다.
         spriteRenderer.enabled = true;
         GetComponent<Collider2D>().enabled = true;
-        if (healthBarSlider != null) healthBarSlider.value = 1f;
+        UpdateHealthBar();
 
         Debug.Log("해치가 부활했습니다!");
     }
@@ -298,6 +303,7 @@ public class SoldierController : MonoBehaviour
         if (currentTarget != null)
         {
             currentTarget.UnblockBySoldier(this);
+            currentTarget = null;
         }
     }
 }

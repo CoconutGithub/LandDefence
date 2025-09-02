@@ -10,14 +10,16 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private int maxSoldiers = 3;
     [SerializeField]
-    private float spawnRate = 10f; // 병사가 죽었을 때 충원되는 시간입니다.
+    private float spawnRate = 10f;
     [SerializeField]
     private float spreadRadius = 1.0f;
     [SerializeField]
     private float rallyPointRange = 3f;
 
-    [Header("업그레이드 정보")]
+    [Header("업그레이드 및 스킬 정보")]
     public TowerBlueprint[] upgradePaths;
+    // (추가) 병영도 스킬을 가질 수 있도록 추가
+    public TowerSkillBlueprint[] towerSkills;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -30,12 +32,21 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     private Transform rallyPointInstance;
     private TowerSpotController parentSpot;
 
+    // (추가) 스킬 레벨 관리를 위한 딕셔너리
+    private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
+
     void Start()
     {
         rallyPointInstance = Instantiate(rallyPointPrefab, transform.position, Quaternion.identity).transform;
         rallyPointInstance.position = transform.position + new Vector3(0, -1.5f, 0);
         rallyPointInstance.gameObject.SetActive(false);
         
+        // (추가) 스킬 레벨 초기화
+        foreach (var skill in towerSkills)
+        {
+            skillLevels[skill.skillName] = 0;
+        }
+
         for (int i = 0; i < maxSoldiers; i++)
         {
             SpawnSoldier();
@@ -44,8 +55,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
     void Update()
     {
-        // (수정) 병영의 핵심 로직을 원래대로 복원합니다.
-        // 병사 수가 최대치보다 적으면, spawnRate에 설정된 시간마다 새로운 병사를 충원합니다.
         if (spawnedSoldiers.Count < maxSoldiers)
         {
             spawnCountdown -= Time.deltaTime;
@@ -61,7 +70,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
             if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                
                 Vector3 targetPos = new Vector3(mousePos.x, mousePos.y, transform.position.z);
 
                 if (Vector3.Distance(transform.position, targetPos) <= rallyPointRange)
@@ -103,6 +111,70 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
     
+    // (추가) 스킬 레벨을 가져오는 함수
+    public int GetSkillLevel(string skillName)
+    {
+        if (skillLevels.ContainsKey(skillName))
+        {
+            return skillLevels[skillName];
+        }
+        return 0;
+    }
+
+    // (추가) 스킬을 업그레이드하는 함수
+    public void UpgradeSkill(TowerSkillBlueprint skillToUpgrade)
+    {
+        int currentLevel = GetSkillLevel(skillToUpgrade.skillName);
+        if (currentLevel >= skillToUpgrade.maxLevel)
+        {
+            Debug.Log("이 스킬은 이미 마스터했습니다!");
+            return;
+        }
+
+        int cost = skillToUpgrade.costs[currentLevel];
+        if (GameManager.instance.SpendGold(cost))
+        {
+            SoundManager.instance.PlayBuildSound();
+            skillLevels[skillToUpgrade.skillName]++;
+            Debug.Log($"{skillToUpgrade.skillName} 스킬 레벨 업! -> {skillLevels[skillToUpgrade.skillName]}");
+
+            // 모든 병사들에게 변경된 스킬 효과를 다시 적용
+            foreach (var soldier in spawnedSoldiers)
+            {
+                if(soldier != null) ApplyAllPassiveSkillEffectsToSoldier(soldier);
+            }
+
+            TowerUpgradeUI.instance.Show(this);
+        }
+        else
+        {
+            Debug.Log("골드가 부족합니다!");
+        }
+    }
+
+    // (추가) 병사에게 모든 패시브 스킬 효과를 적용하는 함수
+    void ApplyAllPassiveSkillEffectsToSoldier(SoldierController soldier)
+    {
+        float healthModifier = 0f;
+        float damageModifier = 0f;
+
+        foreach (var skill in towerSkills)
+        {
+            int skillLevel = GetSkillLevel(skill.skillName);
+            if (skillLevel > 0)
+            {
+                switch (skill.skillName)
+                {
+                    case "폭주":
+                        healthModifier -= skill.values1[skillLevel - 1]; // 체력 감소
+                        damageModifier += skill.values2[skillLevel - 1]; // 공격력 증가
+                        break;
+                }
+            }
+        }
+        soldier.ApplyStatModification(healthModifier, damageModifier);
+    }
+    
     public void SetParentSpot(TowerSpotController spot)
     {
         parentSpot = spot;
@@ -115,14 +187,14 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
         if (soldier != null)
         {
-            // (수정) 생성된 병사를 목록에 직접 추가합니다.
             spawnedSoldiers.Add(soldier);
             soldier.SetBarracks(this);
+            // (추가) 생성된 병사에게 현재 스킬 효과를 적용합니다.
+            ApplyAllPassiveSkillEffectsToSoldier(soldier);
             UpdateSoldierRallyPoints();
         }
     }
 
-    // (수정) 병사가 죽었을 때 목록에서 제거하는 함수는 여전히 필요합니다.
     public void RemoveSoldier(SoldierController soldier)
     {
         if (spawnedSoldiers.Contains(soldier))
@@ -152,6 +224,7 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
+        // (수정) 이제 병영도 TowerUpgradeUI를 사용합니다.
         TowerUpgradeUI.instance.Show(this);
     }
     

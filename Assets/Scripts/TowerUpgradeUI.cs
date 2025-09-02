@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
-// (수정) 모든 타워의 업그레이드 및 '스킬' UI를 제어하는 통합 스크립트입니다.
 public class TowerUpgradeUI : MonoBehaviour
 {
     public static TowerUpgradeUI instance;
@@ -17,11 +17,13 @@ public class TowerUpgradeUI : MonoBehaviour
     [SerializeField]
     private GameObject uiPanel;
     [SerializeField]
-    private GameObject upgradeButtonPrefab; // 업그레이드/스킬 버튼으로 재사용될 프리팹
+    private GameObject upgradeButtonPrefab;
     [SerializeField]
     private Transform buttonContainer;
     [SerializeField]
     private Button setRallyPointButton;
+    [SerializeField]
+    private GameObject skillButtonPrefab; // (추가) 스킬 버튼 프리팹
 
     private TowerController selectedTower;
     private BarracksController selectedBarracks;
@@ -31,7 +33,6 @@ public class TowerUpgradeUI : MonoBehaviour
         uiPanel.SetActive(false);
     }
 
-    // (수정) TowerController에서 호출 시, 업그레이드 경로와 스킬 경로를 모두 확인하여 적절한 UI를 표시합니다.
     public void Show(TowerController tower)
     {
         selectedTower = tower;
@@ -39,21 +40,14 @@ public class TowerUpgradeUI : MonoBehaviour
         
         setRallyPointButton.gameObject.SetActive(false);
 
-        // 기존 버튼들을 모두 삭제합니다.
-        foreach (Transform child in buttonContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // 업그레이드 경로가 있으면 업그레이드 버튼들을 생성합니다.
+        // (수정) 타워의 상태(업그레이드/스킬)에 따라 다른 버튼을 표시
         if (tower.upgradePaths != null && tower.upgradePaths.Length > 0)
         {
-            UpdateButtonsForUpgrades(tower.upgradePaths);
+            UpdateUpgradeButtons(tower.upgradePaths);
         }
-        // 업그레이드 경로는 없고 스킬이 있다면 스킬 버튼들을 생성합니다.
-        else if (tower.towerSkills != null && tower.towerSkills.Length > 0)
+        else
         {
-            UpdateButtonsForSkills(tower.towerSkills);
+            UpdateSkillButtons(tower.towerSkills, tower);
         }
         
         transform.position = tower.transform.position;
@@ -67,26 +61,33 @@ public class TowerUpgradeUI : MonoBehaviour
 
         setRallyPointButton.gameObject.SetActive(true);
 
-        foreach (Transform child in buttonContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
+        // (수정) 병영의 상태(업그레이드/스킬)에 따라 다른 버튼을 표시
         if (barracks.upgradePaths != null && barracks.upgradePaths.Length > 0)
         {
-            UpdateButtonsForUpgrades(barracks.upgradePaths);
+            UpdateUpgradeButtons(barracks.upgradePaths);
         }
-        // (추가) 병영도 최종 티어에서는 스킬을 가질 수 있으므로, 해당 로직을 추가합니다. (현재는 해당사항 없음)
-        // else if (barracks.towerSkills != null && barracks.towerSkills.Length > 0) { ... }
+        else
+        {
+            UpdateSkillButtons(barracks.towerSkills, null, barracks);
+        }
 
         transform.position = barracks.transform.position;
         uiPanel.SetActive(true);
     }
 
-    // 타워 '업그레이드' 버튼들을 생성하는 함수
-    private void UpdateButtonsForUpgrades(TowerBlueprint[] blueprints)
+    void ClearAllButtons()
     {
+        foreach (Transform child in buttonContainer)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+    private void UpdateUpgradeButtons(TowerBlueprint[] blueprints)
+    {
+        ClearAllButtons();
         buttonContainer.gameObject.SetActive(true);
+
         foreach (TowerBlueprint blueprint in blueprints)
         {
             GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
@@ -107,30 +108,34 @@ public class TowerUpgradeUI : MonoBehaviour
         }
     }
 
-    // (추가) 타워 '스킬' 버튼들을 생성하는 새로운 함수
-    private void UpdateButtonsForSkills(TowerSkillBlueprint[] skills)
+    // (수정) 스킬 버튼을 생성하고 설정하는 함수
+    private void UpdateSkillButtons(TowerSkillBlueprint[] skills, TowerController tower = null, BarracksController barracks = null)
     {
+        ClearAllButtons();
         buttonContainer.gameObject.SetActive(true);
-        foreach (TowerSkillBlueprint skillBlueprint in skills)
-        {
-            GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
-            TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
-            Button button = buttonGO.GetComponent<Button>();
 
-            int currentLevel = selectedTower.GetSkillLevel(skillBlueprint.skillName);
-            
-            // 스킬 레벨에 따라 버튼 텍스트와 상호작용 여부를 다르게 설정합니다.
-            if (currentLevel >= skillBlueprint.maxLevel)
+        foreach (TowerSkillBlueprint skill in skills)
+        {
+            GameObject buttonGO = Instantiate(skillButtonPrefab, buttonContainer);
+            Button button = buttonGO.GetComponent<Button>();
+            TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
+
+            int currentLevel = 0;
+            if(tower != null) currentLevel = tower.GetSkillLevel(skill.skillName);
+            else if(barracks != null) currentLevel = barracks.GetSkillLevel(skill.skillName);
+
+            if (currentLevel >= skill.maxLevel)
             {
-                buttonText.text = $"{skillBlueprint.skillName}\n(MAX)";
-                button.interactable = false; // 최대 레벨이면 버튼 비활성화
+                buttonText.text = $"{skill.skillName}\n(마스터)";
+                button.interactable = false;
             }
             else
             {
-                int cost = skillBlueprint.costs[currentLevel];
-                buttonText.text = $"{skillBlueprint.skillName} ({currentLevel}/{skillBlueprint.maxLevel})\n({cost}G)";
+                buttonText.text = $"{skill.skillName} ({currentLevel + 1}LV)\n({skill.costs[currentLevel]}G)";
+                button.interactable = true;
                 button.onClick.AddListener(() => {
-                    selectedTower.UpgradeSkill(skillBlueprint);
+                    if(tower != null) tower.UpgradeSkill(skill);
+                    else if(barracks != null) barracks.UpgradeSkill(skill);
                 });
             }
         }
@@ -163,3 +168,4 @@ public class TowerUpgradeUI : MonoBehaviour
         Hide();
     }
 }
+
