@@ -1,13 +1,12 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections; // (추가) 코루틴 사용을 위해 추가
+using System.Collections;
 
 public class EnemyMovement : MonoBehaviour
 {
     [Header("이동 관련")]
     [SerializeField]
     private float moveSpeed = 2f;
-    // (추가) 넉백 효과가 적용될 때의 이동 속도
     [SerializeField]
     private float knockbackSpeed = 8f;
 
@@ -31,7 +30,6 @@ public class EnemyMovement : MonoBehaviour
     private bool isRooted = false;
     private float rootTimer = 0f;
 
-    // (추가) 넉백 상태를 관리하기 위한 플래그
     private bool isBeingKnockedBack = false;
 
     void Start()
@@ -51,12 +49,14 @@ public class EnemyMovement : MonoBehaviour
         {
             waypoints[i] = _waypointHolder.GetChild(i);
         }
-        transform.position = waypoints[currentWaypointIndex].position;
+        if (waypoints.Length > 0)
+        {
+            transform.position = waypoints[0].position;
+        }
     }
 
     void Update()
     {
-        // (추가) 넉백, 속박 상태일 때는 다른 행동을 하지 않도록 최상단에서 확인합니다.
         if (isBeingKnockedBack) return;
         
         if (isRooted)
@@ -107,7 +107,6 @@ public class EnemyMovement : MonoBehaviour
         rootTimer = duration;
     }
 
-    // (수정) 넉백 로직을 코루틴으로 변경하여 부드러운 이동을 구현합니다.
     public void Knockback(float distance)
     {
         if (isBeingKnockedBack || waypoints == null || waypoints.Length == 0) return;
@@ -118,12 +117,13 @@ public class EnemyMovement : MonoBehaviour
     {
         isBeingKnockedBack = true;
         
-        // 넉백 시작 시, 현재 자신을 막고 있는 유닛들을 해제합니다.
         if (blockingHero != null)
         {
-            blockingHero.ResumeMovement(); // 영웅은 스스로 타겟을 다시 찾을 것입니다.
+            blockingHero.ResumeMovement();
         }
-        foreach(var soldier in blockingSoldiers)
+        
+        // (수정) 리스트의 복사본을 만들어 순회함으로써, 순회 도중 원본 리스트가 변경되어도 에러가 발생하지 않도록 합니다.
+        foreach(var soldier in new List<SoldierController>(blockingSoldiers))
         {
             if(soldier != null)
             {
@@ -138,7 +138,6 @@ public class EnemyMovement : MonoBehaviour
         {
             if (currentWaypointIndex <= 0)
             {
-                // 시작 지점보다 더 뒤로 갈 수 없으면 넉백을 중단합니다.
                 currentWaypointIndex = 0;
                 transform.position = waypoints[0].position;
                 break;
@@ -147,7 +146,7 @@ public class EnemyMovement : MonoBehaviour
             Vector3 previousWaypoint = waypoints[currentWaypointIndex - 1].position;
             float distanceToPrevious = Vector3.Distance(transform.position, previousWaypoint);
 
-            if (distanceToGo > distanceToPrevious)
+            if (distanceToGo >= distanceToPrevious)
             {
                 targetPosition = previousWaypoint;
                 distanceToGo -= distanceToPrevious;
@@ -160,7 +159,6 @@ public class EnemyMovement : MonoBehaviour
                 distanceToGo = 0;
             }
 
-            // 계산된 목표 지점까지 부드럽게 이동합니다.
             while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
             {
                 transform.position = Vector3.MoveTowards(transform.position, targetPosition, knockbackSpeed * Time.deltaTime);
@@ -168,7 +166,7 @@ public class EnemyMovement : MonoBehaviour
             }
         }
 
-        transform.position = targetPosition; // 정확한 위치로 보정
+        transform.position = targetPosition;
         isBeingKnockedBack = false;
     }
 
@@ -218,7 +216,7 @@ public class EnemyMovement : MonoBehaviour
     
     public void BlockMovement(SoldierController soldier, HeroController hero)
     {
-        if (isBeingKnockedBack) return; // 넉백 중에는 막히지 않음
+        if (isBeingKnockedBack) return;
 
         if (soldier != null)
         {
