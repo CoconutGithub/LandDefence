@@ -153,6 +153,7 @@ MonoBehaviour:
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 1852670417170501071, guid: 9c92b8c4422491747aa3e43b0c95004b, type: 3}
+  missilePrefab: {fileID: 0}
 --- !u!61 &-4101450617855879121
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -1,12 +1,12 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic; // (추가) List 사용을 위해 추가
+using System.Collections.Generic; // List 사용을 위해 추가
 
-// 적의 체력과 방어력을 관리하는 스크립트입니다.
 public class EnemyHealth : MonoBehaviour
 {
-    // (추가) 지속 데미지 효과(DOT)의 정보를 담는 내부 클래스입니다.
-    private class DamageOverTimeEffect
+    // (추가) 지속 데미지 효과를 관리하기 위한 내부 클래스
+    [System.Serializable]
+    public class DotEffect
     {
         public float DamagePerSecond;
         public float RemainingDuration;
@@ -36,10 +36,8 @@ public class EnemyHealth : MonoBehaviour
     
     private float currentHealth;
     private TowerType lastAttackerType = TowerType.None;
-    private bool isDead = false; // (추가) 중복 사망 처리를 방지하기 위한 플래그
-
-    // (추가) 이 적에게 적용된 모든 지속 데미지 효과를 관리하는 리스트입니다.
-    private List<DamageOverTimeEffect> activeDotEffects = new List<DamageOverTimeEffect>();
+    private bool isDead = false; // 중복 사망 방지 플래그
+    private List<DotEffect> activeDotEffects = new List<DotEffect>(); // (추가) 적용된 지속 데미지 효과 목록
 
     void Start()
     {
@@ -76,7 +74,7 @@ public class EnemyHealth : MonoBehaviour
         }
 
         // 지속 데미지로 인해 체력이 0 이하가 되었는지 확인합니다.
-        if (currentHealth <= 0)
+        if (currentHealth <= 0 && !isDead)
         {
             Die();
         }
@@ -90,19 +88,15 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
-    // (추가) 외부(발사체 등)에서 이 적에게 지속 데미지를 적용하기 위한 함수입니다.
-    public void ApplyDot(float damagePerSecond, float duration)
+    // (추가) ProjectileController에서 호출할 지속 데미지 적용 함수
+    public void ApplyDotEffect(float damagePerSecond, float duration)
     {
-        activeDotEffects.Add(new DamageOverTimeEffect
-        {
-            DamagePerSecond = damagePerSecond,
-            RemainingDuration = duration
-        });
+        activeDotEffects.Add(new DotEffect { DamagePerSecond = damagePerSecond, RemainingDuration = duration });
     }
 
     public void TakeDamage(float rawDamage, TowerType attackerType, DamageType damageType)
     {
-        if (currentHealth <= 0 || isDead) return;
+        if (isDead) return;
 
         lastAttackerType = attackerType;
 
@@ -117,11 +111,11 @@ public class EnemyHealth : MonoBehaviour
         }
 
         float finalDamage = rawDamage * (1 - defense / 100);
-
-        // (수정) 의도된 피해량(rawDamage)이 1보다 작고 0보다 클 때는 최소 데미지 보정을 적용하지 않습니다.
-        if (rawDamage > 0 && rawDamage < 1) 
+        
+        // 레이저처럼 1 미만의 데미지는 그대로 적용하고, 그 외의 공격은 최소 1의 데미지를 보장합니다.
+        if (rawDamage > 0 && rawDamage < 1)
         {
-             // 레이저 같은 지속적인 약한 데미지는 그대로 적용
+            // Do nothing, let the small damage apply as is (for lasers)
         }
         else if (rawDamage > 0)
         {
@@ -131,12 +125,13 @@ public class EnemyHealth : MonoBehaviour
         {
             finalDamage = 0;
         }
-
+        
         if (finalDamage > 0)
         {
             currentHealth -= finalDamage;
             UpdateHealthBar();
-            if (currentHealth <= 0)
+
+            if (currentHealth <= 0 && !isDead)
             {
                 Die();
             }
@@ -145,6 +140,7 @@ public class EnemyHealth : MonoBehaviour
     
     public void InstantKill()
     {
+        if (isDead) return;
         currentHealth = 0;
         UpdateHealthBar();
         Die();
@@ -152,13 +148,15 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        if (isDead) return;
         isDead = true;
 
         if (lastAttackerType != TowerType.None && lastAttackerType != TowerType.Hero)
         {
             GameObject orb = Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
-            orb.GetComponent<ExperienceController>().Setup(experienceValue, lastAttackerType);
+            if(orb.GetComponent<ExperienceController>() != null)
+            {
+                orb.GetComponent<ExperienceController>().Setup(experienceValue, lastAttackerType);
+            }
         }
         
         GameManager.instance.AddGold(goldValue);

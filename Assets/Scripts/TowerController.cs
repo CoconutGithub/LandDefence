@@ -404,20 +404,47 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
-        // (수정) '하데스' 스킬이 이제 '최대 체력'을 기준으로 즉사 여부를 판단합니다.
+        // (수정) 포세이돈 스킬이 넉백 '반경' 값을 함께 전달하도록 수정합니다.
+        int poseidonLevel = GetSkillLevel("포세이돈");
+        if (poseidonLevel > 0)
+        {
+            TowerSkillBlueprint poseidonSkill = System.Array.Find(towerSkills, skill => skill.skillName == "포세이돈");
+            if (poseidonSkill != null)
+            {
+                float procChance = poseidonSkill.values1[poseidonLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    Transform specialTarget = FindFurthestEnemyInRange();
+                    if (specialTarget != null)
+                    {
+                        SoundManager.instance.PlayAttackSound();
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+
+                        if (projectile != null)
+                        {
+                            float knockbackDist = poseidonSkill.values2[poseidonLevel - 1];
+                            float knockbackRadius = poseidonSkill.values3[poseidonLevel - 1];
+                            projectile.Setup(specialTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, knockbackDist, knockbackRadius);
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
         int hadesLevel = GetSkillLevel("하데스");
         if (hadesLevel > 0)
         {
             TowerSkillBlueprint hadesSkill = System.Array.Find(towerSkills, skill => skill.skillName == "하데스");
             if (hadesSkill != null)
             {
-                if (Random.Range(0f, 100f) < 5f) // 5% 확률
+                if (Random.Range(0f, 100f) < 5f)
                 {
                     EnemyHealth enemyHealth = currentTarget.GetComponent<EnemyHealth>();
                     if (enemyHealth != null)
                     {
                         float healthThreshold = hadesSkill.values1[hadesLevel - 1];
-                        // 적의 '최대 체력'이 설정된 한계치 이하일 때 즉사
                         if (enemyHealth.MaxHealth <= healthThreshold)
                         {
                             enemyHealth.InstantKill();
@@ -586,6 +613,47 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 {
                     highestHealth = enemyHealth.MaxHealth;
                     bestTarget = enemy.transform;
+                }
+            }
+        }
+        return bestTarget;
+    }
+    
+    private Transform FindFurthestEnemyInRange()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Transform bestTarget = null;
+        int maxWaypointIndex = -1;
+        float minDistanceToNextWaypoint = float.MaxValue;
+        
+        Transform waypoints = GameManager.WaypointHolder;
+        if (waypoints == null) return null;
+
+        foreach (GameObject enemyGO in enemies)
+        {
+            float distanceToTower = Vector3.Distance(transform.position, enemyGO.transform.position);
+            if (distanceToTower <= attackRange)
+            {
+                EnemyMovement enemy = enemyGO.GetComponent<EnemyMovement>();
+                if (enemy == null) continue;
+
+                int enemyWaypointIndex = enemy.GetCurrentWaypointIndex();
+                if (enemyWaypointIndex >= waypoints.childCount) continue;
+
+                if (enemyWaypointIndex > maxWaypointIndex)
+                {
+                    maxWaypointIndex = enemyWaypointIndex;
+                    bestTarget = enemy.transform;
+                    minDistanceToNextWaypoint = Vector3.Distance(enemy.transform.position, waypoints.GetChild(enemyWaypointIndex).position);
+                }
+                else if (enemyWaypointIndex == maxWaypointIndex)
+                {
+                    float distanceToNext = Vector3.Distance(enemy.transform.position, waypoints.GetChild(enemyWaypointIndex).position);
+                    if (distanceToNext < minDistanceToNextWaypoint)
+                    {
+                        minDistanceToNextWaypoint = distanceToNext;
+                        bestTarget = enemy.transform;
+                    }
                 }
             }
         }

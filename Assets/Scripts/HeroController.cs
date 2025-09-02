@@ -132,7 +132,12 @@ public class HeroController : MonoBehaviour
         activeClones.Clear();
     }
     
-    // (추가) 외부에서 호출할 수 있는 '힐' 기능입니다.
+    // (추가) 외부(EnemyMovement)에서 호출하여 영웅의 타겟을 초기화하는 함수
+    public void ResumeMovement()
+    {
+        currentTarget = null;
+    }
+
     public void Heal(float amount)
     {
         if (currentHealth <= 0) return;
