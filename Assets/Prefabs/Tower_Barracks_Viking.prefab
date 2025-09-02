@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BarracksController
   maxSoldiers: 3
-  spawnRate: 3
+  spawnRate: 4
   spreadRadius: 0.5
   rallyPointRange: 3
   upgradePaths: []

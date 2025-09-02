@@ -333,13 +333,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49fe6c2f37bfbc04ba3c20f59f9ca161, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoldierController
-  maxHealth: 100
+  maxHealth: 120
   attackDamage: 50
   timeBetweenAttacks: 0.3
   moveSpeed: 3
   healthRegenRate: 30
   timeToStartRegen: 5
   damageType: 0
+  respawnTime: 10
   isAreaOfEffect: 1
   aoeRadius: 1.5
   healthBarSlider: {fileID: 4979688441236379191}

@@ -32,6 +32,8 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     private TowerSpotController parentSpot;
 
     private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
+    // (추가) 병영 패시브 스킬을 위한 원본 능력치
+    private float originalSpawnRate;
 
     void Start()
     {
@@ -43,6 +45,9 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         {
             skillLevels[skill.skillName] = 0;
         }
+        
+        // (추가) 원본 충원 속도 저장
+        originalSpawnRate = spawnRate;
 
         for (int i = 0; i < maxSoldiers; i++)
         {
@@ -58,6 +63,7 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
             if (spawnCountdown <= 0f)
             {
                 SpawnSoldier();
+                // (수정) 현재 적용된 spawnRate를 사용
                 spawnCountdown = spawnRate;
             }
         }
@@ -133,6 +139,9 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
             skillLevels[skillToUpgrade.skillName]++;
             Debug.Log($"{skillToUpgrade.skillName} 스킬 레벨 업! -> {skillLevels[skillToUpgrade.skillName]}");
 
+            // (추가) 병영 자체 패시브 스킬 효과 적용
+            ApplyAllPassiveSkillEffectsToBarracks();
+
             foreach (var soldier in spawnedSoldiers)
             {
                 if(soldier != null) ApplyAllPassiveSkillEffectsToSoldier(soldier);
@@ -146,7 +155,29 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) 체력 흡수 스킬 효과를 계산하도록 로직 추가
+    // (추가) 병영 자체에 적용되는 패시브 스킬을 관리하는 함수
+    void ApplyAllPassiveSkillEffectsToBarracks()
+    {
+        // 능력치를 원본 값으로 초기화
+        spawnRate = originalSpawnRate;
+        
+        // 습득한 모든 패시브 스킬 효과를 순차적으로 적용
+        foreach (var skill in towerSkills)
+        {
+            int skillLevel = GetSkillLevel(skill.skillName);
+            if (skillLevel > 0)
+            {
+                switch (skill.skillName)
+                {
+                    case "인해전술":
+                        float reduction = skill.values1[skillLevel - 1];
+                        spawnRate = Mathf.Max(originalSpawnRate - reduction, 1f); // 최소 1초의 리스폰 시간 보장
+                        break;
+                }
+            }
+        }
+    }
+
     void ApplyAllPassiveSkillEffectsToSoldier(SoldierController soldier)
     {
         float healthModifier = 0f;
@@ -197,9 +228,9 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         if (spawnedSoldiers.Contains(soldier))
         {
             spawnedSoldiers.Remove(soldier);
-            // 병사가 죽으면 바로 충원 카운트다운을 시작합니다.
             if(spawnedSoldiers.Count < maxSoldiers)
             {
+                // (수정) 현재 적용된 spawnRate를 사용
                 spawnCountdown = spawnRate;
             }
         }
