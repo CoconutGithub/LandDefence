@@ -167,6 +167,17 @@ MonoBehaviour:
     - 1
     values2: []
     values3: []
+  - skillName: "\uC6B0\uB9AC\uB294 \uD558\uB098!"
+    skillDescription: "\uBCD1\uC0AC\uC758 \uC801 \uC778\uC2DD \uBC94\uC704\uAC00
+      \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    maxLevel: 3
+    costs: 640000009600000096000000
+    values1:
+    - 0.3
+    - 0.5
+    - 0.7
+    values2: []
+    values3: []
   soldierPrefab: {fileID: 1852670417170501071, guid: 41903a384ec29ae479e843607c6bb941, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458

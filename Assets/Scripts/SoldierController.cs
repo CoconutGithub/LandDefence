@@ -51,8 +51,9 @@ public class SoldierController : MonoBehaviour
 
     private float originalMaxHealth;
     private float originalAttackDamage;
-    // (추가) 체력 흡수 비율을 저장할 변수
     private float lifeStealPercentage = 0f;
+    // (추가) 원본 인식 범위를 저장할 변수
+    private float originalRecognitionRadius;
 
     void Awake()
     {
@@ -60,6 +61,11 @@ public class SoldierController : MonoBehaviour
         recognitionCollider = GetComponent<CircleCollider2D>();
         originalMaxHealth = maxHealth;
         originalAttackDamage = attackDamage;
+        // (추가) 원본 인식 범위 저장
+        if (recognitionCollider != null)
+        {
+            originalRecognitionRadius = recognitionCollider.radius;
+        }
     }
 
     void Start()
@@ -199,12 +205,17 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (수정) 체력 흡수 비율도 함께 받도록 함수 확장
-    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal)
+    // (수정) 인식 범위 보너스도 함께 받도록 함수 확장
+    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus)
     {
         maxHealth = originalMaxHealth + healthModifier;
         attackDamage = originalAttackDamage + damageModifier;
         lifeStealPercentage = lifeSteal;
+
+        if (recognitionCollider != null)
+        {
+            recognitionCollider.radius = originalRecognitionRadius + recognitionRadiusBonus;
+        }
 
         currentHealth = Mathf.Min(currentHealth, maxHealth);
         if (maxHealth <= 0) Die();
@@ -212,7 +223,6 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (수정) 공격 시 체력 흡수 로직 추가
     void Attack()
     {
         float totalDamageDealt = 0;
@@ -225,7 +235,7 @@ public class SoldierController : MonoBehaviour
                 if (hit.CompareTag("Enemy"))
                 {
                     hit.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
-                    totalDamageDealt += attackDamage; // 광역 공격도 흡혈 계산에 포함
+                    totalDamageDealt += attackDamage;
                 }
             }
         }
@@ -238,7 +248,6 @@ public class SoldierController : MonoBehaviour
             }
         }
 
-        // 입힌 총 피해량의 일정 비율만큼 체력 회복
         if (lifeStealPercentage > 0 && totalDamageDealt > 0)
         {
             Heal(totalDamageDealt * (lifeStealPercentage / 100f));
