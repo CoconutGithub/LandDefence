@@ -65,14 +65,22 @@ public class EnemyHealth : MonoBehaviour
         }
 
         float finalDamage = rawDamage * (1 - defense / 100);
-        finalDamage = Mathf.Max(finalDamage, 1);
 
-        currentHealth -= finalDamage;
-        UpdateHealthBar();
-        
-        if (currentHealth <= 0)
+        // (수정) 최초 데미지(rawDamage)가 1 이상인 공격에 대해서만 최소 데미지를 1로 보정합니다.
+        if (rawDamage >= 1.0f)
         {
-            Die();
+            finalDamage = Mathf.Max(finalDamage, 1);
+        }
+
+        if (finalDamage > 0)
+        {
+            currentHealth -= finalDamage;
+            UpdateHealthBar();
+
+            if (currentHealth <= 0)
+            {
+                Die();
+            }
         }
     }
     
@@ -88,7 +96,6 @@ public class EnemyHealth : MonoBehaviour
         if (lastAttackerType != TowerType.None && lastAttackerType != TowerType.Hero)
         {
             GameObject orb = Instantiate(experienceOrbPrefab, transform.position, Quaternion.identity);
-            // (수정) Setup 함수의 인자 순서를 (경험치 양, 타워 종류)로 올바르게 수정합니다.
             orb.GetComponent<ExperienceController>().Setup(experienceValue, lastAttackerType);
         }
         

@@ -117,8 +117,8 @@ MonoBehaviour:
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 0
-  laserDps: 30
-  laserDpsRamp: 10
+  laserDps: 10
+  laserDpsRamp: 20
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 4cbd02ac260a46345933cfac49c1a0d3, type: 3}
     cost: 100

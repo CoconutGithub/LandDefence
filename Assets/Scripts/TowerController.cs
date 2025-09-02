@@ -57,6 +57,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private TowerSpotController parentSpot;
     private float currentDpsRamp = 0f;
     private Transform lastTarget;
+    
+    private float laserTimer = 0f;
 
     void Start()
     {
@@ -123,16 +125,24 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
             if (currentTarget == lastTarget)
             {
-                currentDpsRamp += laserDpsRamp * Time.deltaTime;
+                laserTimer += Time.deltaTime;
+                if (laserTimer >= 1f)
+                {
+                    currentDpsRamp += laserDpsRamp; 
+                    laserTimer -= 1f;
+                }
             }
             else
             {
                 currentDpsRamp = 0f;
+                laserTimer = 0f;
             }
             lastTarget = currentTarget;
 
             float totalDps = laserDps + currentDpsRamp;
-            currentTarget.GetComponent<EnemyHealth>().TakeDamage(totalDps * Time.deltaTime, towerType, damageType);
+            float damageToSend = totalDps * Time.deltaTime;
+
+            currentTarget.GetComponent<EnemyHealth>().TakeDamage(damageToSend, towerType, damageType);
         }
         else
         {
@@ -140,6 +150,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             {
                 laserLineRenderer.enabled = false;
                 currentDpsRamp = 0f;
+                laserTimer = 0f; 
                 lastTarget = null;
             }
         }
@@ -168,7 +179,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             BombProjectileController bomb = projectileGO.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                // (수정) 목표물(Transform) 대신 목표물의 현재 위치(Vector3)를 전달합니다.
                 bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType);
             }
         }
@@ -212,3 +222,4 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
+

@@ -118,8 +118,8 @@ MonoBehaviour:
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 1
-  laserDps: 0
-  laserDpsRamp: 0
+  laserDps: 10
+  laserDpsRamp: 30
   upgradePaths: []
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 8832208381610958432}
