@@ -1043,7 +1043,6 @@ GameObject:
   - component: {fileID: 329346565}
   - component: {fileID: 329346570}
   - component: {fileID: 329346569}
-  - component: {fileID: 329346568}
   - component: {fileID: 329346567}
   - component: {fileID: 329346571}
   - component: {fileID: 329346572}
@@ -1087,32 +1086,6 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &329346568
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329346564}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.HorizontalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!114 &329346569
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1167,6 +1140,7 @@ MonoBehaviour:
   upgradeButtonPrefab: {fileID: 4172360499309377922, guid: 662f1c7678fbcf24d9a330044b8060c0, type: 3}
   buttonContainer: {fileID: 2078956924}
   setRallyPointButton: {fileID: 2071373985}
+  skillButtonPrefab: {fileID: 4172360499309377922, guid: 662f1c7678fbcf24d9a330044b8060c0, type: 3}
 --- !u!114 &329346572
 MonoBehaviour:
   m_ObjectHideFlags: 0
