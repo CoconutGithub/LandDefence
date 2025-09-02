@@ -24,7 +24,7 @@ public class SkillManager : MonoBehaviour
         None,
         Lightning,
         Vine,
-        SkullMagic // (추가) 해골 마법 타겟팅 상태
+        SkullMagic
     }
     private TargetingSkill currentTargetingSkill = TargetingSkill.None;
 
@@ -46,25 +46,28 @@ public class SkillManager : MonoBehaviour
     [SerializeField]
     private float vineDuration = 4f;
     
-    [Header("해골 마법 스킬 설정")] // (추가)
+    [Header("해골 마법 스킬 설정")]
     [SerializeField]
-    private float skullMagicHealthThreshold = 500f; // 이 체력 이하의 적만 즉사시킬 수 있습니다.
+    private float skullMagicHealthThreshold = 500f;
 
-    // (추가) 분신술 스킬 설정
-    [Header("분신술 스킬 설정")]
+    // (추가) 모래 지옥 스킬 설정
+    [Header("모래 지옥 스킬 설정")]
     [SerializeField]
-    private float cloneDuration = 10f; // 분신 지속 시간
+    private float sandHellHealthThreshold = 700f; // 이 체력 이하의 적만 즉사시킬 수 있습니다.
 
     [Header("공통 설정")]
     [SerializeField]
     private LayerMask enemyLayer;
     [SerializeField]
     private GameObject rangeIndicator;
-
-    // (추가) HeroController 참조
-    [Header("참조")]
+    
+    // (추가) 분신술 구현을 위한 변수들
+    [Header("분신술 스킬 설정")]
     [SerializeField]
     private HeroController heroController;
+    [SerializeField]
+    private float cloneDuration = 10f;
+
 
     void Awake()
     {
@@ -122,7 +125,6 @@ public class SkillManager : MonoBehaviour
             
             if (Input.GetMouseButtonDown(0))
             {
-                // (수정) 어떤 스킬이냐에 따라 다른 캐스팅 함수를 호출합니다.
                 switch (currentTargetingSkill)
                 {
                     case TargetingSkill.Lightning:
@@ -186,37 +188,45 @@ public class SkillManager : MonoBehaviour
         }
     }
     
-    // (추가) 해골 마법 버튼에 연결될 함수입니다.
     public void OnSkullMagicButton()
     {
         Skill skullMagicSkill = FindSkill("SkullMagic");
         if (skullMagicSkill != null && skullMagicSkill.currentCooldown <= 0)
         {
-            // 이 스킬은 범위 표시기가 필요 없으므로 바로 타겟팅 모드로 들어갑니다.
             currentTargetingSkill = TargetingSkill.SkullMagic;
             Debug.Log("즉사시킬 적을 선택하세요!");
         }
     }
-    
+
     // (추가) 분신술 버튼에 연결될 함수입니다.
     public void OnCloneSkillButton()
     {
-        Skill cloneSkill = FindSkill("Clone"); // Inspector에서 skillName을 "Clone"으로 설정해야 합니다.
+        Skill cloneSkill = FindSkill("Clone");
         if (cloneSkill != null && cloneSkill.currentCooldown <= 0)
         {
             if (heroController != null)
             {
-                // HeroController에 분신술 활성화 함수를 호출합니다.
                 heroController.ActivateCloneSkill(cloneDuration);
                 StartCooldown(cloneSkill);
             }
             else
             {
-                Debug.LogError("SkillManager에 HeroController가 연결되지 않았습니다!");
+                Debug.LogError("HeroController가 SkillManager에 연결되지 않았습니다!");
             }
         }
     }
     
+    // (추가) 모래 지옥 버튼에 연결될 함수입니다.
+    public void OnSandHellButton()
+    {
+        Skill sandHellSkill = FindSkill("SandHell");
+        if (sandHellSkill != null && sandHellSkill.currentCooldown <= 0)
+        {
+            CastSandHell();
+            StartCooldown(sandHellSkill);
+        }
+    }
+
     // --- 내부 로직 함수들 ---
 
     void CastLightning(Vector3 mousePosition)
@@ -267,13 +277,11 @@ public class SkillManager : MonoBehaviour
         StartCooldown(vineSkill);
     }
     
-    // (추가) 해골 마법 시전 로직입니다.
     void CastSkullMagic(Vector3 mousePosition)
     {
         Skill skullMagicSkill = FindSkill("SkullMagic");
         if (skullMagicSkill == null) return;
 
-        // 마우스 클릭 위치에 있는 적을 찾습니다.
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(mousePosition), Vector2.zero, Mathf.Infinity, enemyLayer);
 
         if (hit.collider != null)
@@ -281,7 +289,6 @@ public class SkillManager : MonoBehaviour
             EnemyHealth enemyHealth = hit.collider.GetComponent<EnemyHealth>();
             if (enemyHealth != null)
             {
-                // 적의 최대 체력이 설정된 한계치 이하일 때만 즉사시킵니다.
                 if (enemyHealth.MaxHealth <= skullMagicHealthThreshold)
                 {
                     enemyHealth.InstantKill();
@@ -293,6 +300,28 @@ public class SkillManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    // (추가) 모래 지옥 시전 로직입니다.
+    void CastSandHell()
+    {
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+        int killCount = 0;
+
+        foreach (GameObject enemyObject in allEnemies)
+        {
+            EnemyHealth enemyHealth = enemyObject.GetComponent<EnemyHealth>();
+            if (enemyHealth != null)
+            {
+                // 적의 최대 체력이 설정된 한계치 이하일 때만 즉사시킵니다.
+                if (enemyHealth.MaxHealth <= sandHellHealthThreshold)
+                {
+                    enemyHealth.InstantKill();
+                    killCount++;
+                }
+            }
+        }
+        Debug.Log($"모래 지옥으로 {killCount}마리의 적을 처치했습니다!");
     }
 
     private Skill FindSkill(string name)
@@ -327,3 +356,4 @@ public class SkillManager : MonoBehaviour
         }
     }
 }
+
