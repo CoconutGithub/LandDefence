@@ -18,7 +18,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
     [Header("업그레이드 및 스킬 정보")]
     public TowerBlueprint[] upgradePaths;
-    // (추가) 병영도 스킬을 가질 수 있도록 추가
     public TowerSkillBlueprint[] towerSkills;
 
     [Header("필요한 컴포넌트")]
@@ -32,7 +31,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     private Transform rallyPointInstance;
     private TowerSpotController parentSpot;
 
-    // (추가) 스킬 레벨 관리를 위한 딕셔너리
     private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
 
     void Start()
@@ -41,7 +39,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         rallyPointInstance.position = transform.position + new Vector3(0, -1.5f, 0);
         rallyPointInstance.gameObject.SetActive(false);
         
-        // (추가) 스킬 레벨 초기화
         foreach (var skill in towerSkills)
         {
             skillLevels[skill.skillName] = 0;
@@ -111,7 +108,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (추가) 스킬 레벨을 가져오는 함수
     public int GetSkillLevel(string skillName)
     {
         if (skillLevels.ContainsKey(skillName))
@@ -121,7 +117,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         return 0;
     }
 
-    // (추가) 스킬을 업그레이드하는 함수
     public void UpgradeSkill(TowerSkillBlueprint skillToUpgrade)
     {
         int currentLevel = GetSkillLevel(skillToUpgrade.skillName);
@@ -138,7 +133,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
             skillLevels[skillToUpgrade.skillName]++;
             Debug.Log($"{skillToUpgrade.skillName} 스킬 레벨 업! -> {skillLevels[skillToUpgrade.skillName]}");
 
-            // 모든 병사들에게 변경된 스킬 효과를 다시 적용
             foreach (var soldier in spawnedSoldiers)
             {
                 if(soldier != null) ApplyAllPassiveSkillEffectsToSoldier(soldier);
@@ -152,11 +146,12 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (추가) 병사에게 모든 패시브 스킬 효과를 적용하는 함수
+    // (수정) 체력 흡수 스킬 효과를 계산하도록 로직 추가
     void ApplyAllPassiveSkillEffectsToSoldier(SoldierController soldier)
     {
         float healthModifier = 0f;
         float damageModifier = 0f;
+        float lifeSteal = 0f;
 
         foreach (var skill in towerSkills)
         {
@@ -166,13 +161,16 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
                 switch (skill.skillName)
                 {
                     case "폭주":
-                        healthModifier -= skill.values1[skillLevel - 1]; // 체력 감소
-                        damageModifier += skill.values2[skillLevel - 1]; // 공격력 증가
+                        healthModifier -= skill.values1[skillLevel - 1];
+                        damageModifier += skill.values2[skillLevel - 1];
+                        break;
+                    case "체력 흡수":
+                        lifeSteal = skill.values1[skillLevel - 1];
                         break;
                 }
             }
         }
-        soldier.ApplyStatModification(healthModifier, damageModifier);
+        soldier.ApplyStatModification(healthModifier, damageModifier, lifeSteal);
     }
     
     public void SetParentSpot(TowerSpotController spot)
@@ -189,7 +187,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         {
             spawnedSoldiers.Add(soldier);
             soldier.SetBarracks(this);
-            // (추가) 생성된 병사에게 현재 스킬 효과를 적용합니다.
             ApplyAllPassiveSkillEffectsToSoldier(soldier);
             UpdateSoldierRallyPoints();
         }
@@ -200,7 +197,11 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         if (spawnedSoldiers.Contains(soldier))
         {
             spawnedSoldiers.Remove(soldier);
-            UpdateSoldierRallyPoints();
+            // 병사가 죽으면 바로 충원 카운트다운을 시작합니다.
+            if(spawnedSoldiers.Count < maxSoldiers)
+            {
+                spawnCountdown = spawnRate;
+            }
         }
     }
     
@@ -224,7 +225,6 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        // (수정) 이제 병영도 TowerUpgradeUI를 사용합니다.
         TowerUpgradeUI.instance.Show(this);
     }
     

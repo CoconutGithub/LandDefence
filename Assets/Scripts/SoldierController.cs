@@ -49,15 +49,15 @@ public class SoldierController : MonoBehaviour
     private bool isHaetae = false;
     private SpriteRenderer spriteRenderer;
 
-    // (추가) 스킬 효과 계산을 위한 원본 능력치
     private float originalMaxHealth;
     private float originalAttackDamage;
+    // (추가) 체력 흡수 비율을 저장할 변수
+    private float lifeStealPercentage = 0f;
 
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         recognitionCollider = GetComponent<CircleCollider2D>();
-        // (추가) 스킬이 적용되기 전의 순수 능력치를 저장합니다.
         originalMaxHealth = maxHealth;
         originalAttackDamage = attackDamage;
     }
@@ -191,7 +191,7 @@ public class SoldierController : MonoBehaviour
     public void SetupAsHaetae(float newMaxHealth, float newAttackDamage)
     {
         isHaetae = true;
-        originalMaxHealth = newMaxHealth; // 해치의 기본 스탯을 원본으로 저장
+        originalMaxHealth = newMaxHealth;
         originalAttackDamage = newAttackDamage;
         maxHealth = newMaxHealth;
         attackDamage = newAttackDamage;
@@ -199,21 +199,24 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (추가) 병영에서 스킬 효과를 적용하기 위해 호출하는 함수
-    public void ApplyStatModification(float healthModifier, float damageModifier)
+    // (수정) 체력 흡수 비율도 함께 받도록 함수 확장
+    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal)
     {
         maxHealth = originalMaxHealth + healthModifier;
         attackDamage = originalAttackDamage + damageModifier;
+        lifeStealPercentage = lifeSteal;
 
-        // 최대 체력이 변경되었으므로, 현재 체력도 비율에 맞게 조정하거나, 최대치를 넘지 않도록 보정
         currentHealth = Mathf.Min(currentHealth, maxHealth);
-        if (maxHealth <= 0) Die(); // 체력 감소로 인해 죽는 경우
+        if (maxHealth <= 0) Die();
         
         UpdateHealthBar();
     }
 
+    // (수정) 공격 시 체력 흡수 로직 추가
     void Attack()
     {
+        float totalDamageDealt = 0;
+
         if (isAreaOfEffect)
         {
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
@@ -222,6 +225,7 @@ public class SoldierController : MonoBehaviour
                 if (hit.CompareTag("Enemy"))
                 {
                     hit.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+                    totalDamageDealt += attackDamage; // 광역 공격도 흡혈 계산에 포함
                 }
             }
         }
@@ -230,7 +234,14 @@ public class SoldierController : MonoBehaviour
             if (currentTarget != null)
             {
                 currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+                totalDamageDealt = attackDamage;
             }
+        }
+
+        // 입힌 총 피해량의 일정 비율만큼 체력 회복
+        if (lifeStealPercentage > 0 && totalDamageDealt > 0)
+        {
+            Heal(totalDamageDealt * (lifeStealPercentage / 100f));
         }
     }
 
