@@ -105,28 +105,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  attackRange: 12
-  timeBetweenAttacks: 5
   towerType: 4
   damageType: 1
-  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
-  bombProjectilePrefab: {fileID: 0}
-  firePoint: {fileID: 8832208381610958432}
+  attackRange: 12
+  timeBetweenAttacks: 4
   baseProjectileDamage: 70
   projectileSpeed: 3
-  aoeRadius: 2
-  isLaserTower: 0
-  laserLine: {fileID: 0}
-  baseLaserDamagePerSecond: 15
-  damageIncreasePerSecond: 20
-  isBurstFire: 0
-  burstCount: 6
-  timeBetweenBursts: 0.1
-  canSlow: 0
   slowAmount: 0.4
   slowDuration: 3
+  explosionRadius: 3
+  bulletsPerBurst: 1
+  timeBetweenShots: 0.1
+  isLaserTower: 0
+  laserDps: 30
+  laserDpsRamp: 10
   upgradePaths: []
-  skills: []
+  towerSkills: []
+  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
+  firePoint: {fileID: 8832208381610958432}
+  laserLineRenderer: {fileID: 0}
+  haetaePrefab: {fileID: 0}
+  missilePrefab: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0

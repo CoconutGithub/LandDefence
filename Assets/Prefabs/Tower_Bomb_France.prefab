@@ -105,28 +105,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66e79dea9649ee2408ae2fc7c22499e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
-  attackRange: 7
-  timeBetweenAttacks: 0.7
   towerType: 4
   damageType: 0
-  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
-  bombProjectilePrefab: {fileID: 0}
-  firePoint: {fileID: 8832208381610958432}
-  baseProjectileDamage: 25
+  attackRange: 7
+  timeBetweenAttacks: 1.2
+  baseProjectileDamage: 30
   projectileSpeed: 5
-  aoeRadius: 2
-  isLaserTower: 0
-  laserLine: {fileID: 0}
-  baseLaserDamagePerSecond: 15
-  damageIncreasePerSecond: 20
-  isBurstFire: 0
-  burstCount: 6
-  timeBetweenBursts: 0.1
-  canSlow: 0
   slowAmount: 0
   slowDuration: 0
+  explosionRadius: 2
+  bulletsPerBurst: 1
+  timeBetweenShots: 0.1
+  isLaserTower: 0
+  laserDps: 30
+  laserDpsRamp: 10
   upgradePaths: []
-  skills: []
+  towerSkills:
+  - skillName: "\uC804\uC120 \uAD6C\uCD95"
+    skillDescription: "\uD3ED\uD0C4\uC5D0 \uB9DE\uC740 \uC801\uB4E4\uC744 \uB290\uB824\uC9C0\uAC8C
+      \uD569\uB2C8\uB2E4."
+    maxLevel: 1
+    costs: c8000000
+    values1:
+    - 0.4
+    values2:
+    - 1
+    values3: []
+  projectilePrefab: {fileID: 4329414863976529247, guid: ee2c5ffaa45196546901974b8620cde4, type: 3}
+  firePoint: {fileID: 8832208381610958432}
+  laserLineRenderer: {fileID: 0}
+  haetaePrefab: {fileID: 0}
+  missilePrefab: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0

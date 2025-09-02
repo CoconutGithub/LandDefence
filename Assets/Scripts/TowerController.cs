@@ -72,6 +72,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private int originalBulletsPerBurst;
     private float originalLaserDps;
     private float originalLaserDpsRamp;
+    // (추가) 원본 둔화 능력치를 저장할 변수
+    private float originalSlowAmount;
+    private float originalSlowDuration;
 
     private float healCheckTimer = 0f;
     private const float HEAL_CHECK_INTERVAL = 0.5f;
@@ -95,6 +98,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         originalBulletsPerBurst = bulletsPerBurst;
         originalLaserDps = laserDps;
         originalLaserDpsRamp = laserDpsRamp;
+        // (추가) 원본 둔화 능력치 저장
+        originalSlowAmount = slowAmount;
+        originalSlowDuration = slowDuration;
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -148,12 +154,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) '전선 구축' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
         timeBetweenAttacks = originalTimeBetweenAttacks;
         bulletsPerBurst = originalBulletsPerBurst;
         laserDps = originalLaserDps;
         laserDpsRamp = originalLaserDpsRamp;
+        slowAmount = originalSlowAmount;
+        slowDuration = originalSlowDuration;
         
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
@@ -179,6 +188,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     case "아브라카다브라!":
                         laserDps = skill.values1[skillLevel - 1];
                         laserDpsRamp = skill.values2[skillLevel - 1];
+                        break;
+                        
+                    case "전선 구축":
+                        slowAmount = skill.values1[skillLevel - 1];
+                        slowDuration = skill.values2[skillLevel - 1];
                         break;
                 }
             }
@@ -402,14 +416,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) 폭탄 발사체 생성 시 둔화 정보를 함께 전달
     void Shoot()
     {
-        // (수정) 포세이돈 스킬이 넉백 '반경' 값을 함께 전달하도록 수정합니다.
         int poseidonLevel = GetSkillLevel("포세이돈");
         if (poseidonLevel > 0)
         {
             TowerSkillBlueprint poseidonSkill = System.Array.Find(towerSkills, skill => skill.skillName == "포세이돈");
-            if (poseidonSkill != null)
+            if (poseidonSkill != null && poseidonSkill.values1.Length >= poseidonLevel && poseidonSkill.values2.Length >= poseidonLevel && poseidonSkill.values3.Length >= poseidonLevel)
             {
                 float procChance = poseidonSkill.values1[poseidonLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
@@ -498,7 +512,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     {
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
-                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType);
+                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0);
                     }
                     return;
                 }
@@ -541,7 +555,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType);
+                bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration);
             }
         }
         else
