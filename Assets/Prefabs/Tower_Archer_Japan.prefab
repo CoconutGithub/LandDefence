@@ -120,9 +120,26 @@ MonoBehaviour:
   laserDps: 30
   laserDpsRamp: 10
   upgradePaths: []
+  towerSkills:
+  - skillName: "\uC7A5\uAC70\uB9AC \uC0AC\uACA9"
+    skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uAC00\uC7A5
+      \uCCB4\uB825\uC774 \uB192\uC740 \uC801\uC5D0\uAC8C \uAC15\uB825\uD55C \uD654\uC0B4\uC744
+      \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    maxLevel: 3
+    costs: 320000003c00000046000000
+    values1:
+    - 15
+    - 20
+    - 25
+    values2:
+    - 1.5
+    - 2
+    - 2.5
+    values3: []
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 0}
+  haetaePrefab: {fileID: 0}
 --- !u!61 &-2395588492771301174
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -131,7 +131,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (수정) 해치 소환 위치를 가장 가까운 '경로 위'로 변경하는 로직
     private void HandleHaetaeSkill(TowerSkillBlueprint haetaeSkill, int newLevel)
     {
         if (newLevel == 1)
@@ -142,13 +141,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             Vector3 bestSpawnPoint = Vector3.zero;
             float minDistanceSqr = float.MaxValue;
 
-            // 모든 웨이포인트 '선분'을 순회합니다. (마지막 지점 제외)
             for (int i = 0; i < waypoints.childCount - 1; i++)
             {
                 Vector3 p1 = waypoints.GetChild(i).position;
                 Vector3 p2 = waypoints.GetChild(i + 1).position;
                 
-                // 타워와 가장 가까운 선분 위의 점을 찾습니다.
                 Vector3 closestPointOnSegment = GetClosestPointOnLineSegment(p1, p2, transform.position);
                 
                 float distSqr = (transform.position - closestPointOnSegment).sqrMagnitude;
@@ -176,17 +173,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (추가) 두 점으로 이루어진 선분 위에서 특정 점과 가장 가까운 점을 찾는 함수
     private Vector3 GetClosestPointOnLineSegment(Vector3 p1, Vector3 p2, Vector3 point)
     {
         Vector3 lineDir = p2 - p1;
         float lineLengthSqr = lineDir.sqrMagnitude;
-        if (lineLengthSqr < 0.0001f) return p1; // 선분의 길이가 거의 0이면 시작점을 반환
+        if (lineLengthSqr < 0.0001f) return p1;
 
-        // 점이 선분 위에 투영된 위치를 계산 (0.0 ~ 1.0 사이 값)
         float t = Mathf.Clamp01(Vector3.Dot(point - p1, lineDir) / lineLengthSqr);
         
-        // 투영된 위치에 해당하는 실제 좌표를 반환
         return p1 + t * lineDir;
     }
 
@@ -283,12 +277,46 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
+        // (추가) '장거리 사격' 스킬 발동 로직
+        int longShotLevel = GetSkillLevel("장거리 사격");
+        if (longShotLevel > 0)
+        {
+            TowerSkillBlueprint longShotSkill = System.Array.Find(towerSkills, skill => skill.skillName == "장거리 사격");
+            if (longShotSkill != null)
+            {
+                float procChance = longShotSkill.values1[longShotLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    Transform specialTarget = FindHighestHealthEnemyInRange();
+                    if (specialTarget != null)
+                    {
+                        // '장거리 사격' 스킬이 발동한 경우
+                        SoundManager.instance.PlayAttackSound();
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+
+                        if (projectile != null)
+                        {
+                            // values2를 데미지 배율로 사용합니다. (예: 2.0 = 200% 데미지)
+                            float damageMultiplier = longShotSkill.values2[longShotLevel - 1]; 
+                            float specialDamage = finalProjectileDamage * damageMultiplier;
+                            
+                            // 장거리 사격은 다른 특수 효과 없이 순수 데미지만 적용
+                            projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
+                        }
+                        return; // 특별 공격을 했으므로, 일반 공격 로직을 건너뜁니다.
+                    }
+                }
+            }
+        }
+
+        // --- 일반 공격 로직 ---
         SoundManager.instance.PlayAttackSound();
-        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
         if (towerType == TowerType.Bomb)
         {
-            BombProjectileController bomb = projectileGO.GetComponent<BombProjectileController>();
+            BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
                 bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType);
@@ -296,7 +324,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
         else
         {
-            ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+            ProjectileController projectile = projectileGO_normal.GetComponent<ProjectileController>();
             if (projectile != null)
             {
                 float dotDamage = 0;
@@ -345,6 +373,30 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             currentTarget = null;
         }
+    }
+
+    // (추가) 범위 내에서 최대 체력이 가장 높은 적을 찾는 함수
+    private Transform FindHighestHealthEnemyInRange()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        Transform bestTarget = null;
+        float highestHealth = 0;
+
+        foreach (GameObject enemy in enemies)
+        {
+            float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
+            if (distanceToEnemy <= attackRange)
+            {
+                EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
+                // 현재 체력이 아닌 '최대 체력'을 기준으로 가장 튼튼한 적을 찾습니다.
+                if (enemyHealth != null && enemyHealth.MaxHealth > highestHealth)
+                {
+                    highestHealth = enemyHealth.MaxHealth;
+                    bestTarget = enemy.transform;
+                }
+            }
+        }
+        return bestTarget;
     }
 
     private void OnDrawGizmosSelected()
