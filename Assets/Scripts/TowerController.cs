@@ -55,6 +55,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private LineRenderer laserLineRenderer;
     [SerializeField]
     private GameObject haetaePrefab; 
+    // (추가) 미사일 스킬을 위한 프리팹 변수
+    [SerializeField]
+    private GameObject missilePrefab;
 
     private Transform currentTarget;
     private float attackCountdown = 0f;
@@ -292,7 +295,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         int shotsToFire = bulletsPerBurst;
         
-        // '두발 사격' 스킬 확인
         int doubleShotLevel = GetSkillLevel("두발 사격");
         if (doubleShotLevel > 0)
         {
@@ -307,7 +309,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
         
-        // (추가) '쌍권총' 스킬 확인
         int dualWieldLevel = GetSkillLevel("쌍권총");
         if (dualWieldLevel > 0)
         {
@@ -333,8 +334,34 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) '미사일' 스킬 발동 로직을 최상단에 추가합니다.
     void Shoot()
     {
+        // '미사일' 스킬 확인
+        int missileLevel = GetSkillLevel("미사일");
+        if (missileLevel > 0 && missilePrefab != null)
+        {
+            TowerSkillBlueprint missileSkill = System.Array.Find(towerSkills, skill => skill.skillName == "미사일");
+            if (missileSkill != null)
+            {
+                float procChance = missileSkill.values1[missileLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    SoundManager.instance.PlayAttackSound(); // 또는 별도의 미사일 발사음
+                    GameObject missileGO = Instantiate(missilePrefab, firePoint.position, firePoint.rotation);
+                    BombProjectileController bomb = missileGO.GetComponent<BombProjectileController>();
+                    if (bomb != null && currentTarget != null)
+                    {
+                        float missileDamage = missileSkill.values2[missileLevel - 1];
+                        float missileRadius = missileSkill.values3[missileLevel - 1];
+                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType);
+                    }
+                    return; // 미사일을 발사했으므로, 아래의 일반 공격 로직을 실행하지 않습니다.
+                }
+            }
+        }
+
+        // '장거리 사격' 스킬 확인
         int longShotLevel = GetSkillLevel("장거리 사격");
         if (longShotLevel > 0)
         {
@@ -363,6 +390,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
         
+        // 일반 공격
         SoundManager.instance.PlayAttackSound();
         GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
