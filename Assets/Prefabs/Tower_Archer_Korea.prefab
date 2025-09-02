@@ -139,9 +139,20 @@ MonoBehaviour:
     - 2
     - 3
     - 4
+  - skillName: "\uD574\uCE58"
+    skillDescription: "\uD0C0\uC6CC \uADFC\uCC98 \uACBD\uB85C\uC5D0 \uD574\uCE58\uB97C
+      \uC601\uAD6C \uC18C\uD658\uD569\uB2C8\uB2E4."
+    maxLevel: 1
+    costs: 96000000
+    values1:
+    - 300
+    values2:
+    - 35
+    values3: []
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 0}
+  haetaePrefab: {fileID: 1852670417170501071, guid: 9c92b8c4422491747aa3e43b0c95004b, type: 3}
 --- !u!61 &-4101450617855879121
 BoxCollider2D:
   m_ObjectHideFlags: 0

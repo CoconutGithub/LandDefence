@@ -7,10 +7,16 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    // (추가) 다른 스크립트에서 웨이포인트 정보에 접근할 수 있도록 static 변수로 선언합니다.
+    public static Transform WaypointHolder { get; private set; }
+
     void Awake()
     {
         if (instance != null) { return; }
         instance = this;
+
+        // (추가) 이 GameManager가 관리하는 웨이포인트 홀더를 static 변수에 할당합니다.
+        WaypointHolder = waypointHolder;
     }
 
     [Header("게임 설정")]
@@ -92,7 +98,6 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < group.count; i++)
             {
                 SpawnEnemy(group.enemyPrefab);
-                // (수정) 1f / rate 대신, 이제 spawnInterval 값을 직접 사용하여 대기합니다.
                 yield return new WaitForSeconds(group.spawnInterval);
             }
             yield return new WaitForSeconds(wave.timeBetweenGroups);
@@ -166,9 +171,9 @@ public class GameManager : MonoBehaviour
 
         foreach (KeyValuePair<TowerType, int> entry in towerExperiences)
         {
-             int savedExp = DataManager.LoadExperience(entry.Key);
-             int totalExp = savedExp + entry.Value;
-             DataManager.SaveExperience(entry.Key, totalExp);
+            int savedExp = DataManager.LoadExperience(entry.Key);
+            int totalExp = savedExp + entry.Value;
+            DataManager.SaveExperience(entry.Key, totalExp);
         }
         
         EndGame(true);
@@ -207,6 +212,8 @@ public class GameManager : MonoBehaviour
     {
         livesText.text = "Lives: " + lives;
     }
+
+
 
     void UpdateExperienceUI()
     {

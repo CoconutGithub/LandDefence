@@ -1,10 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections; // (추가) 코루틴 사용을 위해 추가
 
 // 병사의 모든 행동(이동, 공격, 죽음)과 능력치를 관리하는 스크립트입니다.
 public class SoldierController : MonoBehaviour
 {
-    // (추가) 병사의 현재 행동 상태를 정의합니다.
     private enum SoldierState { ReturningToRallyPoint, IdleAtRallyPoint, ChasingEnemy, Fighting }
     private SoldierState currentState;
 
@@ -23,6 +23,8 @@ public class SoldierController : MonoBehaviour
     private float timeToStartRegen = 3f;
     [SerializeField]
     private DamageType damageType = DamageType.Physical;
+    [SerializeField]
+    private float respawnTime = 10f; // (추가) 해치 전용 부활 시간
 
     [Header("광역 공격 (바이킹 전용)")]
     [SerializeField]
@@ -36,7 +38,7 @@ public class SoldierController : MonoBehaviour
     [SerializeField]
     private GameObject healthBarCanvas;
     [SerializeField]
-    private LayerMask enemyLayer; // (추가) 적을 감지할 때 사용할 레이어 마스크
+    private LayerMask enemyLayer;
 
     private float currentHealth;
     private float attackCountdown = 0f;
@@ -44,7 +46,15 @@ public class SoldierController : MonoBehaviour
     private Vector3 rallyPointPosition;
     private BarracksController ownerBarracks;
     private float timeSinceLastCombat = 0f;
-    private CircleCollider2D recognitionCollider; // (추가) 적 인식 범위
+    private CircleCollider2D recognitionCollider;
+    private bool isHaetae = false; // (추가) 이 유닛이 해치인지 구분하는 플래그
+    private SpriteRenderer spriteRenderer; // (추가) 부활 시 모습을 감추기 위함
+
+    void Awake() // (수정) Start 대신 Awake에서 컴포넌트를 미리 찾아둡니다.
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        recognitionCollider = GetComponent<CircleCollider2D>();
+    }
 
     void Start()
     {
@@ -54,8 +64,7 @@ public class SoldierController : MonoBehaviour
             healthBarSlider.maxValue = 1f;
             healthBarSlider.value = 1f;
         }
-        recognitionCollider = GetComponent<CircleCollider2D>();
-        currentState = SoldierState.ReturningToRallyPoint; // 처음에는 집결 지점으로 이동 시작
+        currentState = SoldierState.ReturningToRallyPoint;
     }
 
     void LateUpdate()
@@ -68,7 +77,6 @@ public class SoldierController : MonoBehaviour
 
     void Update()
     {
-        // (수정) 상태에 따라 다른 행동을 하도록 상태 머신을 사용합니다.
         switch (currentState)
         {
             case SoldierState.ReturningToRallyPoint:
@@ -90,8 +98,7 @@ public class SoldierController : MonoBehaviour
                     currentState = SoldierState.ReturningToRallyPoint;
                     return;
                 }
-                // 적과의 거리가 공격 가능 거리보다 가까워지면 전투 시작
-                if (Vector3.Distance(transform.position, currentTarget.transform.position) <= 1.0f) // 1.0f는 공격 사거리
+                if (Vector3.Distance(transform.position, currentTarget.transform.position) <= 1.0f)
                 {
                     currentState = SoldierState.Fighting;
                     currentTarget.BlockMovement(this, null);
@@ -118,7 +125,6 @@ public class SoldierController : MonoBehaviour
         }
     }
     
-    // (추가) 인식 범위 내의 적을 찾는 함수
     void FindEnemyToChase()
     {
         Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, recognitionCollider.radius, enemyLayer);
@@ -128,7 +134,6 @@ public class SoldierController : MonoBehaviour
         foreach (var hitCollider in hitColliders)
         {
             EnemyMovement enemy = hitCollider.GetComponent<EnemyMovement>();
-            // 적이 아직 3명 미만의 병사에게 막혀있을 때만 타겟으로 삼습니다.
             if (enemy != null && enemy.GetBlockerCount() < 3)
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
@@ -169,11 +174,20 @@ public class SoldierController : MonoBehaviour
     public void SetRallyPointPosition(Vector3 newPosition)
     {
         rallyPointPosition = newPosition;
-        // 새로운 집결 지점을 받으면, 전투 중이 아닐 경우 즉시 복귀를 시작합니다.
         if (currentState == SoldierState.IdleAtRallyPoint)
         {
             currentState = SoldierState.ReturningToRallyPoint;
         }
+    }
+
+    // (추가) 해치로 설정하고 능력치를 부여하는 함수
+    public void SetupAsHaetae(float newMaxHealth, float newAttackDamage)
+    {
+        isHaetae = true;
+        maxHealth = newMaxHealth;
+        attackDamage = newAttackDamage;
+        currentHealth = maxHealth;
+        // 해치는 체력 회복 로직도 공유하므로, healthRegenRate도 설정할 수 있습니다 (필요 시).
     }
     
     public void SetBarracks(BarracksController barracks)
@@ -219,15 +233,46 @@ public class SoldierController : MonoBehaviour
 
     void Die()
     {
-        ReleaseEnemyBeforeDeath(); // (수정) 죽을 때도 적을 풀어줍니다.
-        if (ownerBarracks != null)
+        ReleaseEnemyBeforeDeath();
+        
+        // (수정) 해치일 경우와 일반 병사일 경우를 분리합니다.
+        if (isHaetae)
         {
-            ownerBarracks.RemoveSoldier(this);
+            StartCoroutine(RespawnCoroutine());
         }
-        Destroy(gameObject);
+        else
+        {
+            if (ownerBarracks != null)
+            {
+                ownerBarracks.RemoveSoldier(this);
+            }
+            Destroy(gameObject);
+        }
     }
 
-    // (추가) BarracksController가 호출할 수 있도록 public으로 선언된 함수입니다.
+    // (추가) 해치 전용 부활 코루틴
+    IEnumerator RespawnCoroutine()
+    {
+        // 모습을 감추고 충돌을 비활성화합니다.
+        spriteRenderer.enabled = false;
+        GetComponent<Collider2D>().enabled = false;
+        healthBarCanvas.SetActive(false);
+
+        yield return new WaitForSeconds(respawnTime);
+
+        // 부활 위치(고정된 집결지)로 이동하고 상태를 초기화합니다.
+        transform.position = rallyPointPosition;
+        currentHealth = maxHealth;
+        currentState = SoldierState.IdleAtRallyPoint;
+
+        // 다시 모습을 드러내고 충돌을 활성화합니다.
+        spriteRenderer.enabled = true;
+        GetComponent<Collider2D>().enabled = true;
+        if (healthBarSlider != null) healthBarSlider.value = 1f;
+
+        Debug.Log("해치가 부활했습니다!");
+    }
+
     public void ReleaseEnemyBeforeDeath()
     {
         if (currentTarget != null)
