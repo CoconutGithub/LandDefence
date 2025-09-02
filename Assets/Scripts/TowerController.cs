@@ -78,7 +78,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float healCheckTimer = 0f;
     private const float HEAL_CHECK_INTERVAL = 0.5f;
 
-    // (추가) 빵 보급 스킬 관련 변수
     private bool isSupplyBuffActive = false;
     private float supplyBuffTimer = 0f;
 
@@ -304,7 +303,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (추가) 빵 보급 버프의 지속시간을 관리하는 함수
     void HandleSupplyBuff()
     {
         if (isSupplyBuffActive)
@@ -313,7 +311,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (supplyBuffTimer <= 0)
             {
                 isSupplyBuffActive = false;
-                // 버프가 끝나면, 모든 패시브 효과를 다시 적용하여 공격 속도를 원래 값으로 되돌립니다.
                 ApplyAllPassiveSkillEffects();
             }
         }
@@ -436,7 +433,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
-        // (수정) 빵 보급 스킬 발동 로직을 일반 공격 이전에 추가
         int supplyLevel = GetSkillLevel("빵 보급");
         if (supplyLevel > 0 && !isSupplyBuffActive)
         {
@@ -548,7 +544,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     {
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
-                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0);
+                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
                     }
                     return;
                 }
@@ -591,7 +587,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration);
+                // (수정) '욕심쟁이!' 스킬 정보를 폭탄 발사체에 전달합니다.
+                int greedyLevel = GetSkillLevel("욕심쟁이!");
+                TowerSkillBlueprint greedySkill = null;
+                if (greedyLevel > 0)
+                {
+                    greedySkill = System.Array.Find(towerSkills, skill => skill.skillName == "욕심쟁이!");
+                }
+                
+                bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
             }
         }
         else
