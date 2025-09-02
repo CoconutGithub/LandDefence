@@ -80,6 +80,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     private bool isSupplyBuffActive = false;
     private float supplyBuffTimer = 0f;
+    
+    private float iceSlickCheckTimer = 0f;
+    private const float ICE_SLICK_CHECK_INTERVAL = 0.5f;
 
     void Start()
     {
@@ -282,6 +285,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             HandleHealingAura(healLevel);
         }
+        
+        int iceSlickLevel = GetSkillLevel("빙판");
+        if (iceSlickLevel > 0)
+        {
+            HandleIceSlickAura(iceSlickLevel);
+        }
 
         FindClosestEnemy();
         attackCountdown -= Time.deltaTime;
@@ -303,6 +312,35 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
+    // (수정) '빙판'의 범위를 스킬 값에서 가져오도록 변경
+    void HandleIceSlickAura(int skillLevel)
+    {
+        iceSlickCheckTimer -= Time.deltaTime;
+        if (iceSlickCheckTimer <= 0f)
+        {
+            iceSlickCheckTimer = ICE_SLICK_CHECK_INTERVAL;
+
+            TowerSkillBlueprint iceSlickSkill = System.Array.Find(towerSkills, skill => skill.skillName == "빙판");
+            if (iceSlickSkill == null || iceSlickSkill.values1.Length < skillLevel || iceSlickSkill.values2.Length < skillLevel) return;
+            
+            float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f; 
+            float iceSlickRadius = iceSlickSkill.values2[skillLevel - 1];
+
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, iceSlickRadius);
+            foreach (var collider in colliders)
+            {
+                if (collider.CompareTag("Enemy"))
+                {
+                    EnemyMovement enemy = collider.GetComponent<EnemyMovement>();
+                    if (enemy != null)
+                    {
+                        enemy.ApplySlow(slowAmountValue, ICE_SLICK_CHECK_INTERVAL + 0.1f);
+                    }
+                }
+            }
+        }
+    }
+
     void HandleSupplyBuff()
     {
         if (isSupplyBuffActive)
@@ -587,7 +625,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                // (수정) '욕심쟁이!' 스킬 정보를 폭탄 발사체에 전달합니다.
                 int greedyLevel = GetSkillLevel("욕심쟁이!");
                 TowerSkillBlueprint greedySkill = null;
                 if (greedyLevel > 0)
