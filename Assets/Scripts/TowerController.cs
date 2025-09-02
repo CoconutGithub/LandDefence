@@ -73,9 +73,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float originalLaserDps;
     private float originalLaserDpsRamp;
 
-    // (추가) 힐 스킬의 성능 최적화를 위한 변수
     private float healCheckTimer = 0f;
-    private const float HEAL_CHECK_INTERVAL = 0.5f; // 0.5초마다 주변 아군을 탐색
+    private const float HEAL_CHECK_INTERVAL = 0.5f;
 
     void Start()
     {
@@ -216,7 +215,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             {
                 GameObject haetaeGO = Instantiate(haetaePrefab, bestSpawnPoint, Quaternion.identity);
                 spawnedHaetae = haetaeGO.GetComponent<SoldierController>();
-                spawnedHaetae.SetRallyPointPosition(bestSpawnPoint); 
+                if(spawnedHaetae != null)
+                {
+                    spawnedHaetae.SetRallyPointPosition(bestSpawnPoint);
+                }
             }
         }
         
@@ -224,7 +226,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             float health = haetaeSkill.values1[newLevel - 1];
             float damage = haetaeSkill.values2[newLevel - 1];
-            //spawnedHaetae.SetupAsHaetae(health, damage);
+            spawnedHaetae.SetupAsHaetae(health, damage);
         }
     }
 
@@ -259,7 +261,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Update()
     {
-        // (수정) '힐' 스킬을 배웠는지 확인하고, 배웠다면 치유 오라를 활성화합니다.
         int healLevel = GetSkillLevel("힐");
         if (healLevel > 0)
         {
@@ -271,7 +272,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         if (isLaserTower)
         {
-            HandleLaserAttack();
+            if (healLevel <= 0)
+            {
+                HandleLaserAttack();
+            }
         }
         else
         {
@@ -283,7 +287,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (추가) 주변 아군을 치유하는 새로운 함수
     void HandleHealingAura(int skillLevel)
     {
         healCheckTimer -= Time.deltaTime;
@@ -295,20 +298,17 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (healSkill == null) return;
             
             float healPerSecond = healSkill.values1[skillLevel - 1];
-            float healAmount = healPerSecond * HEAL_CHECK_INTERVAL; // 0.5초마다 치유할 양
+            float healAmount = healPerSecond * HEAL_CHECK_INTERVAL;
 
-            // 주변의 모든 콜라이더를 확인
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
             foreach (var collider in colliders)
             {
-                // 병사 또는 해치인 경우
                 SoldierController soldier = collider.GetComponent<SoldierController>();
                 if (soldier != null)
                 {
                     soldier.Heal(healAmount);
                 }
 
-                // 영웅인 경우
                 HeroController hero = collider.GetComponent<HeroController>();
                 if (hero != null)
                 {
@@ -404,6 +404,30 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
+        // (수정) '하데스' 스킬이 이제 '최대 체력'을 기준으로 즉사 여부를 판단합니다.
+        int hadesLevel = GetSkillLevel("하데스");
+        if (hadesLevel > 0)
+        {
+            TowerSkillBlueprint hadesSkill = System.Array.Find(towerSkills, skill => skill.skillName == "하데스");
+            if (hadesSkill != null)
+            {
+                if (Random.Range(0f, 100f) < 5f) // 5% 확률
+                {
+                    EnemyHealth enemyHealth = currentTarget.GetComponent<EnemyHealth>();
+                    if (enemyHealth != null)
+                    {
+                        float healthThreshold = hadesSkill.values1[hadesLevel - 1];
+                        // 적의 '최대 체력'이 설정된 한계치 이하일 때 즉사
+                        if (enemyHealth.MaxHealth <= healthThreshold)
+                        {
+                            enemyHealth.InstantKill();
+                            return; 
+                        }
+                    }
+                }
+            }
+        }
+        
         int sniperLevel = GetSkillLevel("저격총");
         if (sniperLevel > 0)
         {
