@@ -156,6 +156,18 @@ MonoBehaviour:
   spreadRadius: 0.5
   rallyPointRange: 3
   upgradePaths: []
+  towerSkills:
+  - skillName: "\uBE5B\uC774 \uC788\uC73C\uB77C"
+    skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uAD11\uC5ED
+      \uD53C\uD574\uB97C \uC785\uD799\uB2C8\uB2E4."
+    maxLevel: 3
+    costs: 96000000c8000000fa000000
+    values1:
+    - 5
+    - 7
+    - 10
+    values2: []
+    values3: []
   soldierPrefab: {fileID: 1852670417170501071, guid: 9c53e78469d74a647b4e5b12dc69e499, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458

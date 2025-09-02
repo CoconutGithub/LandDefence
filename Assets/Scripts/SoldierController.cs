@@ -25,9 +25,9 @@ public class SoldierController : MonoBehaviour
     [SerializeField]
     private float respawnTime = 10f;
 
-    [Header("광역 공격 (바이킹 전용)")]
+    [Header("광역 공격")]
     [SerializeField]
-    private bool isAreaOfEffect = false;
+    private bool isAreaOfEffect = false; // 바이킹 전용: 항상 광역 공격
     [SerializeField]
     private float aoeRadius = 1.5f;
 
@@ -52,8 +52,9 @@ public class SoldierController : MonoBehaviour
     private float originalMaxHealth;
     private float originalAttackDamage;
     private float lifeStealPercentage = 0f;
-    // (추가) 원본 인식 범위를 저장할 변수
     private float originalRecognitionRadius;
+    // (추가) 스킬로 부여받는 광역 공격 확률
+    private float aoeChance = 0f;
 
     void Awake()
     {
@@ -61,7 +62,6 @@ public class SoldierController : MonoBehaviour
         recognitionCollider = GetComponent<CircleCollider2D>();
         originalMaxHealth = maxHealth;
         originalAttackDamage = attackDamage;
-        // (추가) 원본 인식 범위 저장
         if (recognitionCollider != null)
         {
             originalRecognitionRadius = recognitionCollider.radius;
@@ -205,12 +205,13 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // (수정) 인식 범위 보너스도 함께 받도록 함수 확장
-    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus)
+    // (수정) 광역 공격 확률도 함께 받도록 함수 확장
+    public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus, float newAoeChance)
     {
         maxHealth = originalMaxHealth + healthModifier;
         attackDamage = originalAttackDamage + damageModifier;
         lifeStealPercentage = lifeSteal;
+        aoeChance = newAoeChance;
 
         if (recognitionCollider != null)
         {
@@ -223,11 +224,22 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
+    // (수정) 확률적 광역 공격 로직 추가
     void Attack()
     {
         float totalDamageDealt = 0;
+        bool isAoeAttackThisTurn = isAreaOfEffect; // 바이킹의 기본 광역 공격
 
-        if (isAreaOfEffect)
+        // 스킬로 광역 공격 확률을 부여받았는지 확인 (스위스 병사)
+        if (!isAoeAttackThisTurn && aoeChance > 0)
+        {
+            if (Random.Range(0f, 100f) < aoeChance)
+            {
+                isAoeAttackThisTurn = true;
+            }
+        }
+
+        if (isAoeAttackThisTurn)
         {
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
             foreach (Collider2D hit in colliders)
@@ -239,7 +251,7 @@ public class SoldierController : MonoBehaviour
                 }
             }
         }
-        else
+        else // 단일 공격
         {
             if (currentTarget != null)
             {

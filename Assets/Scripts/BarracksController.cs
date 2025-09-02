@@ -171,13 +171,14 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '우리는 하나!' 스킬 효과를 계산하도록 로직 추가
+    // (수정) '빛이 있으라' 스킬 효과를 계산하도록 로직 추가
     void ApplyAllPassiveSkillEffectsToSoldier(SoldierController soldier)
     {
         float healthModifier = 0f;
         float damageModifier = 0f;
         float lifeSteal = 0f;
         float recognitionRadiusBonus = 0f;
+        float aoeChance = 0f;
 
         foreach (var skill in towerSkills)
         {
@@ -196,10 +197,13 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
                     case "우리는 하나!":
                         recognitionRadiusBonus = skill.values1[skillLevel - 1];
                         break;
+                    case "빛이 있으라":
+                        aoeChance = skill.values1[skillLevel - 1];
+                        break;
                 }
             }
         }
-        soldier.ApplyStatModification(healthModifier, damageModifier, lifeSteal, recognitionRadiusBonus);
+        soldier.ApplyStatModification(healthModifier, damageModifier, lifeSteal, recognitionRadiusBonus, aoeChance);
     }
     
     public void SetParentSpot(TowerSpotController spot)
