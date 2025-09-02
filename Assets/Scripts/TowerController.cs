@@ -55,7 +55,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private LineRenderer laserLineRenderer;
     [SerializeField]
     private GameObject haetaePrefab; 
-    // (추가) 미사일 스킬을 위한 프리팹 변수
     [SerializeField]
     private GameObject missilePrefab;
 
@@ -70,6 +69,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private SoldierController spawnedHaetae; 
 
     private float originalTimeBetweenAttacks;
+    // (추가) 원본 점사 수를 저장할 변수
+    private int originalBulletsPerBurst;
 
     void Start()
     {
@@ -87,6 +88,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
 
         originalTimeBetweenAttacks = timeBetweenAttacks;
+        // (추가) 원본 점사 수 저장
+        originalBulletsPerBurst = bulletsPerBurst;
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -140,10 +143,18 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) '기관총' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
+        // 모든 능력치를 원본 값으로 초기화
         timeBetweenAttacks = originalTimeBetweenAttacks;
+        bulletsPerBurst = originalBulletsPerBurst;
+        
+        // 데미지도 테크 트리 레벨만 적용된 상태로 초기화
+        int damageLevel = DataManager.LoadDamageLevel(towerType);
+        finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
 
+        // 습득한 모든 패시브 스킬 효과를 순차적으로 적용
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
@@ -153,7 +164,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 {
                     case "빠른 재장전":
                         float reduction = skill.values1[skillLevel - 1];
-                        timeBetweenAttacks = Mathf.Max(originalTimeBetweenAttacks - reduction, 0.1f); // 최소 재장전 시간 보장
+                        timeBetweenAttacks = Mathf.Max(originalTimeBetweenAttacks - reduction, 0.1f);
+                        break;
+
+                    case "기관총":
+                        bulletsPerBurst = (int)skill.values1[skillLevel - 1];
+                        float damageMultiplier = skill.values2[skillLevel - 1]; // e.g. 0.8f for 20% reduction
+                        finalProjectileDamage *= damageMultiplier;
                         break;
                 }
             }
@@ -334,10 +351,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '미사일' 스킬 발동 로직을 최상단에 추가합니다.
     void Shoot()
     {
-        // '미사일' 스킬 확인
         int missileLevel = GetSkillLevel("미사일");
         if (missileLevel > 0 && missilePrefab != null)
         {
@@ -347,7 +362,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = missileSkill.values1[missileLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    SoundManager.instance.PlayAttackSound(); // 또는 별도의 미사일 발사음
+                    SoundManager.instance.PlayAttackSound();
                     GameObject missileGO = Instantiate(missilePrefab, firePoint.position, firePoint.rotation);
                     BombProjectileController bomb = missileGO.GetComponent<BombProjectileController>();
                     if (bomb != null && currentTarget != null)
@@ -356,12 +371,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         float missileRadius = missileSkill.values3[missileLevel - 1];
                         bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType);
                     }
-                    return; // 미사일을 발사했으므로, 아래의 일반 공격 로직을 실행하지 않습니다.
+                    return;
                 }
             }
         }
 
-        // '장거리 사격' 스킬 확인
         int longShotLevel = GetSkillLevel("장거리 사격");
         if (longShotLevel > 0)
         {
@@ -390,7 +404,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
         
-        // 일반 공격
         SoundManager.instance.PlayAttackSound();
         GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
 
