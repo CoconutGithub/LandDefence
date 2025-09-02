@@ -262,9 +262,27 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) '두발 사격' 스킬 로직을 이 코루틴 안에 추가합니다.
     IEnumerator AttackBurst()
     {
-        for (int i = 0; i < bulletsPerBurst; i++)
+        int shotsToFire = bulletsPerBurst;
+
+        // '두발 사격' 스킬 확인
+        int doubleShotLevel = GetSkillLevel("두발 사격");
+        if (doubleShotLevel > 0)
+        {
+            TowerSkillBlueprint doubleShotSkill = System.Array.Find(towerSkills, skill => skill.skillName == "두발 사격");
+            if (doubleShotSkill != null)
+            {
+                float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    shotsToFire *= 2; // 발사 횟수를 2배로!
+                }
+            }
+        }
+
+        for (int i = 0; i < shotsToFire; i++)
         {
             if (currentTarget == null)
             {
@@ -277,7 +295,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
-        // (추가) '장거리 사격' 스킬 발동 로직
+        // '장거리 사격' 스킬 발동 로직
         int longShotLevel = GetSkillLevel("장거리 사격");
         if (longShotLevel > 0)
         {
@@ -297,11 +315,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
                         if (projectile != null)
                         {
-                            // values2를 데미지 배율로 사용합니다. (예: 2.0 = 200% 데미지)
                             float damageMultiplier = longShotSkill.values2[longShotLevel - 1]; 
                             float specialDamage = finalProjectileDamage * damageMultiplier;
-                            
-                            // 장거리 사격은 다른 특수 효과 없이 순수 데미지만 적용
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
                         return; // 특별 공격을 했으므로, 일반 공격 로직을 건너뜁니다.
@@ -375,7 +390,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (추가) 범위 내에서 최대 체력이 가장 높은 적을 찾는 함수
     private Transform FindHighestHealthEnemyInRange()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -388,7 +402,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (distanceToEnemy <= attackRange)
             {
                 EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
-                // 현재 체력이 아닌 '최대 체력'을 기준으로 가장 튼튼한 적을 찾습니다.
                 if (enemyHealth != null && enemyHealth.MaxHealth > highestHealth)
                 {
                     highestHealth = enemyHealth.MaxHealth;
