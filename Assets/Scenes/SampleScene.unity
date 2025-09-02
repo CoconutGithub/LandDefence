@@ -3129,7 +3129,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uAD81\uC218 \uD0C0\uC6CC \uAC74\uC124"
+  m_text: "\uAD81\uC218 \uD0C0\uC6CC \uAC74\uC124(30G)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
   m_sharedMaterial: {fileID: 1301881112995851822, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
@@ -3679,7 +3679,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uBCD1\uC601 \uD0C0\uC6CC \uAC74\uC124"
+  m_text: "\uBCD1\uC601 \uD0C0\uC6CC \uAC74\uC124(35G)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
   m_sharedMaterial: {fileID: 1301881112995851822, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
@@ -5156,7 +5156,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uD3ED\uD0C4 \uD0C0\uC6CC \uAC74\uC124"
+  m_text: "\uD3ED\uD0C4 \uD0C0\uC6CC \uAC74\uC124(50G)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
   m_sharedMaterial: {fileID: 1301881112995851822, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
@@ -5742,7 +5742,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uCD1D \uD0C0\uC6CC \uAC74\uC124"
+  m_text: "\uCD1D \uD0C0\uC6CC \uAC74\uC124(40G)\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
   m_sharedMaterial: {fileID: 1301881112995851822, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
@@ -6148,7 +6148,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uB9C8\uBC95\uC0AC \uD0C0\uC6CC \uAC74\uC124"
+  m_text: "\uB9C8\uBC95\uC0AC \uD0C0\uC6CC \uAC74\uC124(45G)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
   m_sharedMaterial: {fileID: 1301881112995851822, guid: 7cbf01f0fbf34b349ae0fb09d06bd9cf, type: 2}
@@ -6466,7 +6466,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   startLives: 20
-  startGold: 100
+  startGold: 5000
   goldText: {fileID: 1962132355}
   experienceText: {fileID: 537233275}
   livesText: {fileID: 1029970753}

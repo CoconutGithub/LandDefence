@@ -10,7 +10,7 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private int maxSoldiers = 3;
     [SerializeField]
-    private float spawnRate = 10f;
+    private float spawnRate = 10f; // 병사가 죽었을 때 충원되는 시간입니다.
     [SerializeField]
     private float spreadRadius = 1.0f;
     [SerializeField]
@@ -44,6 +44,8 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
     void Update()
     {
+        // (수정) 병영의 핵심 로직을 원래대로 복원합니다.
+        // 병사 수가 최대치보다 적으면, spawnRate에 설정된 시간마다 새로운 병사를 충원합니다.
         if (spawnedSoldiers.Count < maxSoldiers)
         {
             spawnCountdown -= Time.deltaTime;
@@ -60,15 +62,13 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 
-                // (수정) Z축 값을 타워의 Z축 값과 동일하게 맞춰서 2D 거리 계산을 정확하게 합니다.
                 Vector3 targetPos = new Vector3(mousePos.x, mousePos.y, transform.position.z);
 
-                // (수정) 이제 targetPos를 사용하여 거리를 계산합니다.
                 if (Vector3.Distance(transform.position, targetPos) <= rallyPointRange)
                 {
                     rallyPointInstance.position = new Vector3(mousePos.x, mousePos.y, 0);
                     UpdateSoldierRallyPoints();
-                    isInRallyPointMode = false; // 위치 지정이 끝났으므로 모드를 해제합니다.
+                    isInRallyPointMode = false;
                 }
                 else
                 {
@@ -115,12 +115,14 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
         if (soldier != null)
         {
+            // (수정) 생성된 병사를 목록에 직접 추가합니다.
             spawnedSoldiers.Add(soldier);
             soldier.SetBarracks(this);
             UpdateSoldierRallyPoints();
         }
     }
-    
+
+    // (수정) 병사가 죽었을 때 목록에서 제거하는 함수는 여전히 필요합니다.
     public void RemoveSoldier(SoldierController soldier)
     {
         if (spawnedSoldiers.Contains(soldier))
@@ -139,6 +141,8 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
 
         for (int i = 0; i < soldierCount; i++)
         {
+            if(spawnedSoldiers[i] == null) continue;
+
             float angle = i * angleStep * Mathf.Deg2Rad;
             Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * spreadRadius;
             Vector3 targetPosition = rallyPointInstance.position + offset;
@@ -163,3 +167,4 @@ public class BarracksController : MonoBehaviour, IPointerClickHandler
         Gizmos.DrawWireSphere(transform.position, rallyPointRange);
     }
 }
+

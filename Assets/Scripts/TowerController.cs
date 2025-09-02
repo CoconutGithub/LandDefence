@@ -70,6 +70,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     private float originalTimeBetweenAttacks;
     private int originalBulletsPerBurst;
+    // (추가) 원본 레이저 능력치를 저장할 변수
+    private float originalLaserDps;
+    private float originalLaserDpsRamp;
 
     void Start()
     {
@@ -88,6 +91,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
         originalTimeBetweenAttacks = timeBetweenAttacks;
         originalBulletsPerBurst = bulletsPerBurst;
+        // (추가) 원본 레이저 능력치 저장
+        originalLaserDps = laserDps;
+        originalLaserDpsRamp = laserDpsRamp;
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -141,14 +147,19 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) '아브라카다브라!' 스킬 로직 추가
     void ApplyAllPassiveSkillEffects()
     {
+        // 모든 능력치를 원본 값으로 초기화
         timeBetweenAttacks = originalTimeBetweenAttacks;
         bulletsPerBurst = originalBulletsPerBurst;
+        laserDps = originalLaserDps;
+        laserDpsRamp = originalLaserDpsRamp;
         
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
 
+        // 습득한 모든 패시브 스킬 효과를 순차적으로 적용
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
@@ -165,6 +176,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         bulletsPerBurst = (int)skill.values1[skillLevel - 1];
                         float damageMultiplier = skill.values2[skillLevel - 1];
                         finalProjectileDamage *= damageMultiplier;
+                        break;
+                    
+                    case "아브라카다브라!":
+                        laserDps = skill.values1[skillLevel - 1];
+                        laserDpsRamp = skill.values2[skillLevel - 1];
                         break;
                 }
             }
@@ -347,7 +363,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
-        // (추가) '저격총' 스킬 확인
         int sniperLevel = GetSkillLevel("저격총");
         if (sniperLevel > 0)
         {
@@ -357,10 +372,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = sniperSkill.values1[sniperLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    Transform specialTarget = FindHighestHealthEnemyOnMap(); // 사거리 무시 타겟팅
+                    Transform specialTarget = FindHighestHealthEnemyOnMap();
                     if (specialTarget != null)
                     {
-                        SoundManager.instance.PlayAttackSound(); // 또는 별도의 저격 발사음
+                        SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
 
@@ -369,7 +384,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                             float specialDamage = sniperSkill.values2[sniperLevel - 1]; 
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
-                        return; // 저격탄을 발사했으므로, 아래의 다른 스킬/공격 로직을 실행하지 않음
+                        return;
                     }
                 }
             }
@@ -512,7 +527,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         return bestTarget;
     }
 
-    // (추가) 맵 전체에서 가장 체력이 높은 적을 찾는 함수
     private Transform FindHighestHealthEnemyOnMap()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");

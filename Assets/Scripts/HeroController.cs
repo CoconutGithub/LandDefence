@@ -1,7 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 // 영웅의 이동, 전투 등 모든 것을 관리하는 스크립트입니다.
 public class HeroController : MonoBehaviour
@@ -16,7 +16,7 @@ public class HeroController : MonoBehaviour
     [SerializeField]
     private float timeBetweenAttacks = 1f;
     [SerializeField]
-    private float healthRegenRate = 10f;
+    private float healthRegenRate = 10f; 
     [SerializeField]
     private float timeToStartRegen = 5f;
 
@@ -25,22 +25,22 @@ public class HeroController : MonoBehaviour
     private Slider healthBarSlider;
     [SerializeField]
     private GameObject healthBarCanvas;
+    [Header("분신술 스킬")]
     [SerializeField]
     private GameObject heroClonePrefab;
     [SerializeField]
     private Transform cloneSpawnPointLeft;
     [SerializeField]
     private Transform cloneSpawnPointRight;
-
+    
     private Rigidbody2D rb;
     private Vector2 movementInput;
     private float currentHealth;
     private float attackCountdown = 0f;
     private EnemyMovement currentTarget;
-    private float timeSinceLastCombat = 0f;
-    
+    private float timeSinceLastCombat = 0f; 
     private List<GameObject> activeClones = new List<GameObject>();
-    private bool isCloneSkillActive = false;
+
 
     void Start()
     {
@@ -97,6 +97,58 @@ public class HeroController : MonoBehaviour
             }
         }
     }
+    
+    // (추가) SkillManager가 호출할 분신술 스킬 활성화 함수
+    public void ActivateCloneSkill(float duration)
+    {
+        StartCoroutine(CloneSkillCoroutine(duration));
+    }
+    
+    private IEnumerator CloneSkillCoroutine(float duration)
+    {
+        // 기존 분신이 있다면 제거
+        foreach(var clone in activeClones)
+        {
+            if (clone != null) Destroy(clone);
+        }
+        activeClones.Clear();
+
+        // 분신 생성
+        GameObject clone1 = Instantiate(heroClonePrefab, cloneSpawnPointLeft.position, Quaternion.identity);
+        GameObject clone2 = Instantiate(heroClonePrefab, cloneSpawnPointRight.position, Quaternion.identity);
+
+        HeroCloneController cloneController1 = clone1.GetComponent<HeroCloneController>();
+        HeroCloneController cloneController2 = clone2.GetComponent<HeroCloneController>();
+
+        if (cloneController1 != null) cloneController1.Setup(transform);
+        if (cloneController2 != null) cloneController2.Setup(transform);
+        
+        activeClones.Add(clone1);
+        activeClones.Add(clone2);
+
+        // 지속시간만큼 대기
+        yield return new WaitForSeconds(duration);
+
+        // 분신 제거
+        foreach(var clone in activeClones)
+        {
+            if (clone != null) Destroy(clone);
+        }
+        activeClones.Clear();
+    }
+    
+    public void Heal(float amount)
+    {
+        if (currentHealth <= 0) return;
+
+        currentHealth += amount;
+        currentHealth = Mathf.Min(currentHealth, maxHealth);
+        
+        if (healthBarSlider != null)
+        {
+            healthBarSlider.value = currentHealth / maxHealth;
+        }
+    }
 
     void RegenerateHealth()
     {
@@ -125,7 +177,7 @@ public class HeroController : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
-        timeSinceLastCombat = 0f;
+        timeSinceLastCombat = 0f; 
 
         if (healthBarSlider != null)
         {
@@ -144,57 +196,7 @@ public class HeroController : MonoBehaviour
             currentTarget.ResumeMovement();
         }
         Debug.Log("영웅이 쓰러졌습니다!");
-        foreach (GameObject clone in activeClones)
-        {
-            if (clone != null)
-            {
-                Destroy(clone);
-            }
-        }
-        activeClones.Clear();
         gameObject.SetActive(false);
-    }
-    
-    public void ActivateCloneSkill(float duration)
-    {
-        if (!isCloneSkillActive)
-        {
-            StartCoroutine(CloneSkillCoroutine(duration));
-        }
-    }
-
-    // (수정) 분신 생성 로직 변경
-    private IEnumerator CloneSkillCoroutine(float duration)
-    {
-        isCloneSkillActive = true;
-
-        if (cloneSpawnPointLeft != null && heroClonePrefab != null)
-        {
-            // 분신을 생성하고, 부모로 삼는 대신 Setup 함수를 호출하여 본체 정보를 넘겨줍니다.
-            GameObject clone1 = Instantiate(heroClonePrefab, cloneSpawnPointLeft.position, cloneSpawnPointLeft.rotation);
-            clone1.GetComponent<HeroCloneController>().Setup(transform);
-            activeClones.Add(clone1);
-        }
-        if (cloneSpawnPointRight != null && heroClonePrefab != null)
-        {
-            GameObject clone2 = Instantiate(heroClonePrefab, cloneSpawnPointRight.position, cloneSpawnPointRight.rotation);
-            clone2.GetComponent<HeroCloneController>().Setup(transform);
-            activeClones.Add(clone2);
-        }
-
-        // 설정된 지속시간만큼 기다립니다.
-        yield return new WaitForSeconds(duration);
-
-        // 지속시간이 끝나면 모든 분신을 파괴합니다.
-        foreach (GameObject clone in activeClones)
-        {
-            if (clone != null)
-            {
-                Destroy(clone);
-            }
-        }
-        activeClones.Clear();
-        isCloneSkillActive = false;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

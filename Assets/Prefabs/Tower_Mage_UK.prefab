@@ -118,12 +118,28 @@ MonoBehaviour:
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 1
-  laserDps: 10
-  laserDpsRamp: 30
+  laserDps: 30
+  laserDpsRamp: 20
   upgradePaths: []
+  towerSkills:
+  - skillName: "\uC544\uBE0C\uB77C\uCE74\uB2E4\uBE0C\uB77C!"
+    skillDescription: "\uB808\uC774\uC800\uC758 \uAE30\uBCF8 \uB370\uBBF8\uC9C0\uC640
+      \uCD08\uB2F9 \uD53C\uD574 \uC99D\uAC00\uB7C9\uC774 \uC0C1\uC2B9\uD569\uB2C8\uB2E4.\n\nMax
+      Level"
+    maxLevel: 2
+    costs: 96000000c8000000
+    values1:
+    - 35
+    - 40
+    values2:
+    - 50
+    - 100
+    values3: []
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 8832208381610958432}
   laserLineRenderer: {fileID: 3708774722340164092}
+  haetaePrefab: {fileID: 0}
+  missilePrefab: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
