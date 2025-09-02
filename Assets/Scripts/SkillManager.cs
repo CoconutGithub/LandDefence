@@ -50,11 +50,21 @@ public class SkillManager : MonoBehaviour
     [SerializeField]
     private float skullMagicHealthThreshold = 500f; // 이 체력 이하의 적만 즉사시킬 수 있습니다.
 
+    // (추가) 분신술 스킬 설정
+    [Header("분신술 스킬 설정")]
+    [SerializeField]
+    private float cloneDuration = 10f; // 분신 지속 시간
+
     [Header("공통 설정")]
     [SerializeField]
     private LayerMask enemyLayer;
     [SerializeField]
     private GameObject rangeIndicator;
+
+    // (추가) HeroController 참조
+    [Header("참조")]
+    [SerializeField]
+    private HeroController heroController;
 
     void Awake()
     {
@@ -188,6 +198,25 @@ public class SkillManager : MonoBehaviour
         }
     }
     
+    // (추가) 분신술 버튼에 연결될 함수입니다.
+    public void OnCloneSkillButton()
+    {
+        Skill cloneSkill = FindSkill("Clone"); // Inspector에서 skillName을 "Clone"으로 설정해야 합니다.
+        if (cloneSkill != null && cloneSkill.currentCooldown <= 0)
+        {
+            if (heroController != null)
+            {
+                // HeroController에 분신술 활성화 함수를 호출합니다.
+                heroController.ActivateCloneSkill(cloneDuration);
+                StartCooldown(cloneSkill);
+            }
+            else
+            {
+                Debug.LogError("SkillManager에 HeroController가 연결되지 않았습니다!");
+            }
+        }
+    }
+    
     // --- 내부 로직 함수들 ---
 
     void CastLightning(Vector3 mousePosition)
@@ -298,4 +327,3 @@ public class SkillManager : MonoBehaviour
         }
     }
 }
-

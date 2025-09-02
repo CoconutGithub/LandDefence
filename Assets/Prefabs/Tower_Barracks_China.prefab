@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BarracksController
   maxSoldiers: 6
   spawnRate: 2
-  spreadRadius: 0.5
+  spreadRadius: 0.6
   rallyPointRange: 3
   upgradePaths: []
   soldierPrefab: {fileID: 1852670417170501071, guid: 41903a384ec29ae479e843607c6bb941, type: 3}
