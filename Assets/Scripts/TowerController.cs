@@ -1,4 +1,3 @@
-// TowerController.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +22,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float baseProjectileDamage = 25f;
     [SerializeField]
     private float projectileSpeed = 10f;
+    [SerializeField]
+    private Sprite projectileSprite; 
     
     [Header("특수 효과")]
     [SerializeField]
@@ -55,13 +56,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Transform firePoint;
     [SerializeField]
+    private Transform characterSpriteTransform; // (추가) 좌우로 뒤집힐 캐릭터 스프라이트의 Transform 입니다.
+    [SerializeField]
     private LineRenderer laserLineRenderer;
     [SerializeField]
     private GameObject haetaePrefab; 
     [SerializeField]
     private GameObject missilePrefab;
     [SerializeField]
-    private Transform towerSpriteTransform; 
+    private Sprite missileSprite;
 
     private Transform currentTarget;
     private float attackCountdown = 0f;
@@ -304,21 +307,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
 
         FindClosestEnemy();
-                // (수정) 타겟 방향에 따라 스프라이트 좌우를 뒤집는 로직 추가
-        if (currentTarget != null && towerSpriteTransform != null)
-        {
-            if (currentTarget.position.x < transform.position.x)
-            {
-                // 타겟이 타워의 왼쪽에 있을 경우, x축 스케일을 -1로 하여 뒤집습니다.
-                towerSpriteTransform.localScale = new Vector3(-1, 1, 1);
-            }
-            else
-            {
-                // 타겟이 타워의 오른쪽에 있을 경우, x축 스케일을 1로 하여 원상태로 돌립니다.
-                towerSpriteTransform.localScale = new Vector3(1, 1, 1);
-            }
-        }
 
+        // (수정) 타겟의 위치에 따라 캐릭터 스프라이트의 방향을 좌우로 뒤집는 로직입니다.
+        HandleSpriteDirection();
 
         attackCountdown -= Time.deltaTime;
 
@@ -339,7 +330,24 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (수정) '빙판'의 범위를 스킬 값에서 가져오도록 변경
+    // (추가) 타겟의 x좌표와 타워의 x좌표를 비교하여 캐릭터 스프라이트의 좌우 방향을 결정하는 함수입니다.
+    void HandleSpriteDirection()
+    {
+        if (characterSpriteTransform != null && currentTarget != null)
+        {
+            if (currentTarget.position.x < transform.position.x)
+            {
+                // 타겟이 왼쪽에 있으면 스프라이트를 왼쪽으로 뒤집습니다. (x 스케일을 -1로)
+                characterSpriteTransform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+            else
+            {
+                // 타겟이 오른쪽에 있으면 스프라이트를 원래 방향(오른쪽)으로 되돌립니다.
+                characterSpriteTransform.localScale = new Vector3(1f, 1f, 1f);
+            }
+        }
+    }
+
     void HandleIceSlickAura(int skillLevel)
     {
         iceSlickCheckTimer -= Time.deltaTime;
@@ -543,11 +551,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     if (specialTarget != null)
                     {
                         SoundManager.instance.PlayAttackSound();
-                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
-
+                        
                         if (projectile != null)
                         {
+                            projectile.SetSprite(projectileSprite); 
                             float knockbackDist = poseidonSkill.values2[poseidonLevel - 1];
                             float knockbackRadius = poseidonSkill.values3[poseidonLevel - 1];
                             projectile.Setup(specialTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, knockbackDist, knockbackRadius);
@@ -593,11 +602,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     if (specialTarget != null)
                     {
                         SoundManager.instance.PlayAttackSound();
-                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
 
                         if (projectile != null)
                         {
+                            projectile.SetSprite(projectileSprite); 
                             float specialDamage = sniperSkill.values2[sniperLevel - 1]; 
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
@@ -617,10 +627,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 if (Random.Range(0f, 100f) < procChance)
                 {
                     SoundManager.instance.PlayAttackSound();
-                    GameObject missileGO = Instantiate(missilePrefab, firePoint.position, firePoint.rotation);
+                    GameObject missileGO = Instantiate(missilePrefab, firePoint.position, Quaternion.identity);
                     BombProjectileController bomb = missileGO.GetComponent<BombProjectileController>();
                     if (bomb != null && currentTarget != null)
                     {
+                        bomb.SetSprite(missileSprite); 
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
                         bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
@@ -643,11 +654,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     if (specialTarget != null)
                     {
                         SoundManager.instance.PlayAttackSound();
-                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+                        GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
 
                         if (projectile != null)
                         {
+                            projectile.SetSprite(projectileSprite); 
                             float damageMultiplier = longShotSkill.values2[longShotLevel - 1]; 
                             float specialDamage = finalProjectileDamage * damageMultiplier;
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
@@ -659,13 +671,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
         
         SoundManager.instance.PlayAttackSound();
-        GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
+        GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
 
         if (towerType == TowerType.Bomb)
         {
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
+                bomb.SetSprite(projectileSprite); 
                 int greedyLevel = GetSkillLevel("욕심쟁이!");
                 TowerSkillBlueprint greedySkill = null;
                 if (greedyLevel > 0)
@@ -681,6 +694,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             ProjectileController projectile = projectileGO_normal.GetComponent<ProjectileController>();
             if (projectile != null)
             {
+                projectile.SetSprite(projectileSprite); 
                 float dotDamage = 0;
                 float dotDuration = 0;
 

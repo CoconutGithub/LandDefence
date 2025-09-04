@@ -13,8 +13,32 @@ public class ProjectileController : MonoBehaviour
     private float dotDuration;
     private float knockbackDistance;
     private float knockbackRadius;
+    
+    private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer; // (추가) 스프라이트 렌더러 참조
 
-    // (수정) 더 이상 필요 없으므로 rotationOffset 변수를 제거했습니다.
+    void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>(); // (추가) 컴포넌트 찾기
+        if (rb == null)
+        {
+            Debug.LogError("ProjectileController: Rigidbody 2D 컴포넌트를 찾을 수 없습니다! 프리팹에 추가해주세요.");
+        }
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("ProjectileController: Sprite Renderer 컴포넌트를 찾을 수 없습니다!");
+        }
+    }
+
+    // (추가) 외부(TowerController)에서 이 발사체의 이미지를 변경할 수 있도록 하는 함수
+    public void SetSprite(Sprite newSprite)
+    {
+        if (spriteRenderer != null && newSprite != null)
+        {
+            spriteRenderer.sprite = newSprite;
+        }
+    }
 
     public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration, float _dotDamage, float _dotDuration, float _knockbackDistance = 0, float _knockbackRadius = 0)
     {
@@ -31,6 +55,23 @@ public class ProjectileController : MonoBehaviour
         knockbackRadius = _knockbackRadius;
     }
 
+    void FixedUpdate()
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        Vector2 direction = (Vector2)target.position - rb.position;
+        direction.Normalize();
+
+        rb.linearVelocity = direction * moveSpeed;
+
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        rb.rotation = angle;
+    }
+    
     void Update()
     {
         if (target == null)
@@ -38,16 +79,6 @@ public class ProjectileController : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-
-        // --- (수정) 발사체 회전 로직 변경 ---
-        // 1. 타겟을 향하는 방향 벡터를 계산하고 정규화(normalized)합니다.
-        Vector3 direction = (target.position - transform.position).normalized;
-        // 2. 발사체의 오른쪽 방향(transform.right)을 계산된 방향 벡터로 직접 설정합니다.
-        //    이렇게 하면 스프라이트의 오른쪽(일반적인 2D 이미지의 앞쪽)이 항상 타겟을 향하게 됩니다.
-        transform.right = direction;
-        // --- (수정 끝) ---
-
-        transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, target.position) < 0.1f)
         {
@@ -57,6 +88,9 @@ public class ProjectileController : MonoBehaviour
 
     void HitTarget()
     {
+        if (!this.enabled) return;
+        this.enabled = false;
+
         SoundManager.instance.PlayHitSound();
         EnemyHealth enemyHealth = target.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
