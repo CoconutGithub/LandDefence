@@ -1,3 +1,4 @@
+//EnemyHealth.cs
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic; // List 사용을 위해 추가

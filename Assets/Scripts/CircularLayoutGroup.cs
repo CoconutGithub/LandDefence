@@ -1,3 +1,4 @@
+//CircularLayoutGroup.cs
 using UnityEngine;
 
 // 자식 RectTransform들을 원형으로 배치하는 커스텀 레이아웃 그룹입니다.

@@ -1,3 +1,4 @@
+//BombProjectileController.cs
 using UnityEngine;
 using System.Collections.Generic; // List 사용을 위해 추가
 

@@ -1,3 +1,4 @@
+//TowerBlueprint.cs
 using UnityEngine;
 
 // 타워의 설계도 역할을 하는 데이터 클래스입니다.

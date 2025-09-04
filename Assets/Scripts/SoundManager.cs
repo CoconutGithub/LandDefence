@@ -1,3 +1,4 @@
+//SoundManager.cs
 using UnityEngine;
 
 // 게임의 모든 사운드 재생을 중앙에서 관리하는 스크립트입니다.

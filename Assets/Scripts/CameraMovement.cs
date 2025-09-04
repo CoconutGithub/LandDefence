@@ -1,3 +1,4 @@
+//CameraMovement.cs
 using UnityEngine;
 
 // 이 스크립트는 메인 카메라에 부착되어 마우스 드래그로 카메라를 이동시키는 역할을 합니다.

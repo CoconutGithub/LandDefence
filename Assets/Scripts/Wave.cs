@@ -1,3 +1,4 @@
+//Wave.cs
 using UnityEngine;
 
 // 웨이브 정보를 담는 스크립트입니다.

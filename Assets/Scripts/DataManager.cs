@@ -1,3 +1,4 @@
+//DataManager.cs
 using UnityEngine;
 
 // 게임 데이터를 영구적으로 저장하고 불러오는 역할을 하는 클래스입니다.
