@@ -1,4 +1,3 @@
-//ProjectileController.cs
 using UnityEngine;
 
 public class ProjectileController : MonoBehaviour
@@ -13,10 +12,10 @@ public class ProjectileController : MonoBehaviour
     private float dotDamagePerSecond;
     private float dotDuration;
     private float knockbackDistance;
-    // (추가) 넉백 효과가 적용될 범위를 저장할 변수
     private float knockbackRadius;
 
-    // (수정) Setup 함수에서 넉백 반경(_knockbackRadius)도 함께 전달받도록 파라미터를 추가합니다.
+    // (수정) 더 이상 필요 없으므로 rotationOffset 변수를 제거했습니다.
+
     public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration, float _dotDamage, float _dotDuration, float _knockbackDistance = 0, float _knockbackRadius = 0)
     {
         target = _target;
@@ -39,6 +38,14 @@ public class ProjectileController : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        // --- (수정) 발사체 회전 로직 변경 ---
+        // 1. 타겟을 향하는 방향 벡터를 계산하고 정규화(normalized)합니다.
+        Vector3 direction = (target.position - transform.position).normalized;
+        // 2. 발사체의 오른쪽 방향(transform.right)을 계산된 방향 벡터로 직접 설정합니다.
+        //    이렇게 하면 스프라이트의 오른쪽(일반적인 2D 이미지의 앞쪽)이 항상 타겟을 향하게 됩니다.
+        transform.right = direction;
+        // --- (수정 끝) ---
 
         transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
 
@@ -73,14 +80,11 @@ public class ProjectileController : MonoBehaviour
             }
         }
         
-        // (수정) 넉백 효과 적용 로직을 범위 공격으로 변경합니다.
         if (knockbackDistance > 0f)
         {
-            // 발사체가 부딪힌 위치를 중심으로 knockbackRadius 범위 내의 모든 콜라이더를 찾습니다.
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, knockbackRadius);
             foreach (var hitCollider in colliders)
             {
-                // 찾은 콜라이더가 적이라면 넉백 효과를 적용합니다.
                 EnemyMovement enemyMovement = hitCollider.GetComponent<EnemyMovement>();
                 if (enemyMovement != null)
                 {
