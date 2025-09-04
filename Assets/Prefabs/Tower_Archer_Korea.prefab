@@ -142,6 +142,8 @@ MonoBehaviour:
     - 2
     - 3
     - 4
+    overrideProjectileSprite: {fileID: -737063653961155550, guid: 5ac85452ca6f5254e84c84feef00d29e, type: 3}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uD574\uCE58"
     skillDescription: "\uD0C0\uC6CC \uADFC\uCC98 \uACBD\uB85C\uC5D0 \uD574\uCE58\uB97C
       \uC601\uAD6C \uC18C\uD658\uD569\uB2C8\uB2E4."
@@ -152,6 +154,8 @@ MonoBehaviour:
     values2:
     - 35
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
   characterSpriteTransform: {fileID: 8941207430269203735}

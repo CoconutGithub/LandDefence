@@ -24,7 +24,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float projectileSpeed = 10f;
     [SerializeField]
     private Sprite projectileSprite; 
-    
+
     [Header("특수 효과")]
     [SerializeField]
     private float slowAmount = 0.5f;
@@ -56,7 +56,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Transform firePoint;
     [SerializeField]
-    private Transform characterSpriteTransform; // (추가) 좌우로 뒤집힐 캐릭터 스프라이트의 Transform 입니다.
+    private Transform characterSpriteTransform;
     [SerializeField]
     private LineRenderer laserLineRenderer;
     [SerializeField]
@@ -307,8 +307,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
 
         FindClosestEnemy();
-
-        // (수정) 타겟의 위치에 따라 캐릭터 스프라이트의 방향을 좌우로 뒤집는 로직입니다.
         HandleSpriteDirection();
 
         attackCountdown -= Time.deltaTime;
@@ -330,19 +328,16 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (추가) 타겟의 x좌표와 타워의 x좌표를 비교하여 캐릭터 스프라이트의 좌우 방향을 결정하는 함수입니다.
     void HandleSpriteDirection()
     {
         if (characterSpriteTransform != null && currentTarget != null)
         {
             if (currentTarget.position.x < transform.position.x)
             {
-                // 타겟이 왼쪽에 있으면 스프라이트를 왼쪽으로 뒤집습니다. (x 스케일을 -1로)
                 characterSpriteTransform.localScale = new Vector3(-1f, 1f, 1f);
             }
             else
             {
-                // 타겟이 오른쪽에 있으면 스프라이트를 원래 방향(오른쪽)으로 되돌립니다.
                 characterSpriteTransform.localScale = new Vector3(1f, 1f, 1f);
             }
         }
@@ -659,7 +654,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
                         if (projectile != null)
                         {
-                            projectile.SetSprite(projectileSprite); 
+                            // (수정) 장거리 사격 스킬의 시각적 오버라이드를 적용합니다.
+                            if (longShotSkill.overrideProjectileSprite != null)
+                            {
+                                projectile.SetSprite(longShotSkill.overrideProjectileSprite);
+                            }
+                            else
+                            {
+                                projectile.SetSprite(projectileSprite);
+                            }
                             float damageMultiplier = longShotSkill.values2[longShotLevel - 1]; 
                             float specialDamage = finalProjectileDamage * damageMultiplier;
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
@@ -671,14 +674,55 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
         
         SoundManager.instance.PlayAttackSound();
-        GameObject projectileGO_normal = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        
+        // --- (수정 시작) 발사할 프리팹과 이미지를 스킬에 따라 동적으로 결정하는 로직 ---
+
+        // 1. 기본값 설정
+        GameObject prefabToSpawn = projectilePrefab;
+        Sprite spriteToUse = projectileSprite;
+        float dotDamage = 0;
+        float dotDuration = 0;
+        
+        // 2. 불화살 스킬 체크
+        int fireArrowLevel = GetSkillLevel("불화살");
+        if (fireArrowLevel > 0)
+        {
+            TowerSkillBlueprint fireArrowSkill = System.Array.Find(towerSkills, skill => skill.skillName == "불화살");
+            if (fireArrowSkill != null)
+            {
+                float procChance = fireArrowSkill.values1[fireArrowLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    // 불화살 스킬 발동! 효과 적용
+                    dotDamage = fireArrowSkill.values2[fireArrowLevel - 1];
+                    dotDuration = fireArrowSkill.values3[fireArrowLevel - 1];
+
+                    // 시각적 변경 적용
+                    if (fireArrowSkill.overrideProjectilePrefab != null)
+                    {
+                        prefabToSpawn = fireArrowSkill.overrideProjectilePrefab;
+                        spriteToUse = null; // 프리팹이 자체 비주얼을 가지므로 스프라이트는 null
+                    }
+                    else if (fireArrowSkill.overrideProjectileSprite != null)
+                    {
+                        spriteToUse = fireArrowSkill.overrideProjectileSprite;
+                    }
+                }
+            }
+        }
+        
+        // --- (수정 끝) ---
+
+        // 3. 최종 결정된 프리팹 생성
+        GameObject projectileGO_normal = Instantiate(prefabToSpawn, firePoint.position, Quaternion.identity);
 
         if (towerType == TowerType.Bomb)
         {
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                bomb.SetSprite(projectileSprite); 
+                if(spriteToUse != null) bomb.SetSprite(spriteToUse);
+                
                 int greedyLevel = GetSkillLevel("욕심쟁이!");
                 TowerSkillBlueprint greedySkill = null;
                 if (greedyLevel > 0)
@@ -694,26 +738,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             ProjectileController projectile = projectileGO_normal.GetComponent<ProjectileController>();
             if (projectile != null)
             {
-                projectile.SetSprite(projectileSprite); 
-                float dotDamage = 0;
-                float dotDuration = 0;
-
-                int fireArrowLevel = GetSkillLevel("불화살");
-                if (fireArrowLevel > 0)
+                // 스프라이트가 null이 아닐 경우에만 설정 (애니메이션 프리팹의 경우 null)
+                if (spriteToUse != null)
                 {
-                    TowerSkillBlueprint fireArrowSkill = System.Array.Find(towerSkills, skill => skill.skillName == "불화살");
-                    if (fireArrowSkill != null)
-                    {
-                        float procChance = fireArrowSkill.values1[fireArrowLevel - 1];
-
-                        if (Random.Range(0f, 100f) < procChance)
-                        {
-                            dotDamage = fireArrowSkill.values2[fireArrowLevel - 1];
-                            dotDuration = fireArrowSkill.values3[fireArrowLevel - 1];
-                        }
-                    }
+                    projectile.SetSprite(spriteToUse);
                 }
                 
+                // 지속 데미지는 위에서 이미 결정됨
                 projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration, dotDamage, dotDuration);
             }
         }
