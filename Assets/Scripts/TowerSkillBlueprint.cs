@@ -8,6 +8,7 @@ public class TowerSkillBlueprint
     public string skillName;
     [TextArea]
     public string skillDescription;
+    public Sprite icon; // (추가) UI에 표시될 아이콘 이미지입니다.
 
     [Header("스킬 레벨별 데이터")]
     public int maxLevel = 3;
@@ -18,6 +19,7 @@ public class TowerSkillBlueprint
     public float[] values3;
 
     [Header("스킬 발사체 오버라이드 (선택 사항)")]
-    public Sprite overrideProjectileSprite; // 이 스킬 발동 시, 기본 발사체의 이미지를 이것으로 교체합니다. (애니메이션이 없을 경우)
-    public GameObject overrideProjectilePrefab; // 이 스킬 발동 시, 기본 발사체 대신 이 프리팹을 생성합니다. (애니메이션이 있을 경우)
+    public Sprite overrideProjectileSprite;
+    public GameObject overrideProjectilePrefab;
 }
+

@@ -1,4 +1,3 @@
-//TowerBuildUI.cs
 using UnityEngine;
 using TMPro;
 
@@ -18,15 +17,28 @@ public class TowerBuildUI : MonoBehaviour
     }
 
     public GameObject uiPanel;
-
-    // (수정) 건설할 타워의 종류를 늘립니다.
-    public TowerBlueprint archerBlueprint;
-    public TowerBlueprint mageBlueprint;
-    public TowerBlueprint barracksBlueprint;
-    public TowerBlueprint bombBlueprint;
-    public TowerBlueprint gunBlueprint; // (추가) 총 타워의 설계도입니다.
-
     private TowerSpotController currentSpot;
+
+    [Header("궁수 타워")]
+    public TowerBlueprint archerBlueprint;
+    public TextMeshProUGUI archerCostText;
+
+    [Header("마법사 타워")]
+    public TowerBlueprint mageBlueprint;
+    public TextMeshProUGUI mageCostText;
+    
+    [Header("병영 타워")]
+    public TowerBlueprint barracksBlueprint;
+    public TextMeshProUGUI barracksCostText;
+
+    [Header("폭탄 타워")]
+    public TowerBlueprint bombBlueprint;
+    public TextMeshProUGUI bombCostText;
+
+    [Header("총 타워")]
+    public TowerBlueprint gunBlueprint;
+    public TextMeshProUGUI gunCostText;
+
 
     void Start()
     {
@@ -37,6 +49,14 @@ public class TowerBuildUI : MonoBehaviour
     {
         currentSpot = spot;
         transform.position = spot.transform.position;
+
+        // (수정) UI가 보일 때 각 버튼의 비용 텍스트를 업데이트합니다.
+        if (archerCostText != null) archerCostText.text = archerBlueprint.cost + "G";
+        if (mageCostText != null) mageCostText.text = mageBlueprint.cost + "G";
+        if (barracksCostText != null) barracksCostText.text = barracksBlueprint.cost + "G";
+        if (bombCostText != null) bombCostText.text = bombBlueprint.cost + "G";
+        if (gunCostText != null) gunCostText.text = gunBlueprint.cost + "G";
+
         uiPanel.SetActive(true);
     }
 
@@ -44,54 +64,34 @@ public class TowerBuildUI : MonoBehaviour
     {
         uiPanel.SetActive(false);
     }
-
-    // 기본 궁수 타워를 건설하는 함수입니다.
+    
     public void BuildArcherTower()
     {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(archerBlueprint);
-        }
+        if (currentSpot != null) currentSpot.BuildTower(archerBlueprint);
         Hide();
     }
-
-    // 마법사 타워를 건설하는 함수입니다.
+    
     public void BuildMageTower()
     {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(mageBlueprint);
-        }
+        if (currentSpot != null) currentSpot.BuildTower(mageBlueprint);
         Hide();
     }
-
-    // 병영 타워를 건설하는 함수입니다.
+    
     public void BuildBarracksTower()
     {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(barracksBlueprint);
-        }
+        if (currentSpot != null) currentSpot.BuildTower(barracksBlueprint);
         Hide();
     }
-
-    // 폭탄 타워를 건설하는 함수입니다.
+    
     public void BuildBombTower()
     {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(bombBlueprint);
-        }
+        if (currentSpot != null) currentSpot.BuildTower(bombBlueprint);
         Hide();
     }
-
-    // (추가) 총 타워를 건설하는 새로운 함수입니다.
+    
     public void BuildGunTower()
     {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(gunBlueprint);
-        }
+        if (currentSpot != null) currentSpot.BuildTower(gunBlueprint);
         Hide();
     }
 }

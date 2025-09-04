@@ -1,4 +1,3 @@
-//TowerUpgradeUI.cs
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -18,13 +17,12 @@ public class TowerUpgradeUI : MonoBehaviour
     [SerializeField]
     private GameObject uiPanel;
     [SerializeField]
-    private GameObject upgradeButtonPrefab;
+    private GameObject upgradeButtonPrefab; // (수정) 이제 이 프리팹 하나만 사용합니다.
     [SerializeField]
     private Transform buttonContainer;
     [SerializeField]
     private Button setRallyPointButton;
-    [SerializeField]
-    private GameObject skillButtonPrefab; // (추가) 스킬 버튼 프리팹
+    // [SerializeField] private GameObject skillButtonPrefab; // (제거) 더 이상 필요 없습니다.
 
     private TowerController selectedTower;
     private BarracksController selectedBarracks;
@@ -41,7 +39,6 @@ public class TowerUpgradeUI : MonoBehaviour
         
         setRallyPointButton.gameObject.SetActive(false);
 
-        // (수정) 타워의 상태(업그레이드/스킬)에 따라 다른 버튼을 표시
         if (tower.upgradePaths != null && tower.upgradePaths.Length > 0)
         {
             UpdateUpgradeButtons(tower.upgradePaths);
@@ -62,7 +59,6 @@ public class TowerUpgradeUI : MonoBehaviour
 
         setRallyPointButton.gameObject.SetActive(true);
 
-        // (수정) 병영의 상태(업그레이드/스킬)에 따라 다른 버튼을 표시
         if (barracks.upgradePaths != null && barracks.upgradePaths.Length > 0)
         {
             UpdateUpgradeButtons(barracks.upgradePaths);
@@ -93,10 +89,24 @@ public class TowerUpgradeUI : MonoBehaviour
         {
             GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
             
-            TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
-            if (buttonText != null)
+            Image buttonImage = buttonGO.GetComponent<Image>();
+            if (buttonImage != null && blueprint.icon != null)
             {
-                buttonText.text = $"{blueprint.towerName}\n({blueprint.cost}G)";
+                buttonImage.sprite = blueprint.icon;
+            }
+            
+            // (수정) 이름으로 'CostText'를 찾아 비용을 표시합니다.
+            Transform costTextTransform = buttonGO.transform.Find("CostText");
+            if (costTextTransform != null)
+            {
+                costTextTransform.GetComponent<TextMeshProUGUI>().text = $"{blueprint.cost}G";
+            }
+            
+            // (추가) 업그레이드 버튼에서는 'LevelText'를 비활성화합니다.
+            Transform levelTextTransform = buttonGO.transform.Find("LevelText");
+            if (levelTextTransform != null)
+            {
+                levelTextTransform.gameObject.SetActive(false);
             }
 
             Button button = buttonGO.GetComponent<Button>();
@@ -108,8 +118,7 @@ public class TowerUpgradeUI : MonoBehaviour
             }
         }
     }
-
-    // (수정) 스킬 버튼을 생성하고 설정하는 함수
+    
     private void UpdateSkillButtons(TowerSkillBlueprint[] skills, TowerController tower = null, BarracksController barracks = null)
     {
         ClearAllButtons();
@@ -117,22 +126,49 @@ public class TowerUpgradeUI : MonoBehaviour
 
         foreach (TowerSkillBlueprint skill in skills)
         {
-            GameObject buttonGO = Instantiate(skillButtonPrefab, buttonContainer);
+            GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer); // (수정) UpgradeButtonPrefab 사용
+            
+            Image buttonImage = buttonGO.GetComponent<Image>();
+            if (buttonImage != null && skill.icon != null)
+            {
+                buttonImage.sprite = skill.icon;
+            }
+
             Button button = buttonGO.GetComponent<Button>();
-            TextMeshProUGUI buttonText = buttonGO.GetComponentInChildren<TextMeshProUGUI>();
+            
+            // 이름으로 특정 Text 컴포넌트를 찾습니다.
+            TextMeshProUGUI costText = null;
+            Transform costTextTransform = buttonGO.transform.Find("CostText");
+            if (costTextTransform != null)
+            {
+                costText = costTextTransform.GetComponent<TextMeshProUGUI>();
+            }
+
+            TextMeshProUGUI levelText = null;
+            Transform levelTextTransform = buttonGO.transform.Find("LevelText");
+            if (levelTextTransform != null)
+            {
+                levelText = levelTextTransform.GetComponent<TextMeshProUGUI>();
+                levelText.gameObject.SetActive(true); // 스킬 버튼에서는 활성화
+            }
 
             int currentLevel = 0;
             if(tower != null) currentLevel = tower.GetSkillLevel(skill.skillName);
             else if(barracks != null) currentLevel = barracks.GetSkillLevel(skill.skillName);
 
+            if (levelText != null)
+            {
+                levelText.text = $"{currentLevel}/{skill.maxLevel}";
+            }
+
             if (currentLevel >= skill.maxLevel)
             {
-                buttonText.text = $"{skill.skillName}\n(마스터)";
+                if (costText != null) costText.text = "마스터";
                 button.interactable = false;
             }
             else
             {
-                buttonText.text = $"{skill.skillName} ({currentLevel + 1}LV)\n({skill.costs[currentLevel]}G)";
+                if (costText != null) costText.text = $"{skill.costs[currentLevel]}G";
                 button.interactable = true;
                 button.onClick.AddListener(() => {
                     if(tower != null) tower.UpgradeSkill(skill);
