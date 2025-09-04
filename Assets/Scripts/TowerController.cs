@@ -60,6 +60,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private GameObject haetaePrefab; 
     [SerializeField]
     private GameObject missilePrefab;
+    [SerializeField]
+    private Transform towerSpriteTransform; 
 
     private Transform currentTarget;
     private float attackCountdown = 0f;
@@ -302,6 +304,22 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
 
         FindClosestEnemy();
+                // (수정) 타겟 방향에 따라 스프라이트 좌우를 뒤집는 로직 추가
+        if (currentTarget != null && towerSpriteTransform != null)
+        {
+            if (currentTarget.position.x < transform.position.x)
+            {
+                // 타겟이 타워의 왼쪽에 있을 경우, x축 스케일을 -1로 하여 뒤집습니다.
+                towerSpriteTransform.localScale = new Vector3(-1, 1, 1);
+            }
+            else
+            {
+                // 타겟이 타워의 오른쪽에 있을 경우, x축 스케일을 1로 하여 원상태로 돌립니다.
+                towerSpriteTransform.localScale = new Vector3(1, 1, 1);
+            }
+        }
+
+
         attackCountdown -= Time.deltaTime;
 
         if (isLaserTower)
