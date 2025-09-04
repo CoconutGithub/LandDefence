@@ -1,4 +1,3 @@
-//SoldierController.cs
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -39,6 +38,8 @@ public class SoldierController : MonoBehaviour
     private GameObject healthBarCanvas;
     [SerializeField]
     private LayerMask enemyLayer;
+    [SerializeField]
+    private Transform characterSpriteTransform; // (추가) 좌우 방향을 바꿀 스프라이트의 Transform
 
     private float currentHealth;
     private float attackCountdown = 0f;
@@ -49,6 +50,7 @@ public class SoldierController : MonoBehaviour
     private CircleCollider2D recognitionCollider;
     private bool isHaetae = false;
     private SpriteRenderer spriteRenderer;
+    private AnimationController animationController; // (추가) 애니메이션 컨트롤러 참조
 
     private float originalMaxHealth;
     private float originalAttackDamage;
@@ -56,7 +58,6 @@ public class SoldierController : MonoBehaviour
     private float originalRecognitionRadius;
     private float aoeChance = 0f;
 
-    // (추가) 방패 공격 스킬 관련 변수
     private float reflectionChance = 0f;
     private float reflectionDuration = 0f;
     private bool isReflectingDamage = false;
@@ -65,6 +66,13 @@ public class SoldierController : MonoBehaviour
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
+        
+        animationController = GetComponent<AnimationController>(); // (추가) 컴포넌트 찾아오기
+
         recognitionCollider = GetComponent<CircleCollider2D>();
         originalMaxHealth = maxHealth;
         originalAttackDamage = attackDamage;
@@ -95,8 +103,8 @@ public class SoldierController : MonoBehaviour
 
     void Update()
     {
-        // (추가) 피해 반사 지속 시간 관리
         HandleReflection();
+        HandleSpriteDirection(); // (추가) 매 프레임 스프라이트 방향을 체크
 
         switch (currentState)
         {
@@ -146,7 +154,22 @@ public class SoldierController : MonoBehaviour
         }
     }
 
-    // (추가) 피해 반사 상태를 관리하는 함수
+    // (추가) 적 방향에 따라 스프라이트 좌우를 뒤집는 함수
+    void HandleSpriteDirection()
+    {
+        if (characterSpriteTransform != null && currentTarget != null)
+        {
+            if (currentTarget.transform.position.x < transform.position.x)
+            {
+                characterSpriteTransform.localScale = new Vector3(-1f, 1f, 1f);
+            }
+            else
+            {
+                characterSpriteTransform.localScale = new Vector3(1f, 1f, 1f);
+            }
+        }
+    }
+
     void HandleReflection()
     {
         if (isReflectingDamage)
@@ -155,7 +178,6 @@ public class SoldierController : MonoBehaviour
             if (reflectionTimer <= 0f)
             {
                 isReflectingDamage = false;
-                // (선택 사항) 반사 효과가 끝났음을 시각적으로 표시할 수 있습니다.
             }
         }
     }
@@ -227,8 +249,7 @@ public class SoldierController : MonoBehaviour
         currentHealth = maxHealth;
         UpdateHealthBar();
     }
-
-    // (수정) 피해 반사 관련 능력치도 함께 받도록 함수 확장
+    
     public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus, float newAoeChance, float newReflectionChance, float newReflectionDuration)
     {
         maxHealth = originalMaxHealth + healthModifier;
@@ -251,6 +272,12 @@ public class SoldierController : MonoBehaviour
 
     void Attack()
     {
+        // (추가) 공격 시 애니메이션 재생
+        if (animationController != null)
+        {
+            animationController.PlayAttackAnimation();
+        }
+
         float totalDamageDealt = 0;
         bool isAoeAttackThisTurn = isAreaOfEffect;
 
@@ -288,11 +315,9 @@ public class SoldierController : MonoBehaviour
             Heal(totalDamageDealt * (lifeStealPercentage / 100f));
         }
     }
-
-    // (수정) 공격자의 정보를 받고, 피해 반사 로직을 추가
+    
     public void TakeDamage(float damage, EnemyMovement attacker)
     {
-        // 피해 반사 상태라면, 받은 피해를 공격자에게 되돌려줍니다.
         if (isReflectingDamage && attacker != null)
         {
             attacker.GetComponent<EnemyHealth>().TakeDamage(damage, TowerType.Barracks, damageType);
@@ -300,15 +325,13 @@ public class SoldierController : MonoBehaviour
 
         currentHealth -= damage;
         timeSinceLastCombat = 0f;
-
-        // 피해 반사 상태가 아닐 때, 확률적으로 피해 반사를 활성화합니다.
+        
         if (!isReflectingDamage && reflectionChance > 0)
         {
             if (Random.Range(0f, 100f) < reflectionChance)
             {
                 isReflectingDamage = true;
                 reflectionTimer = reflectionDuration;
-                // (선택 사항) 반사 효과가 시작되었음을 시각적으로 표시할 수 있습니다. (예: 방패 아이콘 활성화)
             }
         }
 
@@ -381,4 +404,3 @@ public class SoldierController : MonoBehaviour
         }
     }
 }
-
