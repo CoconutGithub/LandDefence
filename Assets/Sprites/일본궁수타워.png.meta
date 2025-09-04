@@ -1,16 +1,25 @@
 fileFormatVersion: 2
-guid: d8bb96241a22e7b4696989f5bb96bef6
+guid: 9785d3f912a8d9348a424fcbaea4bcb5
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3769516868386905030
-    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_0"
+      213: 8150590772524392126
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_0"
   - first:
-      213: 2471330783052628871
-    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_1"
+      213: 6378934000192233033
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_1"
   - first:
-      213: -964423239173350580
-    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_2"
+      213: 3869682664471998748
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_2"
+  - first:
+      213: 713198626716191592
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_3"
+  - first:
+      213: -4203153766315342289
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_4"
+  - first:
+      213: -1362220558594079710
+    second: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_5"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -106,111 +115,133 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_0"
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_0"
       rect:
         serializedVersion: 2
         x: 0
-        y: 44
-        width: 60
-        height: 110
+        y: 60
+        width: 53
+        height: 99
       alignment: 9
-      pivot: {x: 0.51666665, y: 0.18181819}
+      pivot: {x: 0.4716981, y: 0.121212125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 0ac1a372eeb4d0549a33fadfa3902fda
-      internalID: 1464057833
+      spriteID: ebe94e9bf17bc1170800000000000000
+      internalID: 8150590772524392126
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_1"
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_1"
       rect:
         serializedVersion: 2
-        x: 59
-        y: 49
-        width: 56
-        height: 110
+        x: 54
+        y: 60
+        width: 54
+        height: 99
       alignment: 9
-      pivot: {x: 0.42857143, y: 0.17272727}
+      pivot: {x: 0.4537037, y: 0.121212125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 21ed5ecf85ace5346809be73e2d75dca
-      internalID: -569676494
+      spriteID: 94e9e171da6868850800000000000000
+      internalID: 6378934000192233033
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_2"
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_2"
       rect:
         serializedVersion: 2
-        x: 113
-        y: 49
-        width: 63
-        height: 110
+        x: 111
+        y: 60
+        width: 54
+        height: 99
       alignment: 9
-      pivot: {x: 0.47619048, y: 0.17272727}
+      pivot: {x: 0.42592594, y: 0.121212125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c52b436fb55fb344fb2971d34043f552
-      internalID: -882352864
+      spriteID: c11375181efd3b530800000000000000
+      internalID: 3869682664471998748
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_3"
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_3"
       rect:
         serializedVersion: 2
-        x: 176
-        y: 51
-        width: 71
-        height: 110
+        x: 166
+        y: 60
+        width: 52
+        height: 99
       alignment: 9
-      pivot: {x: 0.37323943, y: 0.17272727}
+      pivot: {x: 0.45192307, y: 0.121212125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 34836d78c5ce9674793c22059f935430
-      internalID: 2089433521
+      spriteID: 86b07bf4f5ac5e900800000000000000
+      internalID: 713198626716191592
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_4"
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_4"
       rect:
         serializedVersion: 2
-        x: 253
-        y: 52
-        width: 65
-        height: 110
+        x: 220
+        y: 60
+        width: 58
+        height: 99
       alignment: 9
-      pivot: {x: 0.43076923, y: 0.15454546}
+      pivot: {x: 0.46551725, y: 0.121212125}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 26ad796786a877b4bb5bde58427a63fd
-      internalID: 104249
+      spriteID: f26cd663be56ba5c0800000000000000
+      internalID: -4203153766315342289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_5"
+      rect:
+        serializedVersion: 2
+        x: 273
+        y: 60
+        width: 51
+        height: 99
+      alignment: 9
+      pivot: {x: 0.43137255, y: 0.121212125}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 224044b8e9b681de0800000000000000
+      internalID: -1362220558594079710
       vertices: []
       indices: 
       edges: []
@@ -219,7 +250,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: eb59a5d5454d18c4e930582e43676e6a
+    spriteID: b2a1e396c8f7bb542b38e9c55c8c3f23
     internalID: 0
     vertices: []
     indices: 
@@ -229,14 +260,12 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_0": -3769516868386905030
-      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_1": 2471330783052628871
-      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___2_-removebg-preview_2": -964423239173350580
-      "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_0": 1464057833
-      "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_1": -569676494
-      "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_2": -882352864
-      "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_3": 2089433521
-      "\uD55C\uAD6D\uAD81\uC218\uD0C0\uC6CC_4": 104249
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_0": 8150590772524392126
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_1": 6378934000192233033
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_2": 3869682664471998748
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_3": 713198626716191592
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_4": -4203153766315342289
+      "ChatGPT_Image_2025\uB144_9\uC6D4_4\uC77C_\uC624\uD6C4_05___1_-removebg-preview_5": -1362220558594079710
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

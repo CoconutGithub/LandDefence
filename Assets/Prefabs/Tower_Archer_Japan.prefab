@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
   - component: {fileID: -2395588492771301174}
+  - component: {fileID: 2783634969242730211}
   m_Layer: 7
   m_Name: Tower_Archer_Japan
   m_TagString: Untagged
@@ -82,15 +83,15 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.6164196, g: 0.9622642, b: 0.1797436, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &52103331461806457
@@ -111,6 +112,7 @@ MonoBehaviour:
   timeBetweenAttacks: 1.2
   baseProjectileDamage: 40
   projectileSpeed: 20
+  projectileSprite: {fileID: 0}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -125,6 +127,7 @@ MonoBehaviour:
     skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uAC00\uC7A5
       \uCCB4\uB825\uC774 \uB192\uC740 \uC801\uC5D0\uAC8C \uAC15\uB825\uD55C \uD654\uC0B4\uC744
       \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 320000003c00000046000000
     values1:
@@ -136,9 +139,12 @@ MonoBehaviour:
     - 2
     - 2.5
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uB450\uBC1C \uC0AC\uACA9"
     skillDescription: "\uACF5\uACA9 \uC2DC \uB0AE\uC740 \uD655\uB960\uB85C \uD654\uC0B4\uC744
       \uB450 \uBC88 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 460000006400000064000000
     values1:
@@ -147,10 +153,15 @@ MonoBehaviour:
     - 15
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
+  characterSpriteTransform: {fileID: 0}
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 0}
+  missilePrefab: {fileID: 0}
+  missileSprite: {fileID: 0}
 --- !u!61 &-2395588492771301174
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -188,8 +199,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.51666665, y: 0.18181819}
+    oldSize: {x: 0.6, y: 1.1}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -197,6 +208,28 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &2783634969242730211
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 71ab585e3b83e10489208eb82ddc6b0f, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0

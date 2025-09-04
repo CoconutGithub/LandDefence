@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 8941207430269203735}
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
-  - component: {fileID: -4101450617855879121}
-  - component: {fileID: 7569268243944974682}
   - component: {fileID: 671004763747912836}
+  - component: {fileID: -4101450617855879121}
+  - component: {fileID: 8571178593926520585}
   m_Layer: 7
   m_Name: Tower_Archer_Korea
   m_TagString: Untagged
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: -4635612598433109370, guid: a36410921670e9041b44f1cc7ae378a6, type: 3}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &52103331461806457
@@ -160,11 +160,23 @@ MonoBehaviour:
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
-  characterSpriteTransform: {fileID: 8941207430269203735}
+  characterSpriteTransform: {fileID: 0}
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 1852670417170501071, guid: 9c92b8c4422491747aa3e43b0c95004b, type: 3}
   missilePrefab: {fileID: 0}
   missileSprite: {fileID: 0}
+--- !u!114 &671004763747912836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!61 &-4101450617855879121
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -202,16 +214,16 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.0990099}
-    oldSize: {x: 1.3333334, y: 2.2444444}
-    newSize: {x: 1, y: 1}
+    pivot: {x: 0.51666665, y: 0.18181819}
+    oldSize: {x: 0.6, y: 1.1}
+    newSize: {x: 0.6, y: 1.1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!95 &7569268243944974682
+--- !u!95 &8571178593926520585
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -221,7 +233,7 @@ Animator:
   m_GameObject: {fileID: 266319913433617465}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: e625a24ac37e2b8409853bbafbe50854, type: 2}
+  m_Controller: {fileID: 9100000, guid: bb93b79f93a655c40a10b78b8f1f447b, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -233,18 +245,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &671004763747912836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 266319913433617465}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0
