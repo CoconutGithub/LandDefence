@@ -112,8 +112,8 @@ MonoBehaviour:
   attackRange: 6
   timeBetweenAttacks: 1
   baseProjectileDamage: 35
-  projectileSpeed: 50
-  projectileSprite: {fileID: 0}
+  projectileSpeed: 15
+  projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -244,7 +244,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

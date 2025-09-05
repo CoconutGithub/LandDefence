@@ -112,7 +112,7 @@ MonoBehaviour:
   attackRange: 12
   timeBetweenAttacks: 1.2
   baseProjectileDamage: 40
-  projectileSpeed: 20
+  projectileSpeed: 10
   projectileSprite: {fileID: 21300000, guid: c41f1db57d9c6c34b9b7342de1c61990, type: 3}
   slowAmount: 0
   slowDuration: 0
