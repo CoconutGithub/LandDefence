@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
+  - component: {fileID: 5076679568791961699}
+  - component: {fileID: 6109878326535115394}
   m_Layer: 7
   m_Name: Tower_Mage
   m_TagString: Untagged
@@ -82,8 +84,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.9150123, g: 0.64228547, b: 0.9924528, a: 1}
+  m_Sprite: {fileID: -2045045150162038540, guid: ea892eb0a802096439ce8b03e5050390, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -111,6 +113,7 @@ MonoBehaviour:
   timeBetweenAttacks: 1
   baseProjectileDamage: 25
   projectileSpeed: 5
+  projectileSprite: {fileID: 0}
   slowAmount: 0.3
   slowDuration: 1
   explosionRadius: 0
@@ -123,12 +126,19 @@ MonoBehaviour:
   - prefab: {fileID: 266319913433617465, guid: 4cbd02ac260a46345933cfac49c1a0d3, type: 3}
     cost: 100
     towerName: "\uC601\uAD6D \uB9C8\uBC95\uC0AC \uD0C0\uC6CC"
+    icon: {fileID: 0}
   - prefab: {fileID: 266319913433617465, guid: c519ad598e9bca643981bf1455387849, type: 3}
     cost: 70
     towerName: "\uADF8\uB9AC\uC2A4 \uB9C8\uBC95\uC0AC \uD0C0\uC6CC"
+    icon: {fileID: 0}
+  towerSkills: []
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
+  characterSpriteTransform: {fileID: 8941207430269203735}
   laserLineRenderer: {fileID: 0}
+  haetaePrefab: {fileID: 0}
+  missilePrefab: {fileID: 0}
+  missileSprite: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -166,8 +176,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.20833333}
+    oldSize: {x: 1.2222222, y: 2.1333334}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -175,6 +185,40 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &5076679568791961699
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5df284bea4d7c3c4a83f6eae67a158d0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6109878326535115394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,7 +244,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
