@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
+  - component: {fileID: 8009218432720828347}
+  - component: {fileID: 8298999444231070493}
   m_Layer: 7
   m_Name: Tower_Gun_Germany
   m_TagString: Untagged
@@ -82,8 +84,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 1, g: 0.76015973, b: 0.5254902, a: 1}
+  m_Sprite: {fileID: -5525284704187999157, guid: 84ddd7dbd30dd45409462127a279dac0, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -110,7 +112,8 @@ MonoBehaviour:
   attackRange: 7
   timeBetweenAttacks: 3
   baseProjectileDamage: 12
-  projectileSpeed: 50
+  projectileSpeed: 15
+  projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -124,6 +127,7 @@ MonoBehaviour:
   - skillName: "\uAE30\uAD00\uCD1D"
     skillDescription: "\uC5F0\uC0AC \uC218\uAC00 100\uBC1C\uB85C \uB298\uC5B4\uB098\uB294
       \uB300\uC2E0, \uACF5\uACA9\uB825\uC774 \uAC10\uC18C\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 1
     costs: c8000000
     values1:
@@ -131,10 +135,13 @@ MonoBehaviour:
     values2:
     - 0.8
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uC800\uACA9\uCD1D"
     skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB9F5
       \uC0C1\uC758 \uAC00\uC7A5 \uCCB4\uB825\uC774 \uB192\uC740 \uC801\uC5D0\uAC8C
       \uAC15\uB825\uD55C \uC800\uACA9\uD0C4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 96000000c8000000c8000000
     values1:
@@ -146,11 +153,15 @@ MonoBehaviour:
     - 250
     - 300
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
+  characterSpriteTransform: {fileID: 8941207430269203735}
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 0}
   missilePrefab: {fileID: 0}
+  missileSprite: {fileID: 0}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -188,8 +199,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.16}
+    oldSize: {x: 1.5333333, y: 2.7777777}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -197,6 +208,40 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &8009218432720828347
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6c9e373628e3101498197bdeec99faf6, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8298999444231070493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0
@@ -222,7 +267,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
