@@ -23,7 +23,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float projectileSpeed = 10f;
     [SerializeField]
-    private Sprite projectileSprite; 
+    private Sprite projectileSprite;
 
     [Header("특수 효과")]
     [SerializeField]
@@ -36,20 +36,22 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private int bulletsPerBurst = 1;
     [SerializeField]
     private float timeBetweenShots = 0.1f;
-    
+
     [Header("레이저 정보 (영국 마법사 전용)")]
     public bool isLaserTower = false;
     [SerializeField]
     private float laserDps = 30f;
     [SerializeField]
     private float laserDpsRamp = 10f;
-    
+    [SerializeField]
+    private Gradient[] laserColorGradients = new Gradient[3];
+
     private float finalProjectileDamage;
 
     [Header("업그레이드 및 스킬 정보")]
     public TowerBlueprint[] upgradePaths;
     public TowerSkillBlueprint[] towerSkills;
-    
+
     [Header("필요한 컴포넌트")]
     [SerializeField]
     private GameObject projectilePrefab;
@@ -60,7 +62,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private LineRenderer laserLineRenderer;
     [SerializeField]
-    private GameObject haetaePrefab; 
+    private GameObject haetaePrefab;
     [SerializeField]
     private GameObject missilePrefab;
     [SerializeField]
@@ -74,7 +76,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float laserTimer = 0f;
 
     private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
-    private SoldierController spawnedHaetae; 
+    private SoldierController spawnedHaetae;
 
     private float originalTimeBetweenAttacks;
     private int originalBulletsPerBurst;
@@ -88,7 +90,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     private bool isSupplyBuffActive = false;
     private float supplyBuffTimer = 0f;
-    
+
     private float iceSlickCheckTimer = 0f;
     private const float ICE_SLICK_CHECK_INTERVAL = 0.5f;
 
@@ -119,6 +121,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         originalLaserDpsRamp = laserDpsRamp;
         originalSlowAmount = slowAmount;
         originalSlowDuration = slowDuration;
+
+        if (isLaserTower)
+        {
+            ApplyLaserColor(0);
+        }
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -130,7 +137,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         TowerUpgradeUI.instance.Show(this);
     }
-    
+
     public int GetSkillLevel(string skillName)
     {
         if (skillLevels.ContainsKey(skillName))
@@ -159,16 +166,41 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
             ApplyAllPassiveSkillEffects();
 
+            if (isLaserTower && skillToUpgrade.skillName == "아브라카다브라!")
+            {
+                ApplyLaserColor(newLevel);
+            }
+
             if (skillToUpgrade.skillName == "해치")
             {
                 HandleHaetaeSkill(skillToUpgrade, newLevel);
             }
-            
+
             TowerUpgradeUI.instance.Show(this);
         }
         else
         {
             Debug.Log("골드가 부족합니다!");
+        }
+    }
+
+    void ApplyLaserColor(int skillLevel)
+    {
+        if (laserLineRenderer == null || laserColorGradients == null) return;
+        if (skillLevel >= 0 && skillLevel < laserColorGradients.Length)
+        {
+            if (laserColorGradients[skillLevel] != null)
+            {
+                laserLineRenderer.colorGradient = laserColorGradients[skillLevel];
+            }
+            else
+            {
+                Debug.LogError($"Tower_Mage_UK 프리팹의 Laser Color Gradients 배열에서 인덱스 {skillLevel}가 비어있습니다(None)!");
+            }
+        }
+        else
+        {
+            Debug.LogError($"적용하려는 레이저 색상 레벨({skillLevel})이 배열 크기({laserColorGradients.Length})를 벗어났습니다!");
         }
     }
 
@@ -180,10 +212,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         laserDpsRamp = originalLaserDpsRamp;
         slowAmount = originalSlowAmount;
         slowDuration = originalSlowDuration;
-        
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
-
         foreach (var skill in towerSkills)
         {
             int skillLevel = GetSkillLevel(skill.skillName);
@@ -195,18 +225,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         float reduction = skill.values1[skillLevel - 1];
                         timeBetweenAttacks = Mathf.Max(originalTimeBetweenAttacks - reduction, 0.1f);
                         break;
-
                     case "기관총":
                         bulletsPerBurst = (int)skill.values1[skillLevel - 1];
                         float damageMultiplier = skill.values2[skillLevel - 1];
                         finalProjectileDamage *= damageMultiplier;
                         break;
-                    
                     case "아브라카다브라!":
                         laserDps = skill.values1[skillLevel - 1];
                         laserDpsRamp = skill.values2[skillLevel - 1];
                         break;
-                        
                     case "전선 구축":
                         slowAmount = skill.values1[skillLevel - 1];
                         slowDuration = skill.values2[skillLevel - 1];
@@ -215,44 +242,37 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
     }
-    
+
     private void HandleHaetaeSkill(TowerSkillBlueprint haetaeSkill, int newLevel)
     {
         if (newLevel == 1)
         {
             Transform waypoints = GameManager.WaypointHolder;
             if (waypoints == null || waypoints.childCount < 2) return;
-
             Vector3 bestSpawnPoint = Vector3.zero;
             float minDistanceSqr = float.MaxValue;
-
             for (int i = 0; i < waypoints.childCount - 1; i++)
             {
                 Vector3 p1 = waypoints.GetChild(i).position;
                 Vector3 p2 = waypoints.GetChild(i + 1).position;
-                
                 Vector3 closestPointOnSegment = GetClosestPointOnLineSegment(p1, p2, transform.position);
-                
                 float distSqr = (transform.position - closestPointOnSegment).sqrMagnitude;
-
                 if (distSqr < minDistanceSqr)
                 {
                     minDistanceSqr = distSqr;
                     bestSpawnPoint = closestPointOnSegment;
                 }
             }
-            
             if (bestSpawnPoint != Vector3.zero)
             {
                 GameObject haetaeGO = Instantiate(haetaePrefab, bestSpawnPoint, Quaternion.identity);
                 spawnedHaetae = haetaeGO.GetComponent<SoldierController>();
-                if(spawnedHaetae != null)
+                if (spawnedHaetae != null)
                 {
                     spawnedHaetae.SetRallyPointPosition(bestSpawnPoint);
                 }
             }
         }
-        
         if (spawnedHaetae != null)
         {
             float health = haetaeSkill.values1[newLevel - 1];
@@ -266,9 +286,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         Vector3 lineDir = p2 - p1;
         float lineLengthSqr = lineDir.sqrMagnitude;
         if (lineLengthSqr < 0.0001f) return p1;
-
         float t = Mathf.Clamp01(Vector3.Dot(point - p1, lineDir) / lineLengthSqr);
-        
         return p1 + t * lineDir;
     }
 
@@ -278,13 +296,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             SoundManager.instance.PlayBuildSound();
             GameObject newTowerGO = Instantiate(blueprint.prefab, transform.position, transform.rotation);
-
             var newTowerController = newTowerGO.GetComponent<TowerController>();
             if (newTowerController != null) newTowerController.SetParentSpot(parentSpot);
-            
             var newBarracksController = newTowerGO.GetComponent<BarracksController>();
             if (newBarracksController != null) newBarracksController.SetParentSpot(parentSpot);
-            
             parentSpot.SetCurrentTower(newTowerGO);
             Destroy(gameObject);
         }
@@ -293,29 +308,35 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     void Update()
     {
         HandleSupplyBuff();
-        
         int healLevel = GetSkillLevel("힐");
         if (healLevel > 0)
         {
             HandleHealingAura(healLevel);
         }
-        
         int iceSlickLevel = GetSkillLevel("빙판");
         if (iceSlickLevel > 0)
         {
             HandleIceSlickAura(iceSlickLevel);
         }
-
         FindClosestEnemy();
         HandleSpriteDirection();
-
         attackCountdown -= Time.deltaTime;
-
         if (isLaserTower)
         {
-            if (healLevel <= 0)
+            if (currentTarget != null)
             {
-                HandleLaserAttack();
+                if (healLevel <= 0)
+                {
+                    HandleLaserAttack(true);
+                }
+                else
+                {
+                    HandleLaserAttack(false);
+                }
+            }
+            else
+            {
+                HandleLaserAttack(false);
             }
         }
         else
@@ -327,7 +348,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
     }
-    
+
     void HandleSpriteDirection()
     {
         if (characterSpriteTransform != null && currentTarget != null)
@@ -349,13 +370,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         if (iceSlickCheckTimer <= 0f)
         {
             iceSlickCheckTimer = ICE_SLICK_CHECK_INTERVAL;
-
             TowerSkillBlueprint iceSlickSkill = System.Array.Find(towerSkills, skill => skill.skillName == "빙판");
             if (iceSlickSkill == null || iceSlickSkill.values1.Length < skillLevel || iceSlickSkill.values2.Length < skillLevel) return;
-            
-            float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f; 
+            float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f;
             float iceSlickRadius = iceSlickSkill.values2[skillLevel - 1];
-
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, iceSlickRadius);
             foreach (var collider in colliders)
             {
@@ -390,13 +408,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         if (healCheckTimer <= 0f)
         {
             healCheckTimer = HEAL_CHECK_INTERVAL;
-
             TowerSkillBlueprint healSkill = System.Array.Find(towerSkills, skill => skill.skillName == "힐");
             if (healSkill == null) return;
-            
             float healPerSecond = healSkill.values1[skillLevel - 1];
             float healAmount = healPerSecond * HEAL_CHECK_INTERVAL;
-
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, attackRange);
             foreach (var collider in colliders)
             {
@@ -405,7 +420,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 {
                     soldier.Heal(healAmount);
                 }
-
                 HeroController hero = collider.GetComponent<HeroController>();
                 if (hero != null)
                 {
@@ -415,51 +429,72 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    void HandleLaserAttack()
+    // (수정) 레이저 공격 함수에 애니메이션 제어 로직 추가
+    void HandleLaserAttack(bool canDamage)
     {
         if (currentTarget != null)
         {
             laserLineRenderer.enabled = true;
+            // (추가) 애니메이션 컨트롤러가 있다면, IsCasting 파라미터를 true로 설정
+            if (animationController != null)
+            {
+                animationController.SetAnimationBool("IsCasting", true);
+            }
             laserLineRenderer.SetPosition(0, firePoint.position);
             laserLineRenderer.SetPosition(1, currentTarget.position);
 
-            if (currentTarget == lastTarget)
+            if (canDamage)
             {
-                laserTimer += Time.deltaTime;
-                if (laserTimer >= 1f)
+                if (currentTarget == lastTarget)
                 {
-                    currentDpsRamp += laserDpsRamp; 
-                    laserTimer -= 1f;
+                    laserTimer += Time.deltaTime;
+                    if (laserTimer >= 1f)
+                    {
+                        currentDpsRamp += laserDpsRamp;
+                        laserTimer -= 1f;
+                    }
+                }
+                else
+                {
+                    currentDpsRamp = 0f;
+                    laserTimer = 0f;
+                }
+                lastTarget = currentTarget;
+
+                float totalDps = laserDps + currentDpsRamp;
+                float damageToSend = totalDps * Time.deltaTime;
+
+                EnemyHealth enemyHealth = currentTarget.GetComponent<EnemyHealth>();
+                if (enemyHealth != null)
+                {
+                    enemyHealth.TakeDamage(damageToSend, towerType, damageType);
+                }
+                else
+                {
+                    Debug.LogError($"타겟 '{currentTarget.name}'에서 EnemyHealth 스크립트를 찾을 수 없습니다!");
                 }
             }
-            else
-            {
-                currentDpsRamp = 0f;
-                laserTimer = 0f;
-            }
-            lastTarget = currentTarget;
-
-            float totalDps = laserDps + currentDpsRamp;
-            float damageToSend = totalDps * Time.deltaTime;
-
-            currentTarget.GetComponent<EnemyHealth>().TakeDamage(damageToSend, towerType, damageType);
         }
         else
         {
             if (laserLineRenderer.enabled)
             {
                 laserLineRenderer.enabled = false;
+                // (추가) 애니메이션 컨트롤러가 있다면, IsCasting 파라미터를 false로 설정
+                if (animationController != null)
+                {
+                    animationController.SetAnimationBool("IsCasting", false);
+                }
                 currentDpsRamp = 0f;
-                laserTimer = 0f; 
+                laserTimer = 0f;
                 lastTarget = null;
             }
         }
     }
-    
+
     IEnumerator AttackBurst()
     {
         int shotsToFire = bulletsPerBurst;
-        
         int doubleShotLevel = GetSkillLevel("두발 사격");
         if (doubleShotLevel > 0)
         {
@@ -469,20 +504,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    shotsToFire *= 2; 
+                    shotsToFire *= 2;
                 }
-            }
-            for (int i = 0; i < shotsToFire; i++)
-            {
-                if (currentTarget == null)
-                {
-                    yield break;
-                }
-                Shoot();
-                yield return new WaitForSeconds(timeBetweenShots);
             }
         }
-        
         int dualWieldLevel = GetSkillLevel("쌍권총");
         if (dualWieldLevel > 0)
         {
@@ -492,11 +517,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = dualWieldSkill.values1[dualWieldLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    shotsToFire *= 2; 
+                    shotsToFire *= 2;
                 }
             }
         }
-
         for (int i = 0; i < shotsToFire; i++)
         {
             if (currentTarget == null)
@@ -514,7 +538,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             animationController.PlayAttackAnimation();
         }
-
         int supplyLevel = GetSkillLevel("빵 보급");
         if (supplyLevel > 0 && !isSupplyBuffActive)
         {
@@ -532,7 +555,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-
         int poseidonLevel = GetSkillLevel("포세이돈");
         if (poseidonLevel > 0)
         {
@@ -548,10 +570,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
-                        
                         if (projectile != null)
                         {
-                            projectile.SetSprite(projectileSprite); 
+                            projectile.SetSprite(projectileSprite);
                             float knockbackDist = poseidonSkill.values2[poseidonLevel - 1];
                             float knockbackRadius = poseidonSkill.values3[poseidonLevel - 1];
                             projectile.Setup(specialTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, knockbackDist, knockbackRadius);
@@ -561,7 +582,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-
         int hadesLevel = GetSkillLevel("하데스");
         if (hadesLevel > 0)
         {
@@ -577,13 +597,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         if (enemyHealth.MaxHealth <= healthThreshold)
                         {
                             enemyHealth.InstantKill();
-                            return; 
+                            return;
                         }
                     }
                 }
             }
         }
-        
         int sniperLevel = GetSkillLevel("저격총");
         if (sniperLevel > 0)
         {
@@ -599,11 +618,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
-
                         if (projectile != null)
                         {
-                            projectile.SetSprite(projectileSprite); 
-                            float specialDamage = sniperSkill.values2[sniperLevel - 1]; 
+                            projectile.SetSprite(projectileSprite);
+                            float specialDamage = sniperSkill.values2[sniperLevel - 1];
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
                         return;
@@ -611,7 +629,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-
         int missileLevel = GetSkillLevel("미사일");
         if (missileLevel > 0 && missilePrefab != null)
         {
@@ -626,7 +643,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     BombProjectileController bomb = missileGO.GetComponent<BombProjectileController>();
                     if (bomb != null && currentTarget != null)
                     {
-                        bomb.SetSprite(missileSprite); 
+                        bomb.SetSprite(missileSprite);
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
                         bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
@@ -635,7 +652,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-
         int longShotLevel = GetSkillLevel("장거리 사격");
         if (longShotLevel > 0)
         {
@@ -651,10 +667,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
-
                         if (projectile != null)
                         {
-                            // (수정) 장거리 사격 스킬의 시각적 오버라이드를 적용합니다.
                             if (longShotSkill.overrideProjectileSprite != null)
                             {
                                 projectile.SetSprite(longShotSkill.overrideProjectileSprite);
@@ -663,7 +677,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                             {
                                 projectile.SetSprite(projectileSprite);
                             }
-                            float damageMultiplier = longShotSkill.values2[longShotLevel - 1]; 
+                            float damageMultiplier = longShotSkill.values2[longShotLevel - 1];
                             float specialDamage = finalProjectileDamage * damageMultiplier;
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
@@ -672,18 +686,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        
         SoundManager.instance.PlayAttackSound();
-        
-        // --- (수정 시작) 발사할 프리팹과 이미지를 스킬에 따라 동적으로 결정하는 로직 ---
-
-        // 1. 기본값 설정
         GameObject prefabToSpawn = projectilePrefab;
         Sprite spriteToUse = projectileSprite;
         float dotDamage = 0;
         float dotDuration = 0;
-        
-        // 2. 불화살 스킬 체크
         int fireArrowLevel = GetSkillLevel("불화살");
         if (fireArrowLevel > 0)
         {
@@ -693,15 +700,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = fireArrowSkill.values1[fireArrowLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    // 불화살 스킬 발동! 효과 적용
                     dotDamage = fireArrowSkill.values2[fireArrowLevel - 1];
                     dotDuration = fireArrowSkill.values3[fireArrowLevel - 1];
-
-                    // 시각적 변경 적용
                     if (fireArrowSkill.overrideProjectilePrefab != null)
                     {
                         prefabToSpawn = fireArrowSkill.overrideProjectilePrefab;
-                        spriteToUse = null; // 프리팹이 자체 비주얼을 가지므로 스프라이트는 null
+                        spriteToUse = null;
                     }
                     else if (fireArrowSkill.overrideProjectileSprite != null)
                     {
@@ -710,26 +714,19 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        
-        // --- (수정 끝) ---
-
-        // 3. 최종 결정된 프리팹 생성
         GameObject projectileGO_normal = Instantiate(prefabToSpawn, firePoint.position, Quaternion.identity);
-
         if (towerType == TowerType.Bomb)
         {
             BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
             if (bomb != null)
             {
-                if(spriteToUse != null) bomb.SetSprite(spriteToUse);
-                
+                if (spriteToUse != null) bomb.SetSprite(spriteToUse);
                 int greedyLevel = GetSkillLevel("욕심쟁이!");
                 TowerSkillBlueprint greedySkill = null;
                 if (greedyLevel > 0)
                 {
                     greedySkill = System.Array.Find(towerSkills, skill => skill.skillName == "욕심쟁이!");
                 }
-                
                 bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
             }
         }
@@ -738,13 +735,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             ProjectileController projectile = projectileGO_normal.GetComponent<ProjectileController>();
             if (projectile != null)
             {
-                // 스프라이트가 null이 아닐 경우에만 설정 (애니메이션 프리팹의 경우 null)
                 if (spriteToUse != null)
                 {
                     projectile.SetSprite(spriteToUse);
                 }
-                
-                // 지속 데미지는 위에서 이미 결정됨
                 projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration, dotDamage, dotDuration);
             }
         }
@@ -779,7 +773,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         Transform bestTarget = null;
         float highestHealth = 0;
-
         foreach (GameObject enemy in enemies)
         {
             float distanceToEnemy = Vector3.Distance(transform.position, enemy.transform.position);
@@ -795,17 +788,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
         return bestTarget;
     }
-    
+
     private Transform FindFurthestEnemyInRange()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         Transform bestTarget = null;
         int maxWaypointIndex = -1;
         float minDistanceToNextWaypoint = float.MaxValue;
-        
         Transform waypoints = GameManager.WaypointHolder;
         if (waypoints == null) return null;
-
         foreach (GameObject enemyGO in enemies)
         {
             float distanceToTower = Vector3.Distance(transform.position, enemyGO.transform.position);
@@ -813,10 +804,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             {
                 EnemyMovement enemy = enemyGO.GetComponent<EnemyMovement>();
                 if (enemy == null) continue;
-
                 int enemyWaypointIndex = enemy.GetCurrentWaypointIndex();
                 if (enemyWaypointIndex >= waypoints.childCount) continue;
-
                 if (enemyWaypointIndex > maxWaypointIndex)
                 {
                     maxWaypointIndex = enemyWaypointIndex;
@@ -842,7 +831,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
         Transform bestTarget = null;
         float highestHealth = 0;
-
         foreach (GameObject enemy in enemies)
         {
             EnemyHealth enemyHealth = enemy.GetComponent<EnemyHealth>();
