@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 1883572114609059514}
   - component: {fileID: 52103331461806457}
   - component: {fileID: -3492042215985664023}
+  - component: {fileID: 5332053921192509867}
+  - component: {fileID: 5940349391466639316}
   m_Layer: 7
   m_Name: Tower_Gun_USA
   m_TagString: Untagged
@@ -82,8 +84,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.9924528, g: 0.3801281, b: 0.56516343, a: 1}
+  m_Sprite: {fileID: 8995680115253576691, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -110,7 +112,8 @@ MonoBehaviour:
   attackRange: 5
   timeBetweenAttacks: 4
   baseProjectileDamage: 45
-  projectileSpeed: 50
+  projectileSpeed: 12
+  projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -124,6 +127,7 @@ MonoBehaviour:
   - skillName: "\uBE60\uB978 \uC7AC\uC7A5\uC804"
     skillDescription: "\uD0C0\uC6CC\uC758 \uC7AC\uC7A5\uC804 \uC2DC\uAC04\uC774 \uC601\uAD6C\uC801\uC73C\uB85C
       \uAC10\uC18C\uD569\uB2C8\uB2E4."
+    icon: {fileID: 21300000, guid: e35011624e5ac5945beff484f68b83ce, type: 3}
     maxLevel: 3
     costs: 64000000aa000000fa000000
     values1:
@@ -132,9 +136,12 @@ MonoBehaviour:
     - 2
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uC30D\uAD8C\uCD1D"
     skillDescription: "\uACF5\uACA9 \uC2DC \uB0AE\uC740 \uD655\uB960\uB85C 2\uBC30\uC758
       \uCD1D\uC54C\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    icon: {fileID: 21300000, guid: ebd3707ac7c74274ca6928356b4dec29, type: 3}
     maxLevel: 3
     costs: 78000000b4000000e6000000
     values1:
@@ -143,9 +150,12 @@ MonoBehaviour:
     - 10
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uBBF8\uC0AC\uC77C"
     skillDescription: "\uACF5\uACA9 \uC2DC \uB0AE\uC740 \uD655\uB960\uB85C \uAD11\uC5ED
       \uD53C\uD574\uB97C \uC8FC\uB294 \uBBF8\uC0AC\uC77C\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
+    icon: {fileID: 21300000, guid: 0c55c97e836b9b24293619ed61efb57b, type: 3}
     maxLevel: 2
     costs: 9600000096000000
     values1:
@@ -157,11 +167,15 @@ MonoBehaviour:
     values3:
     - 0.7
     - 1
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
+  characterSpriteTransform: {fileID: 8941207430269203735}
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 0}
   missilePrefab: {fileID: 4329414863976529247, guid: 8433460bb02ac404ca13b67881f8624e, type: 3}
+  missileSprite: {fileID: 21300000, guid: a1c85135af99fbc4d883f17f26548c05, type: 3}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -199,8 +213,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.18691589}
+    oldSize: {x: 1.1333333, y: 2.3777778}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -208,6 +222,40 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!95 &5332053921192509867
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0e522bc4bad362b48a38e252a76b3fe0, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5940349391466639316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266319913433617465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &4004923673545705458
 GameObject:
   m_ObjectHideFlags: 0
@@ -233,7 +281,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
