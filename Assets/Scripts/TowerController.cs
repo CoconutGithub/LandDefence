@@ -17,6 +17,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float timeBetweenAttacks = 1f;
 
+    // (추가) 연사 타워인지 구분하는 체크박스
+    [Header("연사 타워 설정 (독일 총 타워 전용)")]
+    [SerializeField]
+    private bool isRapidFireTower = false;
+
     [Header("발사체 정보")]
     [SerializeField]
     private float baseProjectileDamage = 25f;
@@ -193,14 +198,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             {
                 laserLineRenderer.colorGradient = laserColorGradients[skillLevel];
             }
-            else
-            {
-                Debug.LogError($"Tower_Mage_UK 프리팹의 Laser Color Gradients 배열에서 인덱스 {skillLevel}가 비어있습니다(None)!");
-            }
-        }
-        else
-        {
-            Debug.LogError($"적용하려는 레이저 색상 레벨({skillLevel})이 배열 크기({laserColorGradients.Length})를 벗어났습니다!");
         }
     }
 
@@ -325,14 +322,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             if (currentTarget != null)
             {
-                if (healLevel <= 0)
-                {
-                    HandleLaserAttack(true);
-                }
-                else
-                {
-                    HandleLaserAttack(false);
-                }
+                HandleLaserAttack(true);
             }
             else
             {
@@ -343,7 +333,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             if (currentTarget != null && attackCountdown <= 0f)
             {
-                StartCoroutine(AttackBurst());
+                StartAttackSequence();
                 attackCountdown = timeBetweenAttacks;
             }
         }
@@ -429,13 +419,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) 레이저 공격 함수에 애니메이션 제어 로직 추가
-    void HandleLaserAttack(bool canDamage)
+    void HandleLaserAttack(bool isActive)
     {
-        if (currentTarget != null)
+        if (isActive && currentTarget != null)
         {
             laserLineRenderer.enabled = true;
-            // (추가) 애니메이션 컨트롤러가 있다면, IsCasting 파라미터를 true로 설정
             if (animationController != null)
             {
                 animationController.SetAnimationBool("IsCasting", true);
@@ -443,44 +431,32 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             laserLineRenderer.SetPosition(0, firePoint.position);
             laserLineRenderer.SetPosition(1, currentTarget.position);
 
-            if (canDamage)
+            if (currentTarget == lastTarget)
             {
-                if (currentTarget == lastTarget)
+                laserTimer += Time.deltaTime;
+                if (laserTimer >= 1f)
                 {
-                    laserTimer += Time.deltaTime;
-                    if (laserTimer >= 1f)
-                    {
-                        currentDpsRamp += laserDpsRamp;
-                        laserTimer -= 1f;
-                    }
-                }
-                else
-                {
-                    currentDpsRamp = 0f;
-                    laserTimer = 0f;
-                }
-                lastTarget = currentTarget;
-
-                float totalDps = laserDps + currentDpsRamp;
-                float damageToSend = totalDps * Time.deltaTime;
-
-                EnemyHealth enemyHealth = currentTarget.GetComponent<EnemyHealth>();
-                if (enemyHealth != null)
-                {
-                    enemyHealth.TakeDamage(damageToSend, towerType, damageType);
-                }
-                else
-                {
-                    Debug.LogError($"타겟 '{currentTarget.name}'에서 EnemyHealth 스크립트를 찾을 수 없습니다!");
+                    currentDpsRamp += laserDpsRamp;
+                    laserTimer -= 1f;
                 }
             }
+            else
+            {
+                currentDpsRamp = 0f;
+                laserTimer = 0f;
+            }
+            lastTarget = currentTarget;
+
+            float totalDps = laserDps + currentDpsRamp;
+            float damageToSend = totalDps * Time.deltaTime;
+
+            currentTarget.GetComponent<EnemyHealth>().TakeDamage(damageToSend, towerType, damageType);
         }
         else
         {
             if (laserLineRenderer.enabled)
             {
                 laserLineRenderer.enabled = false;
-                // (추가) 애니메이션 컨트롤러가 있다면, IsCasting 파라미터를 false로 설정
                 if (animationController != null)
                 {
                     animationController.SetAnimationBool("IsCasting", false);
@@ -492,52 +468,71 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    IEnumerator AttackBurst()
+    // (수정) 공격 애니메이션을 시작시키는 단일 진입점
+    void StartAttackSequence()
     {
-        int shotsToFire = bulletsPerBurst;
-        int doubleShotLevel = GetSkillLevel("두발 사격");
-        if (doubleShotLevel > 0)
+        if (animationController != null)
         {
-            TowerSkillBlueprint doubleShotSkill = System.Array.Find(towerSkills, skill => skill.skillName == "두발 사격");
-            if (doubleShotSkill != null)
+            if (isRapidFireTower)
             {
-                float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
-                if (Random.Range(0f, 100f) < procChance)
-                {
-                    shotsToFire *= 2;
-                }
+                // 연사 타워는 IsBursting 신호로 애니메이션 제어
+                StartCoroutine(BurstFireCoroutine());
+            }
+            else
+            {
+                // 단발/점사 타워는 DoAttack 신호로 애니메이션 제어
+                animationController.PlayAttackAnimation();
             }
         }
-        int dualWieldLevel = GetSkillLevel("쌍권총");
-        if (dualWieldLevel > 0)
+        else
         {
-            TowerSkillBlueprint dualWieldSkill = System.Array.Find(towerSkills, skill => skill.skillName == "쌍권총");
-            if (dualWieldSkill != null)
+            // 애니메이션이 없는 경우, 즉시 발사
+            if (isRapidFireTower)
             {
-                float procChance = dualWieldSkill.values1[dualWieldLevel - 1];
-                if (Random.Range(0f, 100f) < procChance)
-                {
-                    shotsToFire *= 2;
-                }
+                StartCoroutine(BurstFireCoroutine());
+            }
+            else
+            {
+                FireOneShot();
             }
         }
-        for (int i = 0; i < shotsToFire; i++)
+    }
+
+    // (수정) 애니메이션 이벤트에서 호출될 단발/점사 발사 함수
+    public void FireOneShot()
+    {
+        SoundManager.instance.PlayAttackSound();
+        Shoot();
+    }
+
+    // (수정) 연사 시작을 위한 새로운 코루틴
+    private IEnumerator BurstFireCoroutine()
+    {
+        if (animationController != null)
+        {
+            animationController.SetAnimationBool("IsBursting", true);
+        }
+
+        for (int i = 0; i < bulletsPerBurst; i++)
         {
             if (currentTarget == null)
             {
-                yield break;
+                break; // 연사 도중 타겟이 사라지면 중단
             }
+            SoundManager.instance.PlayAttackSound();
             Shoot();
             yield return new WaitForSeconds(timeBetweenShots);
+        }
+
+        if (animationController != null)
+        {
+            animationController.SetAnimationBool("IsBursting", false);
         }
     }
 
     void Shoot()
     {
-        if (animationController != null)
-        {
-            animationController.PlayAttackAnimation();
-        }
+        // ... (기존 Shoot 함수의 내용은 그대로 유지)
         int supplyLevel = GetSkillLevel("빵 보급");
         if (supplyLevel > 0 && !isSupplyBuffActive)
         {
@@ -567,7 +562,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     Transform specialTarget = FindFurthestEnemyInRange();
                     if (specialTarget != null)
                     {
-                        SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
@@ -615,7 +609,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     Transform specialTarget = FindHighestHealthEnemyOnMap();
                     if (specialTarget != null)
                     {
-                        SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
@@ -638,7 +631,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = missileSkill.values1[missileLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    SoundManager.instance.PlayAttackSound();
                     GameObject missileGO = Instantiate(missilePrefab, firePoint.position, Quaternion.identity);
                     BombProjectileController bomb = missileGO.GetComponent<BombProjectileController>();
                     if (bomb != null && currentTarget != null)
@@ -664,7 +656,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     Transform specialTarget = FindHighestHealthEnemyInRange();
                     if (specialTarget != null)
                     {
-                        SoundManager.instance.PlayAttackSound();
                         GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
@@ -686,7 +677,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 }
             }
         }
-        SoundManager.instance.PlayAttackSound();
         GameObject prefabToSpawn = projectilePrefab;
         Sprite spriteToUse = projectileSprite;
         float dotDamage = 0;
