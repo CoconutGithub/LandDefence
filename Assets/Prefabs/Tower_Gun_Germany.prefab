@@ -125,9 +125,9 @@ MonoBehaviour:
   upgradePaths: []
   towerSkills:
   - skillName: "\uAE30\uAD00\uCD1D"
-    skillDescription: "\uC5F0\uC0AC \uC218\uAC00 100\uBC1C\uB85C \uB298\uC5B4\uB098\uB294
+    skillDescription: "\uC5F0\uC0AC \uC218\uAC00 50\uBC1C\uB85C \uB298\uC5B4\uB098\uB294
       \uB300\uC2E0, \uACF5\uACA9\uB825\uC774 \uAC10\uC18C\uD569\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 0b82e2ae2c89b4345a7213915bd82bfd, type: 3}
     maxLevel: 1
     costs: c8000000
     values1:
@@ -141,7 +141,7 @@ MonoBehaviour:
     skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uB9F5
       \uC0C1\uC758 \uAC00\uC7A5 \uCCB4\uB825\uC774 \uB192\uC740 \uC801\uC5D0\uAC8C
       \uAC15\uB825\uD55C \uC800\uACA9\uD0C4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 24aa68a802c65b646a95b53022eed6f4, type: 3}
     maxLevel: 3
     costs: 96000000c8000000c8000000
     values1:
@@ -153,7 +153,7 @@ MonoBehaviour:
     - 250
     - 300
     values3: []
-    overrideProjectileSprite: {fileID: 0}
+    overrideProjectileSprite: {fileID: 21300000, guid: 2e772bf2a69eb02448ad5512c94ed80c, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
