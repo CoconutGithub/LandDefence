@@ -51,6 +51,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Gradient[] laserColorGradients = new Gradient[3];
 
+    // (추가) 힐 스킬 시각 효과를 위한 변수
+    [Header("힐 스킬 효과")]
+    [SerializeField]
+    private GameObject healingAuraEffect;
+
     private float finalProjectileDamage;
 
     [Header("업그레이드 및 스킬 정보")]
@@ -113,6 +118,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         if (isLaserTower && laserLineRenderer != null)
         {
             laserLineRenderer.enabled = false;
+        }
+
+        // (추가) 시작 시 힐링 오라를 비활성화합니다.
+        if (healingAuraEffect != null)
+        {
+            healingAuraEffect.SetActive(false);
         }
 
         foreach (var skill in towerSkills)
@@ -392,8 +403,20 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // (수정) 힐링 오라의 활성화 및 크기 조절 로직 추가
     void HandleHealingAura(int skillLevel)
     {
+        if (healingAuraEffect != null)
+        {
+            // 스킬 레벨이 1 이상이면 오라를 활성화하고 크기를 조절합니다.
+            if (!healingAuraEffect.activeSelf)
+            {
+                healingAuraEffect.SetActive(true);
+            }
+            // 오라의 지름이 타워의 공격(힐) 범위와 일치하도록 크기를 설정합니다.
+            healingAuraEffect.transform.localScale = new Vector3(attackRange * 10, attackRange * 10, 1f);
+        }
+
         healCheckTimer -= Time.deltaTime;
         if (healCheckTimer <= 0f)
         {
