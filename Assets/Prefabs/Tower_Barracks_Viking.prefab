@@ -82,8 +82,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.4415095, g: 0.3433186, b: 0.272403, a: 1}
+  m_Sprite: {fileID: 2505205456817968253, guid: 623970ea2fa0c2846bf536b761ae4a61, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -130,8 +130,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.17283951}
+    oldSize: {x: 1.7057143, y: 2.3142858}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -160,6 +160,7 @@ MonoBehaviour:
   - skillName: "\uD3ED\uC8FC"
     skillDescription: "\uBC14\uC774\uD0B9 \uBCD1\uC0AC\uC758 \uCD5C\uB300 \uCCB4\uB825\uC774
       \uAC10\uC18C\uD558\uACE0 \uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 640000007800000096000000
     values1:
@@ -171,9 +172,12 @@ MonoBehaviour:
     - 10
     - 15
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uCCB4\uB825 \uD761\uC218"
     skillDescription: "\uC801\uC5D0\uAC8C \uC785\uD78C \uD53C\uD574\uC758 \uC77C\uBD80\uB97C
       \uCCB4\uB825\uC73C\uB85C \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 96000000aa000000c8000000
     values1:
@@ -182,6 +186,8 @@ MonoBehaviour:
     - 13
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   soldierPrefab: {fileID: 1852670417170501071, guid: 84667251823afba479ef3c6f128f5841, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458
