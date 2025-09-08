@@ -221,7 +221,7 @@ MonoBehaviour:
   - prefab: {fileID: 266319913433617465, guid: c519ad598e9bca643981bf1455387849, type: 3}
     cost: 70
     towerName: "\uADF8\uB9AC\uC2A4 \uB9C8\uBC95\uC0AC \uD0C0\uC6CC"
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: a2d3b30ba02e7fb429d0696f32821cad, type: 3}
   towerSkills: []
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}

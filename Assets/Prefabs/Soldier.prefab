@@ -177,6 +177,8 @@ GameObject:
   - component: {fileID: 9222797873444308748}
   - component: {fileID: 5835908562457066811}
   - component: {fileID: 8514670505802456664}
+  - component: {fileID: 5035946709175431751}
+  - component: {fileID: 7618701670790938682}
   m_Layer: 0
   m_Name: Soldier
   m_TagString: Untagged
@@ -195,7 +197,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 5228632259358895676}
   m_Father: {fileID: 0}
@@ -247,8 +249,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: -2413806693520163455, guid: b13278790a6bff84dbc30f37f3d89600, type: 3}
-  m_Color: {r: 0.4862745, g: 0.6042838, b: 0.9607843, a: 1}
+  m_Sprite: {fileID: -6040708008194570946, guid: 33475fe06c4e7a24c9ceddaa7e49ccfe, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -335,18 +337,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoldierController
   maxHealth: 150
   attackDamage: 30
-  damageType: 0
   timeBetweenAttacks: 0.5
+  moveSpeed: 3
   healthRegenRate: 30
   timeToStartRegen: 3
-  pursuitRange: 1
+  damageType: 0
+  respawnTime: 10
+  isAreaOfEffect: 0
+  aoeRadius: 1.5
+  attackAnimationClip: {fileID: 7400000, guid: 67a03c1ceae063a46abd0e514d2344ca, type: 2}
+  healthBarSlider: {fileID: 4979688441236379191}
+  healthBarCanvas: {fileID: 6356077035225273916}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
-  isAoEAttacker: 0
-  aoeRadius: 1.5
-  healthBarSlider: {fileID: 4979688441236379191}
-  healthBarCanvas: {fileID: 6356077035225273916}
+--- !u!95 &5035946709175431751
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1852670417170501071}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: aae0c83cb3227dd48be3e78b4669ae39, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7618701670790938682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1852670417170501071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &2974342527480028504
 GameObject:
   m_ObjectHideFlags: 0

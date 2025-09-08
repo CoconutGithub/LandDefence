@@ -30,6 +30,11 @@ public class SoldierController : MonoBehaviour
     private bool isAreaOfEffect = false;
     [SerializeField]
     private float aoeRadius = 1.5f;
+    
+    [Header("애니메이션 정보")]
+    [SerializeField]
+    private AnimationClip attackAnimationClip;
+    private float attackAnimLength;
 
     [Header("필요한 컴포넌트")]
     [SerializeField]
@@ -38,8 +43,6 @@ public class SoldierController : MonoBehaviour
     private GameObject healthBarCanvas;
     [SerializeField]
     private LayerMask enemyLayer;
-    [SerializeField]
-    private Transform characterSpriteTransform; // (추가) 좌우 방향을 바꿀 스프라이트의 Transform
 
     private float currentHealth;
     private float attackCountdown = 0f;
@@ -50,7 +53,6 @@ public class SoldierController : MonoBehaviour
     private CircleCollider2D recognitionCollider;
     private bool isHaetae = false;
     private SpriteRenderer spriteRenderer;
-    private AnimationController animationController; // (추가) 애니메이션 컨트롤러 참조
 
     private float originalMaxHealth;
     private float originalAttackDamage;
@@ -62,17 +64,16 @@ public class SoldierController : MonoBehaviour
     private float reflectionDuration = 0f;
     private bool isReflectingDamage = false;
     private float reflectionTimer = 0f;
+    
+    private AnimationController animationController;
+    
+    // (추가) 병사의 원래 스케일 값을 저장할 변수
+    private Vector3 originalScale;
 
     void Awake()
     {
+        animationController = GetComponent<AnimationController>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
-        {
-            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-        }
-        
-        animationController = GetComponent<AnimationController>(); // (추가) 컴포넌트 찾아오기
-
         recognitionCollider = GetComponent<CircleCollider2D>();
         originalMaxHealth = maxHealth;
         originalAttackDamage = attackDamage;
@@ -80,10 +81,18 @@ public class SoldierController : MonoBehaviour
         {
             originalRecognitionRadius = recognitionCollider.radius;
         }
+        
+        // (추가) 시작할 때 현재 스케일 값을 저장합니다.
+        originalScale = transform.localScale;
     }
 
     void Start()
     {
+        if (attackAnimationClip != null)
+        {
+            attackAnimLength = attackAnimationClip.length;
+        }
+
         currentHealth = maxHealth;
         if (healthBarSlider != null)
         {
@@ -104,7 +113,24 @@ public class SoldierController : MonoBehaviour
     void Update()
     {
         HandleReflection();
-        HandleSpriteDirection(); // (추가) 매 프레임 스프라이트 방향을 체크
+        
+        // (수정) 방향을 바꿀 때, 저장해 둔 원래 스케일 값을 사용하도록 변경합니다.
+        if (currentTarget != null)
+        {
+            if (currentTarget.transform.position.x < transform.position.x)
+            {
+                transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
+            }
+            else
+            {
+                transform.localScale = new Vector3(originalScale.x, originalScale.y, originalScale.z);
+            }
+        }
+        else
+        {
+            // 타겟이 없을 때는 오른쪽(기본 방향)을 보도록 설정합니다.
+            transform.localScale = originalScale;
+        }
 
         switch (currentState)
         {
@@ -147,26 +173,71 @@ public class SoldierController : MonoBehaviour
                 }
                 if (attackCountdown <= 0f)
                 {
-                    Attack();
+                    StartAttackSequence();
                     attackCountdown = timeBetweenAttacks;
                 }
                 break;
         }
     }
-
-    // (추가) 적 방향에 따라 스프라이트 좌우를 뒤집는 함수
-    void HandleSpriteDirection()
+    
+    void StartAttackSequence()
     {
-        if (characterSpriteTransform != null && currentTarget != null)
+        if (animationController != null)
         {
-            if (currentTarget.transform.position.x < transform.position.x)
+            if (attackAnimLength > 0 && timeBetweenAttacks > 0)
             {
-                characterSpriteTransform.localScale = new Vector3(-1f, 1f, 1f);
+                float speedMultiplier = attackAnimLength / timeBetweenAttacks;
+                animationController.SetAnimationSpeed(speedMultiplier);
             }
             else
             {
-                characterSpriteTransform.localScale = new Vector3(1f, 1f, 1f);
+                animationController.SetAnimationSpeed(1f);
             }
+            animationController.PlayAttackAnimation();
+        }
+        else
+        {
+            DealDamage();
+        }
+    }
+    
+    public void DealDamage()
+    {
+        float totalDamageDealt = 0;
+        bool isAoeAttackThisTurn = isAreaOfEffect;
+
+        if (!isAoeAttackThisTurn && aoeChance > 0)
+        {
+            if (Random.Range(0f, 100f) < aoeChance)
+            {
+                isAoeAttackThisTurn = true;
+            }
+        }
+
+        if (isAoeAttackThisTurn)
+        {
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
+            foreach (Collider2D hit in colliders)
+            {
+                if (hit.CompareTag("Enemy"))
+                {
+                    hit.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+                    totalDamageDealt += attackDamage;
+                }
+            }
+        }
+        else
+        {
+            if (currentTarget != null)
+            {
+                currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
+                totalDamageDealt = attackDamage;
+            }
+        }
+
+        if (lifeStealPercentage > 0 && totalDamageDealt > 0)
+        {
+            Heal(totalDamageDealt * (lifeStealPercentage / 100f));
         }
     }
 
@@ -249,7 +320,7 @@ public class SoldierController : MonoBehaviour
         currentHealth = maxHealth;
         UpdateHealthBar();
     }
-    
+
     public void ApplyStatModification(float healthModifier, float damageModifier, float lifeSteal, float recognitionRadiusBonus, float newAoeChance, float newReflectionChance, float newReflectionDuration)
     {
         maxHealth = originalMaxHealth + healthModifier;
@@ -270,52 +341,6 @@ public class SoldierController : MonoBehaviour
         UpdateHealthBar();
     }
 
-    void Attack()
-    {
-        // (추가) 공격 시 애니메이션 재생
-        if (animationController != null)
-        {
-            animationController.PlayAttackAnimation();
-        }
-
-        float totalDamageDealt = 0;
-        bool isAoeAttackThisTurn = isAreaOfEffect;
-
-        if (!isAoeAttackThisTurn && aoeChance > 0)
-        {
-            if (Random.Range(0f, 100f) < aoeChance)
-            {
-                isAoeAttackThisTurn = true;
-            }
-        }
-
-        if (isAoeAttackThisTurn)
-        {
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, aoeRadius);
-            foreach (Collider2D hit in colliders)
-            {
-                if (hit.CompareTag("Enemy"))
-                {
-                    hit.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
-                    totalDamageDealt += attackDamage;
-                }
-            }
-        }
-        else
-        {
-            if (currentTarget != null)
-            {
-                currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Barracks, damageType);
-                totalDamageDealt = attackDamage;
-            }
-        }
-
-        if (lifeStealPercentage > 0 && totalDamageDealt > 0)
-        {
-            Heal(totalDamageDealt * (lifeStealPercentage / 100f));
-        }
-    }
-    
     public void TakeDamage(float damage, EnemyMovement attacker)
     {
         if (isReflectingDamage && attacker != null)
@@ -325,7 +350,7 @@ public class SoldierController : MonoBehaviour
 
         currentHealth -= damage;
         timeSinceLastCombat = 0f;
-        
+
         if (!isReflectingDamage && reflectionChance > 0)
         {
             if (Random.Range(0f, 100f) < reflectionChance)
@@ -404,3 +429,4 @@ public class SoldierController : MonoBehaviour
         }
     }
 }
+
