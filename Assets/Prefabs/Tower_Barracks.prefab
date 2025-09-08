@@ -82,12 +82,12 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.5924529, g: 0.4518794, b: 0.34764683, a: 1}
+  m_Sprite: {fileID: 8226984137135740416, guid: 547e831acc6418249aa1435b2f4aa9cf, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.3033333, y: 2.5533333}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -130,9 +130,9 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.1697128}
+    oldSize: {x: 1.3033333, y: 2.5533333}
+    newSize: {x: 1.3033333, y: 2.5533333}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -159,12 +159,16 @@ MonoBehaviour:
   - prefab: {fileID: 266319913433617465, guid: 5065dff084035b242a776c4f68dd995d, type: 3}
     cost: 50
     towerName: "\uBC14\uC774\uD0B9 \uBCD1\uC601 \uD0C0\uC6CC"
+    icon: {fileID: 0}
   - prefab: {fileID: 266319913433617465, guid: 26e597ebb00f6ec4ab605cccbdfcc315, type: 3}
     cost: 70
     towerName: "\uC911\uAD6D \uBCD1\uC601 \uD0C0\uC6CC"
+    icon: {fileID: 0}
   - prefab: {fileID: 266319913433617465, guid: b52ab24705507244486331c2ceae59fa, type: 3}
     cost: 60
     towerName: "\uC2A4\uC704\uC2A4 \uBCD1\uC601 \uD0C0\uC6CC"
+    icon: {fileID: 0}
+  towerSkills: []
   soldierPrefab: {fileID: 1852670417170501071, guid: d3c49df4d4ef02e4ebff096c83f33bd3, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458

@@ -371,13 +371,24 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         if (characterSpriteTransform != null && currentTarget != null)
         {
+            float newScaleX = 1f;
             if (currentTarget.position.x < transform.position.x)
             {
-                characterSpriteTransform.localScale = new Vector3(-1f, 1f, 1f);
+                newScaleX = -1f;
             }
-            else
+
+            // 캐릭터 스프라이트의 방향을 설정합니다.
+            characterSpriteTransform.localScale = new Vector3(newScaleX, 1f, 1f);
+
+            // (추가) 힐링 오라가 있다면, 오라의 방향도 캐릭터와 동일하게 설정합니다.
+            if (healingAuraEffect != null && healingAuraEffect.activeSelf)
             {
-                characterSpriteTransform.localScale = new Vector3(1f, 1f, 1f);
+                // 오라의 크기는 그대로 유지하면서 방향만 바꿉니다.
+                healingAuraEffect.transform.localScale = new Vector3(
+                    Mathf.Abs(healingAuraEffect.transform.localScale.x) * newScaleX,
+                    healingAuraEffect.transform.localScale.y,
+                    healingAuraEffect.transform.localScale.z
+                );
             }
         }
     }
