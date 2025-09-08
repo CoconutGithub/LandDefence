@@ -1,4 +1,3 @@
-//AnimationController.cs
 using UnityEngine;
 
 public class AnimationController : MonoBehaviour
@@ -56,6 +55,15 @@ public class AnimationController : MonoBehaviour
         if (animator != null)
         {
             animator.SetFloat(floatName, value);
+        }
+    }
+    
+    // (추가) 애니메이터의 전역 속도를 설정하는 함수
+    public void SetAnimationSpeed(float speed)
+    {
+        if (animator != null)
+        {
+            animator.speed = speed;
         }
     }
 }

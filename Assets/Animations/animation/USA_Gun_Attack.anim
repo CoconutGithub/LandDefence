@@ -21,15 +21,15 @@ AnimationClip:
   - serializedVersion: 2
     curve:
     - time: 0
-      value: {fileID: 8995680115253576691, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+      value: {fileID: 965191522611441707, guid: 78630b068e34299439898750fcd77d1d, type: 3}
     - time: 0.083333336
-      value: {fileID: 3481801230120691916, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+      value: {fileID: 6154169009222205633, guid: 78630b068e34299439898750fcd77d1d, type: 3}
     - time: 0.16666667
-      value: {fileID: 3231812793507668638, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+      value: {fileID: 4559428932273340072, guid: 78630b068e34299439898750fcd77d1d, type: 3}
     - time: 0.25
-      value: {fileID: 8995680115253576691, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+      value: {fileID: 5000804388352126536, guid: 78630b068e34299439898750fcd77d1d, type: 3}
     - time: 0.33333334
-      value: {fileID: -6740811468460572104, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+      value: {fileID: 7685895168455580339, guid: 78630b068e34299439898750fcd77d1d, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
@@ -52,11 +52,11 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     pptrCurveMapping:
-    - {fileID: 8995680115253576691, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
-    - {fileID: 3481801230120691916, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
-    - {fileID: 3231812793507668638, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
-    - {fileID: 8995680115253576691, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
-    - {fileID: -6740811468460572104, guid: 34b69cee20efbf4469ec404d218f09b5, type: 3}
+    - {fileID: 965191522611441707, guid: 78630b068e34299439898750fcd77d1d, type: 3}
+    - {fileID: 6154169009222205633, guid: 78630b068e34299439898750fcd77d1d, type: 3}
+    - {fileID: 4559428932273340072, guid: 78630b068e34299439898750fcd77d1d, type: 3}
+    - {fileID: 5000804388352126536, guid: 78630b068e34299439898750fcd77d1d, type: 3}
+    - {fileID: 7685895168455580339, guid: 78630b068e34299439898750fcd77d1d, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
@@ -81,11 +81,4 @@ AnimationClip:
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
-  m_Events:
-  - time: 0.16666667
-    functionName: StartBurstFire
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
+  m_Events: []

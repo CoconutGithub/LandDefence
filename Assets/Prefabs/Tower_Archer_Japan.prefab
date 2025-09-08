@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 8150590772524392126, guid: 9785d3f912a8d9348a424fcbaea4bcb5, type: 3}
+  m_Sprite: {fileID: -1424426478182495036, guid: d46b724cd95e4dd4aa0d12cf91bedde6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -111,6 +111,8 @@ MonoBehaviour:
   damageType: 0
   attackRange: 12
   timeBetweenAttacks: 1.2
+  isRapidFireTower: 0
+  attackAnimationClip: {fileID: 7400000, guid: 42249d64971f9f341835571164b9a1f8, type: 2}
   baseProjectileDamage: 40
   projectileSpeed: 10
   projectileSprite: {fileID: 21300000, guid: c41f1db57d9c6c34b9b7342de1c61990, type: 3}
@@ -210,6 +212,7 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
+  healingAuraEffect: {fileID: 0}
   upgradePaths: []
   towerSkills:
   - skillName: "\uC7A5\uAC70\uB9AC \uC0AC\uACA9"
@@ -288,8 +291,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.4716981, y: 0.121212125}
-    oldSize: {x: 1.325, y: 2.475}
+    pivot: {x: 0.51741296, y: 0.13297872}
+    oldSize: {x: 1.675, y: 3.1333334}
     newSize: {x: 1.325, y: 2.475}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -356,7 +359,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

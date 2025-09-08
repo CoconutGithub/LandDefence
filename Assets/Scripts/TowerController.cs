@@ -17,10 +17,13 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private float timeBetweenAttacks = 1f;
 
-    // (추가) 연사 타워인지 구분하는 체크박스
     [Header("연사 타워 설정 (독일 총 타워 전용)")]
     [SerializeField]
     private bool isRapidFireTower = false;
+
+    [Header("애니메이션 정보")]
+    [SerializeField]
+    private AnimationClip attackAnimationClip;
 
     [Header("발사체 정보")]
     [SerializeField]
@@ -51,7 +54,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Gradient[] laserColorGradients = new Gradient[3];
 
-    // (추가) 힐 스킬 시각 효과를 위한 변수
     [Header("힐 스킬 효과")]
     [SerializeField]
     private GameObject healingAuraEffect;
@@ -78,6 +80,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Sprite missileSprite;
 
+    private float attackAnimLength;
     private Transform currentTarget;
     private float attackCountdown = 0f;
     private TowerSpotController parentSpot;
@@ -103,6 +106,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     private float iceSlickCheckTimer = 0f;
     private const float ICE_SLICK_CHECK_INTERVAL = 0.5f;
+    private Coroutine burstFireCoroutine;
 
     void Start()
     {
@@ -110,6 +114,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         if (animationController == null)
         {
             Debug.LogWarning($"TowerController: AnimationController 컴포넌트를 찾을 수 없습니다. 오브젝트: {gameObject.name}");
+        }
+
+        if (attackAnimationClip != null)
+        {
+            attackAnimLength = attackAnimationClip.length;
+        }
+        else if (!isLaserTower && !isRapidFireTower)
+        {
+            Debug.LogWarning($"'{gameObject.name}'의 Attack Animation Clip이 연결되지 않아 공격 속도에 따른 애니메이션 속도 조절이 작동하지 않습니다.");
         }
 
         int damageLevel = DataManager.LoadDamageLevel(towerType);
@@ -120,7 +133,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             laserLineRenderer.enabled = false;
         }
 
-        // (추가) 시작 시 힐링 오라를 비활성화합니다.
         if (healingAuraEffect != null)
         {
             healingAuraEffect.SetActive(false);
@@ -185,6 +197,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (isLaserTower && skillToUpgrade.skillName == "아브라카다브라!")
             {
                 ApplyLaserColor(newLevel);
+            }
+            
+            if (skillToUpgrade.skillName == "힐")
+            {
+                 if (healingAuraEffect != null) healingAuraEffect.SetActive(newLevel > 0);
             }
 
             if (skillToUpgrade.skillName == "해치")
@@ -403,20 +420,16 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) 힐링 오라의 활성화 및 크기 조절 로직 추가
     void HandleHealingAura(int skillLevel)
     {
         if (healingAuraEffect != null)
         {
-            // 스킬 레벨이 1 이상이면 오라를 활성화하고 크기를 조절합니다.
             if (!healingAuraEffect.activeSelf)
             {
                 healingAuraEffect.SetActive(true);
             }
-            // 오라의 지름이 타워의 공격(힐) 범위와 일치하도록 크기를 설정합니다.
             healingAuraEffect.transform.localScale = new Vector3(attackRange * 10, attackRange * 10, 1f);
         }
-
         healCheckTimer -= Time.deltaTime;
         if (healCheckTimer <= 0f)
         {
@@ -491,45 +504,91 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) 공격 애니메이션을 시작시키는 단일 진입점
     void StartAttackSequence()
     {
         if (animationController != null)
         {
-            if (isRapidFireTower)
+            if (!isRapidFireTower && attackAnimLength > 0 && timeBetweenAttacks > 0)
             {
-                // 연사 타워는 IsBursting 신호로 애니메이션 제어
-                StartCoroutine(BurstFireCoroutine());
+                float speedMultiplier = attackAnimLength / timeBetweenAttacks;
+                animationController.SetAnimationSpeed(speedMultiplier);
             }
             else
             {
-                // 단발/점사 타워는 DoAttack 신호로 애니메이션 제어
+                animationController.SetAnimationSpeed(1f);
+            }
+
+            if (isRapidFireTower)
+            {
+                if (burstFireCoroutine == null)
+                {
+                    burstFireCoroutine = StartCoroutine(RapidFireCoroutine());
+                }
+            }
+            else
+            {
                 animationController.PlayAttackAnimation();
             }
         }
         else
         {
-            // 애니메이션이 없는 경우, 즉시 발사
             if (isRapidFireTower)
             {
-                StartCoroutine(BurstFireCoroutine());
+                if (burstFireCoroutine == null)
+                {
+                    burstFireCoroutine = StartCoroutine(RapidFireCoroutine());
+                }
             }
             else
             {
-                FireOneShot();
+                StartCoroutine(BurstFireCoroutine());
             }
         }
     }
 
-    // (수정) 애니메이션 이벤트에서 호출될 단발/점사 발사 함수
+    // (수정) '두발 사격' 스킬 로직을 이 곳으로 이동
     public void FireOneShot()
     {
         SoundManager.instance.PlayAttackSound();
-        Shoot();
+        Shoot(); // 첫 발 발사
+
+        // '두발 사격' 스킬 체크
+        int doubleShotLevel = GetSkillLevel("두발 사격");
+        if (doubleShotLevel > 0)
+        {
+            TowerSkillBlueprint doubleShotSkill = System.Array.Find(towerSkills, skill => skill.skillName == "두발 사격");
+            if (doubleShotSkill != null)
+            {
+                float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    // 스킬 발동 시, 짧은 시간 후 두 번째 발사
+                    StartCoroutine(SecondShotCoroutine());
+                }
+            }
+        }
+    }
+    
+    // (추가) '두발 사격'의 두 번째 발사를 위한 코루틴
+    private IEnumerator SecondShotCoroutine()
+    {
+        yield return new WaitForSeconds(timeBetweenShots); // 짧은 발사 간격
+        if (currentTarget != null) // 타겟이 여전히 유효하면
+        {
+            SoundManager.instance.PlayAttackSound();
+            Shoot(); // 두 번째 발 발사
+        }
     }
 
-    // (수정) 연사 시작을 위한 새로운 코루틴
-    private IEnumerator BurstFireCoroutine()
+    public void FireBurst()
+    {
+        if (burstFireCoroutine == null)
+        {
+            burstFireCoroutine = StartCoroutine(BurstFireCoroutine());
+        }
+    }
+    
+    private IEnumerator RapidFireCoroutine()
     {
         if (animationController != null)
         {
@@ -540,7 +599,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             if (currentTarget == null)
             {
-                break; // 연사 도중 타겟이 사라지면 중단
+                break;
             }
             SoundManager.instance.PlayAttackSound();
             Shoot();
@@ -551,11 +610,44 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             animationController.SetAnimationBool("IsBursting", false);
         }
+        burstFireCoroutine = null;
+    }
+    
+    // (수정) '쌍권총' 스킬만 남겨서 점사 타워 전용으로 만듦
+    private IEnumerator BurstFireCoroutine()
+    {
+        int shotsToFire = bulletsPerBurst;
+
+        // '쌍권총'(미국 총 타워) 스킬을 체크합니다.
+        int dualWieldLevel = GetSkillLevel("쌍권총");
+        if (dualWieldLevel > 0)
+        {
+            TowerSkillBlueprint dualWieldSkill = System.Array.Find(towerSkills, skill => skill.skillName == "쌍권총");
+            if (dualWieldSkill != null)
+            {
+                float procChance = dualWieldSkill.values1[dualWieldLevel - 1];
+                if (Random.Range(0f, 100f) < procChance)
+                {
+                    shotsToFire *= 2; // 발동 시 발사 수 2배 (총 12발)
+                }
+            }
+        }
+
+        for (int i = 0; i < shotsToFire; i++)
+        {
+            if (currentTarget == null)
+            {
+                break; 
+            }
+            SoundManager.instance.PlayAttackSound();
+            Shoot();
+            yield return new WaitForSeconds(timeBetweenShots);
+        }
+        burstFireCoroutine = null;
     }
 
     void Shoot()
     {
-        // ... (기존 Shoot 함수의 내용은 그대로 유지)
         int supplyLevel = GetSkillLevel("빵 보급");
         if (supplyLevel > 0 && !isSupplyBuffActive)
         {

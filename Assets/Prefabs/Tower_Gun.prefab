@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5, y: 0.5, z: 0}
-  m_LocalScale: {x: 1.2, y: 0.9, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8832208381610958432}
@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 4395030446498097292, guid: d7e2db761ffd5d54aa59a81933eabdfd, type: 3}
+  m_Sprite: {fileID: 4339173995039201160, guid: 10faa9d94153b2a458ef960d883e63a7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -111,6 +111,8 @@ MonoBehaviour:
   damageType: 0
   attackRange: 6
   timeBetweenAttacks: 1
+  isRapidFireTower: 0
+  attackAnimationClip: {fileID: 7400000, guid: 0945e769dd1341e45813f369eac708bb, type: 2}
   baseProjectileDamage: 35
   projectileSpeed: 15
   projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
@@ -210,6 +212,7 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
+  healingAuraEffect: {fileID: 0}
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 7c74f50a5ddb5a247baaefdaaf738cbf, type: 3}
     cost: 70
@@ -264,8 +267,8 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.4903846, y: 0.17094018}
-    oldSize: {x: 1.1555556, y: 2.6}
+    pivot: {x: 0.5, y: 0.16393442}
+    oldSize: {x: 1.4, y: 2.5416667}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -332,7 +335,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3, y: 1.6, z: 0}
+  m_LocalPosition: {x: 0.5, y: 1.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
