@@ -82,12 +82,12 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 7482667652216324306, guid: 323158aaa6ffc754994344b3e59cafc3, type: 3}
-  m_Color: {r: 0.94117653, g: 0.36078432, b: 0.18431373, a: 1}
+  m_Sprite: {fileID: -9003952531146048377, guid: 799fc1ba6dce77040a5347d0bc51dc9c, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 6.34, y: 7.65}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -131,8 +131,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 6.34, y: 7.65}
+    newSize: {x: 6.34, y: 7.65}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -159,6 +159,7 @@ MonoBehaviour:
   towerSkills:
   - skillName: "\uC778\uD574\uC804\uC220"
     skillDescription: "\uBCD1\uC0AC\uC758 \uCDA9\uC6D0 \uC18D\uB3C4\uAC00 \uAC10\uC18C\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: aa000000c800000096000000
     values1:
@@ -167,9 +168,12 @@ MonoBehaviour:
     - 1
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uC6B0\uB9AC\uB294 \uD558\uB098!"
     skillDescription: "\uBCD1\uC0AC\uC758 \uC801 \uC778\uC2DD \uBC94\uC704\uAC00
       \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    icon: {fileID: 0}
     maxLevel: 3
     costs: 640000009600000096000000
     values1:
@@ -178,6 +182,8 @@ MonoBehaviour:
     - 0.7
     values2: []
     values3: []
+    overrideProjectileSprite: {fileID: 0}
+    overrideProjectilePrefab: {fileID: 0}
   soldierPrefab: {fileID: 1852670417170501071, guid: 41903a384ec29ae479e843607c6bb941, type: 3}
   rallyPointPrefab: {fileID: 7618032371689887845, guid: c5f26dd0767168140a2f8e8dafb41d9c, type: 3}
 --- !u!1 &4004923673545705458
