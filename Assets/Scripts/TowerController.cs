@@ -693,6 +693,17 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         if (towerType == TowerType.Bomb)
         {
+            // (수정) 발사 시점의 목표 위치를 결정합니다.
+            Vector3 bombTargetPosition;
+            if (currentTarget != null)
+            {
+                bombTargetPosition = currentTarget.position; // 타겟이 살아있으면 현재 위치
+            }
+            else
+            {
+                bombTargetPosition = lastTargetPosition; // 사라졌으면 마지막 위치
+            }
+
             GameObject prefabToSpawn_Bomb = projectilePrefab;
             GameObject projectileGO_bomb = Instantiate(prefabToSpawn_Bomb, firePoint.position, Quaternion.identity);
             BombProjectileController bomb = projectileGO_bomb.GetComponent<BombProjectileController>();

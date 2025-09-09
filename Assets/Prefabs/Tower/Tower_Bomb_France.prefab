@@ -114,7 +114,7 @@ MonoBehaviour:
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: 79bc1287acee1a64faf131851c5bd5ee, type: 2}
   baseProjectileDamage: 30
-  projectileSpeed: 5
+  projectileSpeed: 7
   projectileSprite: {fileID: 21300000, guid: a1c85135af99fbc4d883f17f26548c05, type: 3}
   slowAmount: 0
   slowDuration: 0
@@ -213,6 +213,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   healingAuraEffect: {fileID: 0}
+  iceSlickEffect: {fileID: 0}
   upgradePaths: []
   towerSkills:
   - skillName: "\uC804\uC120 \uAD6C\uCD95"

@@ -115,7 +115,7 @@ MonoBehaviour:
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: b008ff8e241c3e14a85048832b58637d, type: 2}
   baseProjectileDamage: 70
-  projectileSpeed: 3
+  projectileSpeed: 5
   projectileSprite: {fileID: 21300000, guid: d5e6963000e387c409c46090ffb4aabe, type: 3}
   slowAmount: 0.4
   slowDuration: 3
