@@ -51,14 +51,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float laserDps = 30f;
     [SerializeField]
     private float laserDpsRamp = 10f;
+    // (수정) LineRenderer 그라데이션 대신, 스프라이트에 적용할 단일 색상 배열로 변경
     [SerializeField]
-    private Gradient[] laserColorGradients = new Gradient[3];
+    private Color[] laserColors = new Color[3]; 
 
     [Header("힐 스킬 효과")]
     [SerializeField]
     private GameObject healingAuraEffect;
     
-    // (추가) 빙판 스킬 시각 효과를 위한 변수
     [Header("빙판 스킬 효과")]
     [SerializeField]
     private GameObject iceSlickEffect;
@@ -76,14 +76,20 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private Transform firePoint;
     [SerializeField]
     private Transform characterSpriteTransform;
-    [SerializeField]
-    private LineRenderer laserLineRenderer;
+    // (제거) 더 이상 LineRenderer를 직접 참조하지 않습니다.
+    // [SerializeField]
+    // private LineRenderer laserLineRenderer;
     [SerializeField]
     private GameObject haetaePrefab;
     [SerializeField]
     private GameObject missilePrefab;
     [SerializeField]
     private Sprite missileSprite;
+    
+    // (추가) 새로운 스프라이트 레이저 프리팹을 연결할 변수
+    [SerializeField]
+    private GameObject laserBeamPrefab;
+    private LaserBeamController activeLaserBeam; // 현재 활성화된 레이저를 저장할 변수
 
     private float attackAnimLength;
     private Transform currentTarget;
@@ -135,17 +141,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         int damageLevel = DataManager.LoadDamageLevel(towerType);
         finalProjectileDamage = baseProjectileDamage * (1f + (damageLevel * 0.1f));
 
-        if (isLaserTower && laserLineRenderer != null)
-        {
-            laserLineRenderer.enabled = false;
-        }
-
         if (healingAuraEffect != null)
         {
             healingAuraEffect.SetActive(false);
         }
         
-        // (추가) 시작 시 빙판 오라를 비활성화합니다.
         if (iceSlickEffect != null)
         {
             iceSlickEffect.SetActive(false);
@@ -162,11 +162,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         originalLaserDpsRamp = laserDpsRamp;
         originalSlowAmount = slowAmount;
         originalSlowDuration = slowDuration;
-
-        if (isLaserTower)
-        {
-            ApplyLaserColor(0);
-        }
     }
 
     public void SetParentSpot(TowerSpotController spot)
@@ -206,18 +201,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             Debug.Log($"{skillToUpgrade.skillName} 스킬 레벨 업! -> {newLevel}");
 
             ApplyAllPassiveSkillEffects();
-
-            if (isLaserTower && skillToUpgrade.skillName == "아브라카다브라!")
-            {
-                ApplyLaserColor(newLevel);
-            }
             
             if (skillToUpgrade.skillName == "힐")
             {
                  if (healingAuraEffect != null) healingAuraEffect.SetActive(newLevel > 0);
             }
             
-            // (추가) '빙판' 스킬을 배우면 시각 효과를 활성화합니다.
             if (skillToUpgrade.skillName == "빙판")
             {
                  if (iceSlickEffect != null) iceSlickEffect.SetActive(newLevel > 0);
@@ -236,17 +225,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    void ApplyLaserColor(int skillLevel)
-    {
-        if (laserLineRenderer == null || laserColorGradients == null) return;
-        if (skillLevel >= 0 && skillLevel < laserColorGradients.Length)
-        {
-            if (laserColorGradients[skillLevel] != null)
-            {
-                laserLineRenderer.colorGradient = laserColorGradients[skillLevel];
-            }
-        }
-    }
+    // (제거) LineRenderer 색상 설정 함수는 더 이상 필요 없습니다.
+    // void ApplyLaserColor(int skillLevel) { ... }
 
     void ApplyAllPassiveSkillEffects()
     {
@@ -363,24 +343,23 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             HandleIceSlickAura(iceSlickLevel);
         }
         FindClosestEnemy();
+        
+        if (currentTarget != null)
+        {
+            lastTargetPosition = currentTarget.position;
+        }
+
         HandleSpriteDirection();
         attackCountdown -= Time.deltaTime;
         if (isLaserTower)
         {
-            if (currentTarget != null)
-            {
-                HandleLaserAttack(true);
-            }
-            else
-            {
-                HandleLaserAttack(false);
-            }
+            // (수정) 새로운 스프라이트 레이저 로직으로 변경
+            HandleSpriteLaserAttack();
         }
         else
         {
             if (currentTarget != null && attackCountdown <= 0f)
             {
-                lastTargetPosition = currentTarget.position;
                 StartAttackSequence();
                 attackCountdown = timeBetweenAttacks;
             }
@@ -407,7 +386,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     healingAuraEffect.transform.localScale.z
                 );
             }
-            // (추가) 빙판 오라가 있다면, 오라의 방향도 캐릭터와 동일하게 설정합니다.
+            
             if (iceSlickEffect != null && iceSlickEffect.activeSelf)
             {
                 iceSlickEffect.transform.localScale = new Vector3(
@@ -419,7 +398,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
     
-    // (수정) 빙판 오라의 크기를 조절하고, 적에게 둔화를 거는 로직으로 변경
     void HandleIceSlickAura(int skillLevel)
     {
         TowerSkillBlueprint iceSlickSkill = System.Array.Find(towerSkills, skill => skill.skillName == "빙판");
@@ -428,8 +406,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f; 
         float iceSlickRadius = iceSlickSkill.values2[skillLevel - 1];
         
-        // (수정) 힐링 오라와 동일한 방식으로 크기를 계산합니다.
-        // 숫자 10은 스프라이트 크기에 맞춰 조절할 수 있는 보정값입니다.
         if (iceSlickEffect != null)
         {
              iceSlickEffect.transform.localScale = new Vector3(iceSlickRadius * 10, iceSlickRadius * 10, 1f);
@@ -504,18 +480,37 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    void HandleLaserAttack(bool isActive)
+    // (수정) LineRenderer 대신 새로운 스프라이트 기반 레이저를 제어하는 함수
+    void HandleSpriteLaserAttack()
     {
-        if (isActive && currentTarget != null)
+        // 타겟이 있고, 힐 스킬을 배우지 않았을 때
+        if (currentTarget != null && GetSkillLevel("힐") <= 0)
         {
-            laserLineRenderer.enabled = true;
+            // 아직 레이저가 생성되지 않았다면, 새로 생성합니다.
+            if (activeLaserBeam == null)
+            {
+                GameObject laserGO = Instantiate(laserBeamPrefab, transform.position, Quaternion.identity);
+                activeLaserBeam = laserGO.GetComponent<LaserBeamController>();
+            }
+
+            // 스킬 레벨에 맞는 색상을 가져옵니다.
+            int skillLevel = GetSkillLevel("아브라카다브라!");
+            Color laserColor = Color.white; // 기본값
+            if (skillLevel > 0 && skillLevel <= laserColors.Length)
+            {
+                laserColor = laserColors[skillLevel - 1];
+            }
+
+            // 매 프레임 레이저를 업데이트합니다.
+            activeLaserBeam.UpdateLaser(firePoint.position, currentTarget.position, laserColor);
+            
+            // 애니메이션을 제어합니다.
             if (animationController != null)
             {
                 animationController.SetAnimationBool("IsCasting", true);
             }
-            laserLineRenderer.SetPosition(0, firePoint.position);
-            laserLineRenderer.SetPosition(1, currentTarget.position);
 
+            // 데미지 계산 및 적용 로직은 그대로 유지합니다.
             if (currentTarget == lastTarget)
             {
                 laserTimer += Time.deltaTime;
@@ -537,21 +532,28 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
             currentTarget.GetComponent<EnemyHealth>().TakeDamage(damageToSend, towerType, damageType);
         }
-        else
+        else // 타겟이 없거나 힐 스킬을 배웠다면
         {
-            if (laserLineRenderer.enabled)
+            // 활성화된 레이저가 있다면 파괴합니다.
+            if (activeLaserBeam != null)
             {
-                laserLineRenderer.enabled = false;
-                if (animationController != null)
-                {
-                    animationController.SetAnimationBool("IsCasting", false);
-                }
-                currentDpsRamp = 0f;
-                laserTimer = 0f;
-                lastTarget = null;
+                Destroy(activeLaserBeam.gameObject);
+                activeLaserBeam = null;
             }
+            
+            // 애니메이션을 멈춥니다.
+            if (animationController != null)
+            {
+                animationController.SetAnimationBool("IsCasting", false);
+            }
+
+            // 데미지 관련 변수들을 초기화합니다.
+            currentDpsRamp = 0f;
+            laserTimer = 0f;
+            lastTarget = null;
         }
     }
+
 
     void StartAttackSequence()
     {
@@ -693,15 +695,14 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     {
         if (towerType == TowerType.Bomb)
         {
-            // (수정) 발사 시점의 목표 위치를 결정합니다.
             Vector3 bombTargetPosition;
             if (currentTarget != null)
             {
-                bombTargetPosition = currentTarget.position; // 타겟이 살아있으면 현재 위치
+                bombTargetPosition = currentTarget.position;
             }
             else
             {
-                bombTargetPosition = lastTargetPosition; // 사라졌으면 마지막 위치
+                bombTargetPosition = lastTargetPosition;
             }
 
             GameObject prefabToSpawn_Bomb = projectilePrefab;
@@ -718,7 +719,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     greedySkill = System.Array.Find(towerSkills, skill => skill.skillName == "욕심쟁이!");
                 }
                 
-                bomb.Setup(lastTargetPosition, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
+                bomb.Setup(bombTargetPosition, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
             }
             return;
         }
@@ -761,7 +762,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
                         {
-                            // (수정) 포세이돈 스킬의 overrideSprite를 적용합니다.
                             if (poseidonSkill.overrideProjectileSprite != null)
                             {
                                 projectile.SetSprite(poseidonSkill.overrideProjectileSprite);
@@ -805,7 +805,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                                 {
                                     projectile.SetSprite(projectileSprite);
                                 }
-                                // (수정) 여기서 true를 전달하여 즉사 임무를 부여합니다.
                                 projectile.Setup(currentTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, 0, 0, true);
                             }
                             return;
@@ -830,7 +829,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
                         {
-                            // (수정) 저격총 스킬에 overrideSprite가 설정되어 있으면 그것을 사용하고, 아니면 기본 스프라이트를 사용합니다.
                             if (sniperSkill.overrideProjectileSprite != null)
                             {
                                 projectile.SetSprite(sniperSkill.overrideProjectileSprite);
@@ -839,7 +837,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                             {
                                 projectile.SetSprite(projectileSprite);
                             }
-                            
                             float specialDamage = sniperSkill.values2[sniperLevel - 1];
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
@@ -864,7 +861,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         bomb.SetSprite(missileSprite);
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
-                        bomb.Setup(lastTargetPosition, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
+                        
+                        Vector3 missileTargetPosition;
+                        if (currentTarget != null) { missileTargetPosition = currentTarget.position; }
+                        else { missileTargetPosition = lastTargetPosition; }
+                        
+                        bomb.Setup(missileTargetPosition, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
                     }
                     return;
                 }
