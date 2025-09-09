@@ -249,8 +249,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: -2413806693520163455, guid: b13278790a6bff84dbc30f37f3d89600, type: 3}
-  m_Color: {r: 0.056924086, g: 0.23460858, b: 0.7735849, a: 1}
+  m_Sprite: {fileID: -4324792773164769039, guid: 9c75ffee6e4394940968a7670e93067d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -345,7 +345,7 @@ MonoBehaviour:
   respawnTime: 10
   isAreaOfEffect: 0
   aoeRadius: 1.5
-  attackAnimationClip: {fileID: 0}
+  attackAnimationClip: {fileID: 7400000, guid: b9e1c8c615b8ae041853ab58d50e3c78, type: 2}
   healthBarSlider: {fileID: 4979688441236379191}
   healthBarCanvas: {fileID: 6356077035225273916}
   enemyLayer:
@@ -532,7 +532,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0.7}
+  m_AnchoredPosition: {x: 0, y: 1}
   m_SizeDelta: {x: 80, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &1362565467692651845
