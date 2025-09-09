@@ -57,6 +57,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [Header("힐 스킬 효과")]
     [SerializeField]
     private GameObject healingAuraEffect;
+    
+    // (추가) 빙판 스킬 시각 효과를 위한 변수
+    [Header("빙판 스킬 효과")]
+    [SerializeField]
+    private GameObject iceSlickEffect;
 
     private float finalProjectileDamage;
 
@@ -139,6 +144,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             healingAuraEffect.SetActive(false);
         }
+        
+        // (추가) 시작 시 빙판 오라를 비활성화합니다.
+        if (iceSlickEffect != null)
+        {
+            iceSlickEffect.SetActive(false);
+        }
 
         foreach (var skill in towerSkills)
         {
@@ -204,6 +215,12 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             if (skillToUpgrade.skillName == "힐")
             {
                  if (healingAuraEffect != null) healingAuraEffect.SetActive(newLevel > 0);
+            }
+            
+            // (추가) '빙판' 스킬을 배우면 시각 효과를 활성화합니다.
+            if (skillToUpgrade.skillName == "빙판")
+            {
+                 if (iceSlickEffect != null) iceSlickEffect.SetActive(newLevel > 0);
             }
 
             if (skillToUpgrade.skillName == "해치")
@@ -390,19 +407,39 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                     healingAuraEffect.transform.localScale.z
                 );
             }
+            // (추가) 빙판 오라가 있다면, 오라의 방향도 캐릭터와 동일하게 설정합니다.
+            if (iceSlickEffect != null && iceSlickEffect.activeSelf)
+            {
+                iceSlickEffect.transform.localScale = new Vector3(
+                    Mathf.Abs(iceSlickEffect.transform.localScale.x) * newScaleX,
+                    iceSlickEffect.transform.localScale.y,
+                    iceSlickEffect.transform.localScale.z
+                );
+            }
         }
     }
-
+    
+    // (수정) 빙판 오라의 크기를 조절하고, 적에게 둔화를 거는 로직으로 변경
     void HandleIceSlickAura(int skillLevel)
     {
+        TowerSkillBlueprint iceSlickSkill = System.Array.Find(towerSkills, skill => skill.skillName == "빙판");
+        if (iceSlickSkill == null || iceSlickSkill.values1.Length < skillLevel || iceSlickSkill.values2.Length < skillLevel) return;
+        
+        float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f; 
+        float iceSlickRadius = iceSlickSkill.values2[skillLevel - 1];
+        
+        // (수정) 힐링 오라와 동일한 방식으로 크기를 계산합니다.
+        // 숫자 10은 스프라이트 크기에 맞춰 조절할 수 있는 보정값입니다.
+        if (iceSlickEffect != null)
+        {
+             iceSlickEffect.transform.localScale = new Vector3(iceSlickRadius * 10, iceSlickRadius * 10, 1f);
+        }
+
         iceSlickCheckTimer -= Time.deltaTime;
         if (iceSlickCheckTimer <= 0f)
         {
             iceSlickCheckTimer = ICE_SLICK_CHECK_INTERVAL;
-            TowerSkillBlueprint iceSlickSkill = System.Array.Find(towerSkills, skill => skill.skillName == "빙판");
-            if (iceSlickSkill == null || iceSlickSkill.values1.Length < skillLevel || iceSlickSkill.values2.Length < skillLevel) return;
-            float slowAmountValue = iceSlickSkill.values1[skillLevel - 1] / 100f;
-            float iceSlickRadius = iceSlickSkill.values2[skillLevel - 1];
+
             Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, iceSlickRadius);
             foreach (var collider in colliders)
             {
@@ -853,7 +890,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
         GameObject projectileGO_normal = Instantiate(prefabToSpawn, firePoint.position, Quaternion.identity);
         
-        // (수정) 변수 이름 충돌을 피하기 위해 'projectileComponent'로 변경
         ProjectileController projectileComponent = projectileGO_normal.GetComponent<ProjectileController>();
         if (projectileComponent != null)
         {

@@ -115,7 +115,7 @@ MonoBehaviour:
   attackAnimationClip: {fileID: 7400000, guid: 12c0a0021f801f94fb926c1ac631ab9d, type: 2}
   baseProjectileDamage: 15
   projectileSpeed: 5
-  projectileSprite: {fileID: 21300000, guid: c41f1db57d9c6c34b9b7342de1c61990, type: 3}
+  projectileSprite: {fileID: 21300000, guid: ed06c4e44071def48ab9ffcd66f7acd5, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -213,6 +213,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   healingAuraEffect: {fileID: 0}
+  iceSlickEffect: {fileID: 0}
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 70fb4f679f1c49c468f063d12f0fd9fc, type: 3}
     cost: 50

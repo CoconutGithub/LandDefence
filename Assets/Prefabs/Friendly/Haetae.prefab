@@ -249,7 +249,7 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: 924841193473921770, guid: 5dba4eac14808a444ae68383aa159dd9, type: 3}
+  m_Sprite: {fileID: 5566617802145206138, guid: 19fef5f0f0defb841bee4fc00174b7f3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -345,12 +345,12 @@ MonoBehaviour:
   respawnTime: 10
   isAreaOfEffect: 1
   aoeRadius: 1
+  attackAnimationClip: {fileID: 7400000, guid: 3031248650d9e814da87f425a14a90ac, type: 2}
   healthBarSlider: {fileID: 4979688441236379191}
   healthBarCanvas: {fileID: 6356077035225273916}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
-  characterSpriteTransform: {fileID: 0}
 --- !u!95 &1575418834207805851
 Animator:
   serializedVersion: 7

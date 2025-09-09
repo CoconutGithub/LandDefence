@@ -114,8 +114,8 @@ MonoBehaviour:
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: 0945e769dd1341e45813f369eac708bb, type: 2}
   baseProjectileDamage: 35
-  projectileSpeed: 15
-  projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
+  projectileSpeed: 12
+  projectileSprite: {fileID: 21300000, guid: 2773a7c2d58f084498571e3132a13ec3, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -213,6 +213,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   healingAuraEffect: {fileID: 0}
+  iceSlickEffect: {fileID: 0}
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 7c74f50a5ddb5a247baaefdaaf738cbf, type: 3}
     cost: 70

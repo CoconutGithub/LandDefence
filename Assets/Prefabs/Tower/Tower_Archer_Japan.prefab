@@ -115,7 +115,7 @@ MonoBehaviour:
   attackAnimationClip: {fileID: 7400000, guid: 42249d64971f9f341835571164b9a1f8, type: 2}
   baseProjectileDamage: 40
   projectileSpeed: 10
-  projectileSprite: {fileID: 21300000, guid: c41f1db57d9c6c34b9b7342de1c61990, type: 3}
+  projectileSprite: {fileID: 21300000, guid: ed06c4e44071def48ab9ffcd66f7acd5, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -213,6 +213,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   healingAuraEffect: {fileID: 0}
+  iceSlickEffect: {fileID: 0}
   upgradePaths: []
   towerSkills:
   - skillName: "\uC7A5\uAC70\uB9AC \uC0AC\uACA9"
@@ -231,7 +232,7 @@ MonoBehaviour:
     - 2
     - 2.5
     values3: []
-    overrideProjectileSprite: {fileID: 1583949092009823919, guid: 01064ad6d0f5a6e4d8dd58cbbc78e087, type: 3}
+    overrideProjectileSprite: {fileID: 21300000, guid: e3c0183a379c8784f9e6483e6be68dbf, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uB450\uBC1C \uC0AC\uACA9"
     skillDescription: "\uACF5\uACA9 \uC2DC \uB0AE\uC740 \uD655\uB960\uB85C \uD654\uC0B4\uC744
@@ -245,7 +246,7 @@ MonoBehaviour:
     - 15
     values2: []
     values3: []
-    overrideProjectileSprite: {fileID: 4071258901155677298, guid: 01064ad6d0f5a6e4d8dd58cbbc78e087, type: 3}
+    overrideProjectileSprite: {fileID: 21300000, guid: 9d3a8c76ae23421478415c5dd96ebde1, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}

@@ -114,8 +114,8 @@ MonoBehaviour:
   isRapidFireTower: 1
   attackAnimationClip: {fileID: 7400000, guid: a7644ad5cbad09642806cdcc88ea5eb2, type: 2}
   baseProjectileDamage: 12
-  projectileSpeed: 15
-  projectileSprite: {fileID: 21300000, guid: 1afe995f0757ae04cbf0311977ec04c1, type: 3}
+  projectileSpeed: 5
+  projectileSprite: {fileID: 21300000, guid: 2773a7c2d58f084498571e3132a13ec3, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 0
@@ -213,6 +213,7 @@ MonoBehaviour:
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   healingAuraEffect: {fileID: 0}
+  iceSlickEffect: {fileID: 0}
   upgradePaths: []
   towerSkills:
   - skillName: "\uAE30\uAD00\uCD1D"
@@ -244,7 +245,7 @@ MonoBehaviour:
     - 250
     - 300
     values3: []
-    overrideProjectileSprite: {fileID: 21300000, guid: 2e772bf2a69eb02448ad5512c94ed80c, type: 3}
+    overrideProjectileSprite: {fileID: 21300000, guid: 37c55a7d9f9a8e94dae5ba970d9b80d6, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
