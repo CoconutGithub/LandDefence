@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.EventSystems; // (추가) UI 클릭 이벤트를 감지하기 위해 필요합니다.
 
 public class TowerUpgradeUI : MonoBehaviour
 {
@@ -17,25 +18,51 @@ public class TowerUpgradeUI : MonoBehaviour
     [SerializeField]
     private GameObject uiPanel;
     [SerializeField]
-    private GameObject upgradeButtonPrefab; // (수정) 이제 이 프리팹 하나만 사용합니다.
+    private GameObject upgradeButtonPrefab;
     [SerializeField]
     private Transform buttonContainer;
     [SerializeField]
     private Button setRallyPointButton;
-    // [SerializeField] private GameObject skillButtonPrefab; // (제거) 더 이상 필요 없습니다.
 
     private TowerController selectedTower;
     private BarracksController selectedBarracks;
+    private Transform selectedTowerTransform; // (추가) 현재 선택된 타워의 Transform을 저장합니다.
 
     void Start()
     {
         uiPanel.SetActive(false);
+    }
+    
+    // (추가) 패널이 활성화되어 있을 때, 매 프레임 실행됩니다.
+    void Update()
+    {
+        // 만약 마우스 왼쪽 버튼을 클릭했고, 그 클릭이 UI 요소(버튼 등) 위가 아니라면
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            // 그리고 현재 마우스 위치가 이 패널의 영역 밖이라면
+            if (!RectTransformUtility.RectangleContainsScreenPoint(uiPanel.GetComponent<RectTransform>(), Input.mousePosition))
+            {
+                 Hide(); // 패널을 숨깁니다.
+            }
+        }
+    }
+    
+    // (추가) 모든 렌더링이 끝난 후, 매 프레임 실행됩니다.
+    void LateUpdate()
+    {
+        // 패널이 활성화되어 있고, 타워가 선택되어 있다면
+        if (uiPanel.activeSelf && selectedTowerTransform != null)
+        {
+            // UI의 위치를 타워의 월드 위치와 동일하게 계속 업데이트합니다.
+            transform.position = selectedTowerTransform.position;
+        }
     }
 
     public void Show(TowerController tower)
     {
         selectedTower = tower;
         selectedBarracks = null;
+        selectedTowerTransform = tower.transform; // (추가) 타워의 Transform을 저장합니다.
         
         setRallyPointButton.gameObject.SetActive(false);
 
@@ -56,6 +83,7 @@ public class TowerUpgradeUI : MonoBehaviour
     {
         selectedBarracks = barracks;
         selectedTower = null;
+        selectedTowerTransform = barracks.transform; // (추가) 병영의 Transform을 저장합니다.
 
         setRallyPointButton.gameObject.SetActive(true);
 
@@ -88,37 +116,28 @@ public class TowerUpgradeUI : MonoBehaviour
         foreach (TowerBlueprint blueprint in blueprints)
         {
             GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
-            
-            Image buttonImage = buttonGO.GetComponent<Image>();
-            if (buttonImage != null && blueprint.icon != null)
-            {
-                buttonImage.sprite = blueprint.icon;
-            }
-            
-            // (수정) 이름으로 'CostText'를 찾아 비용을 표시합니다.
-            Transform costTextTransform = buttonGO.transform.Find("CostText");
-            if (costTextTransform != null)
-            {
-                costTextTransform.GetComponent<TextMeshProUGUI>().text = $"{blueprint.cost}G";
-            }
-            
-            // (추가) 업그레이드 버튼에서는 'LevelText'를 비활성화합니다.
+            Button button = buttonGO.GetComponent<Button>();
+            Image icon = buttonGO.GetComponent<Image>();
+            icon.sprite = blueprint.icon;
+
             Transform levelTextTransform = buttonGO.transform.Find("LevelText");
             if (levelTextTransform != null)
             {
                 levelTextTransform.gameObject.SetActive(false);
             }
 
-            Button button = buttonGO.GetComponent<Button>();
-            if (button != null)
+            TextMeshProUGUI costText = buttonGO.transform.Find("CostText").GetComponent<TextMeshProUGUI>();
+            if (costText != null)
             {
-                button.onClick.AddListener(() => {
-                    UpgradeTo(blueprint);
-                });
+                costText.text = blueprint.cost + "G";
             }
+            
+            button.onClick.AddListener(() => {
+                UpgradeTo(blueprint);
+            });
         }
     }
-    
+
     private void UpdateSkillButtons(TowerSkillBlueprint[] skills, TowerController tower = null, BarracksController barracks = null)
     {
         ClearAllButtons();
@@ -126,61 +145,49 @@ public class TowerUpgradeUI : MonoBehaviour
 
         foreach (TowerSkillBlueprint skill in skills)
         {
-            GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer); // (수정) UpgradeButtonPrefab 사용
-            
-            Image buttonImage = buttonGO.GetComponent<Image>();
-            if (buttonImage != null && skill.icon != null)
-            {
-                buttonImage.sprite = skill.icon;
-            }
-
+            GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
             Button button = buttonGO.GetComponent<Button>();
+            Image icon = buttonGO.GetComponent<Image>();
+            icon.sprite = skill.icon;
             
-            // 이름으로 특정 Text 컴포넌트를 찾습니다.
-            TextMeshProUGUI costText = null;
-            Transform costTextTransform = buttonGO.transform.Find("CostText");
-            if (costTextTransform != null)
-            {
-                costText = costTextTransform.GetComponent<TextMeshProUGUI>();
-            }
-
-            TextMeshProUGUI levelText = null;
             Transform levelTextTransform = buttonGO.transform.Find("LevelText");
-            if (levelTextTransform != null)
-            {
-                levelText = levelTextTransform.GetComponent<TextMeshProUGUI>();
-                levelText.gameObject.SetActive(true); // 스킬 버튼에서는 활성화
-            }
+            Transform costTextTransform = buttonGO.transform.Find("CostText");
 
             int currentLevel = 0;
             if(tower != null) currentLevel = tower.GetSkillLevel(skill.skillName);
             else if(barracks != null) currentLevel = barracks.GetSkillLevel(skill.skillName);
 
-            if (levelText != null)
+            if (levelTextTransform != null)
             {
-                levelText.text = $"{currentLevel}/{skill.maxLevel}";
+                levelTextTransform.gameObject.SetActive(true);
+                levelTextTransform.GetComponent<TextMeshProUGUI>().text = $"{currentLevel}/{skill.maxLevel}";
             }
 
-            if (currentLevel >= skill.maxLevel)
+            if (costTextTransform != null)
             {
-                if (costText != null) costText.text = "마스터";
-                button.interactable = false;
+                if (currentLevel >= skill.maxLevel)
+                {
+                    costTextTransform.GetComponent<TextMeshProUGUI>().text = "마스터";
+                    button.interactable = false;
+                }
+                else
+                {
+                    costTextTransform.GetComponent<TextMeshProUGUI>().text = skill.costs[currentLevel] + "G";
+                    button.interactable = true;
+                }
             }
-            else
-            {
-                if (costText != null) costText.text = $"{skill.costs[currentLevel]}G";
-                button.interactable = true;
-                button.onClick.AddListener(() => {
-                    if(tower != null) tower.UpgradeSkill(skill);
-                    else if(barracks != null) barracks.UpgradeSkill(skill);
-                });
-            }
+            
+            button.onClick.AddListener(() => {
+                if(tower != null) tower.UpgradeSkill(skill);
+                else if(barracks != null) barracks.UpgradeSkill(skill);
+            });
         }
     }
 
     public void Hide()
     {
         uiPanel.SetActive(false);
+        selectedTowerTransform = null; // (추가) 패널이 닫힐 때 참조를 비워줍니다.
     }
 
     public void OnSetRallyPointButton()
