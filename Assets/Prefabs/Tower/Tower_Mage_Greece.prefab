@@ -218,7 +218,7 @@ MonoBehaviour:
   - skillName: "\uD558\uB370\uC2A4"
     skillDescription: "\uACF5\uACA9 \uC2DC 5% \uD655\uB960\uB85C \uCCB4\uB825\uC774
       \uB0AE\uC740 \uC801\uC744 \uC989\uC0AC\uC2DC\uD0B5\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 7bae4dcb14ac827439641f6258902065, type: 3}
     maxLevel: 3
     costs: c8000000fa0000002c010000
     values1:
@@ -232,7 +232,7 @@ MonoBehaviour:
   - skillName: "\uD3EC\uC138\uC774\uB3C8"
     skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uAC00\uC7A5
       \uC55E\uC11C\uAC00\uB294 \uC801\uC744 \uD574\uC77C\uB85C \uBC00\uC5B4\uB0C5\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 1d809347d0ca556438dccdad8a71b7b4, type: 3}
     maxLevel: 3
     costs: c8000000fa0000002c010000
     values1:

@@ -1,25 +1,16 @@
 fileFormatVersion: 2
-guid: d9f4ca7d999028147806e9f891099984
+guid: e720527d453fa854a8430744582e957a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5911324204159036432
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_0
+      213: -4719097641294920892
+    second: Generated Image September 09, 2025 - 2_33PM-Photoroom_0
   - first:
-      213: -5513964518331065155
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_1
+      213: 5552930751357542138
+    second: Generated Image September 09, 2025 - 2_33PM-Photoroom_1
   - first:
-      213: 7726732047130303073
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_2
-  - first:
-      213: -3507384942922301613
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_3
-  - first:
-      213: 8196516845672326236
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_4
-  - first:
-      213: 505890133891665807
-    second: Generated Image September 09, 2025 - 1_46PM-Photoroom_5
+      213: 5639172550185009084
+    second: Generated Image September 09, 2025 - 2_33PM-Photoroom_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -66,7 +57,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 150
+  spritePixelsToUnits: 130
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -115,104 +106,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_0"
+      name: Generated Image September 09, 2025 - 2_33PM-Photoroom_0
       rect:
         serializedVersion: 2
-        x: 47
-        y: 35
-        width: 303
-        height: 391
+        x: 69
+        y: 370
+        width: 202
+        height: 313
       alignment: 9
-      pivot: {x: 0.45874587, y: 0.20460358}
+      pivot: {x: 0.43069306, y: 0.15974441}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: cb2e3780f892106449e499fa8619ecce
-      internalID: -1651250049
+      spriteID: 4438b36b2b5628eb0800000000000000
+      internalID: -4719097641294920892
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_1"
+      name: Generated Image September 09, 2025 - 2_33PM-Photoroom_1
       rect:
         serializedVersion: 2
-        x: 37
-        y: 500
-        width: 291
-        height: 378
+        x: 354
+        y: 370
+        width: 260
+        height: 311
       alignment: 9
-      pivot: {x: 0.5120275, y: 0.21164021}
+      pivot: {x: 0.32692307, y: 0.1607717}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: e265f9eca19d4cf49842bb207d1b07a1
-      internalID: -1421994746
+      spriteID: afe52010919ff0d40800000000000000
+      internalID: 5552930751357542138
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_2"
+      name: Generated Image September 09, 2025 - 2_33PM-Photoroom_2
       rect:
         serializedVersion: 2
-        x: 368
-        y: 35
-        width: 383
-        height: 394
+        x: 648
+        y: 370
+        width: 250
+        height: 313
       alignment: 9
-      pivot: {x: 0.36031333, y: 0.20304568}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline:
-      - - {x: 83.5, y: -103}
-        - {x: 98.5, y: -62}
-        - {x: 134.5, y: -7}
-        - {x: 146.5, y: 65}
-        - {x: 173.5, y: 83}
-        - {x: 175.5, y: 110}
-        - {x: 157.5, y: 163}
-        - {x: 78.5, y: 170}
-        - {x: -20.5, y: 165}
-        - {x: -92.5, y: 177}
-        - {x: -163.5, y: 164}
-        - {x: -188.5, y: 10}
-        - {x: -188.5, y: -108}
-        - {x: -132.5, y: -176}
-        - {x: -15.5, y: -176}
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 7c7185521ca5a6f4f8fd8be2b7db1d60
-      internalID: 1380982402
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_3"
-      rect:
-        serializedVersion: 2
-        x: 691
-        y: 500
-        width: 277
-        height: 381
-      alignment: 9
-      pivot: {x: 0.48736462, y: 0.20997375}
+      pivot: {x: 0.348, y: 0.15974441}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 7a2c1d8cb54a3b942bd8dc0a4ededf1b
-      internalID: 1967175310
+      spriteID: cbf39e88e8d524e40800000000000000
+      internalID: 5639172550185009084
       vertices: []
       indices: 
       edges: []
@@ -221,7 +175,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 39482704a08909740af40bdc1026d04e
+    spriteID: 6e7a987fa453eeb488e1ed743912b312
     internalID: 0
     vertices: []
     indices: 
@@ -231,16 +185,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_0: -5911324204159036432
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_1: -5513964518331065155
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_2: 7726732047130303073
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_3: -3507384942922301613
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_4: 8196516845672326236
-      Generated Image September 09, 2025 - 1_46PM-Photoroom_5: 505890133891665807
-      "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_0": -1651250049
-      "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_1": -1421994746
-      "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_2": 1380982402
-      "\uD504\uB791\uC2A4\uD3ED\uD0C4\uD0C0\uC6CC_3": 1967175310
+      Generated Image September 09, 2025 - 2_33PM-Photoroom_0: -4719097641294920892
+      Generated Image September 09, 2025 - 2_33PM-Photoroom_1: 5552930751357542138
+      Generated Image September 09, 2025 - 2_33PM-Photoroom_2: 5639172550185009084
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

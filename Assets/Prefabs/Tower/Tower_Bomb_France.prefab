@@ -84,12 +84,12 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 2
-  m_Sprite: {fileID: 1898883472, guid: 1b2045a96aad0aa43a09f90069fbab75, type: 3}
+  m_Sprite: {fileID: -1651250049, guid: d9f4ca7d999028147806e9f891099984, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 3.03, y: 3.91}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -115,7 +115,7 @@ MonoBehaviour:
   attackAnimationClip: {fileID: 7400000, guid: 79bc1287acee1a64faf131851c5bd5ee, type: 2}
   baseProjectileDamage: 30
   projectileSpeed: 5
-  projectileSprite: {fileID: 21300000, guid: d5e6963000e387c409c46090ffb4aabe, type: 3}
+  projectileSprite: {fileID: 21300000, guid: a1c85135af99fbc4d883f17f26548c05, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 2
@@ -218,7 +218,7 @@ MonoBehaviour:
   - skillName: "\uC804\uC120 \uAD6C\uCD95"
     skillDescription: "\uD3ED\uD0C4\uC5D0 \uB9DE\uC740 \uC801\uB4E4\uC744 \uB290\uB824\uC9C0\uAC8C
       \uD569\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 5fc111acf3777054e83062c4284d4412, type: 3}
     maxLevel: 1
     costs: c8000000
     values1:
@@ -231,7 +231,7 @@ MonoBehaviour:
   - skillName: "\uBE75 \uBCF4\uAE09"
     skillDescription: "\uACF5\uACA9 \uC2DC \uB0AE\uC740 \uD655\uB960\uB85C \uC7A0\uC2DC\uB3D9\uC548
       \uACF5\uACA9 \uC18D\uB3C4\uAC00 \uB300\uD3ED \uC99D\uAC00\uD569\uB2C8\uB2E4."
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 54bc9bbe2963ab340ae085a285c790d8, type: 3}
     maxLevel: 3
     costs: 960000009600000096000000
     values1:
@@ -292,9 +292,9 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.4982699, y: 0.26666668}
-    oldSize: {x: 1.9266666, y: 2}
-    newSize: {x: 1, y: 1}
+    pivot: {x: 0.45874587, y: 0.20460358}
+    oldSize: {x: 2.02, y: 2.6066666}
+    newSize: {x: 3.03, y: 3.91}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -360,7 +360,7 @@ Transform:
   m_GameObject: {fileID: 4004923673545705458}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.8, y: 1.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
