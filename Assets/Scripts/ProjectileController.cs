@@ -17,6 +17,9 @@ public class ProjectileController : MonoBehaviour
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer; // (추가) 스프라이트 렌더러 참조
 
+    // (추가) 이 탄환이 즉사 효과를 가졌는지 확인하는 변수
+    private bool isInstantKill = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -40,7 +43,7 @@ public class ProjectileController : MonoBehaviour
         }
     }
 
-    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration, float _dotDamage, float _dotDuration, float _knockbackDistance = 0, float _knockbackRadius = 0)
+    public void Setup(Transform _target, float _damage, float _speed, TowerType _ownerType, DamageType _damageType, float _slowAmount, float _slowDuration, float _dotDamage, float _dotDuration, float _knockbackDistance = 0, float _knockbackRadius = 0, bool _isInstantKill = false)
     {
         target = _target;
         damage = _damage;
@@ -53,6 +56,7 @@ public class ProjectileController : MonoBehaviour
         this.dotDuration = _dotDuration;
         knockbackDistance = _knockbackDistance;
         knockbackRadius = _knockbackRadius;
+        isInstantKill = _isInstantKill;
     }
 
     void FixedUpdate()
@@ -95,13 +99,21 @@ public class ProjectileController : MonoBehaviour
         EnemyHealth enemyHealth = target.GetComponent<EnemyHealth>();
         if (enemyHealth != null)
         {
-            if(damage > 0)
+           // (수정) 즉사 임무를 가진 탄환인지 먼저 확인합니다.
+            if (isInstantKill)
             {
-                enemyHealth.TakeDamage(damage, ownerTowerType, damageType);
+                enemyHealth.InstantKill(); // 임무 완수!
             }
-            if(dotDamagePerSecond > 0 && dotDuration > 0)
+            else // 일반 탄환이라면 기존 로직을 실행합니다.
             {
-                enemyHealth.ApplyDotEffect(dotDamagePerSecond, dotDuration);
+                if(damage > 0)
+                {
+                    enemyHealth.TakeDamage(damage, ownerTowerType, damageType);
+                }
+                if(dotDamagePerSecond > 0 && dotDuration > 0)
+                {
+                    enemyHealth.ApplyDotEffect(dotDamagePerSecond, dotDuration);
+                }
             }
         }
 

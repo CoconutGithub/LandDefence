@@ -761,7 +761,15 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
                         {
-                            projectile.SetSprite(projectileSprite);
+                            // (수정) 포세이돈 스킬의 overrideSprite를 적용합니다.
+                            if (poseidonSkill.overrideProjectileSprite != null)
+                            {
+                                projectile.SetSprite(poseidonSkill.overrideProjectileSprite);
+                            }
+                            else
+                            {
+                                projectile.SetSprite(projectileSprite);
+                            }
                             float knockbackDist = poseidonSkill.values2[poseidonLevel - 1];
                             float knockbackRadius = poseidonSkill.values3[poseidonLevel - 1];
                             projectile.Setup(specialTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, knockbackDist, knockbackRadius);
@@ -785,7 +793,21 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         float healthThreshold = hadesSkill.values1[hadesLevel - 1];
                         if (enemyHealth.MaxHealth <= healthThreshold)
                         {
-                            enemyHealth.InstantKill();
+                            GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+                            ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
+                            if (projectile != null)
+                            {
+                                if (hadesSkill.overrideProjectileSprite != null)
+                                {
+                                    projectile.SetSprite(hadesSkill.overrideProjectileSprite);
+                                }
+                                else
+                                {
+                                    projectile.SetSprite(projectileSprite);
+                                }
+                                // (수정) 여기서 true를 전달하여 즉사 임무를 부여합니다.
+                                projectile.Setup(currentTarget, 0, projectileSpeed, towerType, damageType, 0, 0, 0, 0, 0, 0, true);
+                            }
                             return;
                         }
                     }

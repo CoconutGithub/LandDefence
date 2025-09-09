@@ -115,7 +115,7 @@ MonoBehaviour:
   attackAnimationClip: {fileID: 7400000, guid: 79bc1287acee1a64faf131851c5bd5ee, type: 2}
   baseProjectileDamage: 30
   projectileSpeed: 7
-  projectileSprite: {fileID: 21300000, guid: a1c85135af99fbc4d883f17f26548c05, type: 3}
+  projectileSprite: {fileID: 21300000, guid: 1c249e4c7e286f348a89d83a3df3096c, type: 3}
   slowAmount: 0
   slowDuration: 0
   explosionRadius: 2

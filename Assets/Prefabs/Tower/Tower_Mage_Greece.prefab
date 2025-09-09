@@ -114,7 +114,7 @@ MonoBehaviour:
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: 64f455776c53dd44abf7c4502b7977ec, type: 2}
   baseProjectileDamage: 35
-  projectileSpeed: 15
+  projectileSpeed: 5
   projectileSprite: {fileID: 21300000, guid: e668701cd8fc7944ebda1acb12f8bebf, type: 3}
   slowAmount: 0.7
   slowDuration: 2
@@ -228,7 +228,7 @@ MonoBehaviour:
     - 700
     values2: []
     values3: []
-    overrideProjectileSprite: {fileID: 0}
+    overrideProjectileSprite: {fileID: 21300000, guid: be4b827b9be902b4483775db993ded9d, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   - skillName: "\uD3EC\uC138\uC774\uB3C8"
     skillDescription: "\uACF5\uACA9 \uC2DC \uD655\uB960\uC801\uC73C\uB85C \uAC00\uC7A5
@@ -248,7 +248,7 @@ MonoBehaviour:
     - 1
     - 1.2
     - 1.5
-    overrideProjectileSprite: {fileID: 0}
+    overrideProjectileSprite: {fileID: 21300000, guid: 8de404a6f6661d04ab3183f34da6fc6b, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}
   firePoint: {fileID: 8832208381610958432}
