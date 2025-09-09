@@ -267,7 +267,7 @@ MonoBehaviour:
   laserLineRenderer: {fileID: 0}
   haetaePrefab: {fileID: 0}
   missilePrefab: {fileID: 4329414863976529247, guid: 8433460bb02ac404ca13b67881f8624e, type: 3}
-  missileSprite: {fileID: 21300000, guid: a1c85135af99fbc4d883f17f26548c05, type: 3}
+  missileSprite: {fileID: 21300000, guid: 6857f9b6a41f3aa488188725ba5a3858, type: 3}
 --- !u!61 &-3492042215985664023
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -797,7 +797,16 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         ProjectileController projectile = projectileGO.GetComponent<ProjectileController>();
                         if (projectile != null)
                         {
-                            projectile.SetSprite(projectileSprite);
+                            // (수정) 저격총 스킬에 overrideSprite가 설정되어 있으면 그것을 사용하고, 아니면 기본 스프라이트를 사용합니다.
+                            if (sniperSkill.overrideProjectileSprite != null)
+                            {
+                                projectile.SetSprite(sniperSkill.overrideProjectileSprite);
+                            }
+                            else
+                            {
+                                projectile.SetSprite(projectileSprite);
+                            }
+                            
                             float specialDamage = sniperSkill.values2[sniperLevel - 1];
                             projectile.Setup(specialTarget, specialDamage, projectileSpeed, towerType, damageType, 0, 0, 0, 0);
                         }
