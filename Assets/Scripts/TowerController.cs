@@ -87,6 +87,8 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float currentDpsRamp = 0f;
     private Transform lastTarget;
     private float laserTimer = 0f;
+    
+    private Vector3 lastTargetPosition;
 
     private Dictionary<string, int> skillLevels = new Dictionary<string, int>();
     private SoldierController spawnedHaetae;
@@ -361,6 +363,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         {
             if (currentTarget != null && attackCountdown <= 0f)
             {
+                lastTargetPosition = currentTarget.position;
                 StartAttackSequence();
                 attackCountdown = timeBetweenAttacks;
             }
@@ -377,13 +380,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 newScaleX = -1f;
             }
 
-            // 캐릭터 스프라이트의 방향을 설정합니다.
             characterSpriteTransform.localScale = new Vector3(newScaleX, 1f, 1f);
 
-            // (추가) 힐링 오라가 있다면, 오라의 방향도 캐릭터와 동일하게 설정합니다.
             if (healingAuraEffect != null && healingAuraEffect.activeSelf)
             {
-                // 오라의 크기는 그대로 유지하면서 방향만 바꿉니다.
                 healingAuraEffect.transform.localScale = new Vector3(
                     Mathf.Abs(healingAuraEffect.transform.localScale.x) * newScaleX,
                     healingAuraEffect.transform.localScale.y,
@@ -430,7 +430,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
     }
-
+    
     void HandleHealingAura(int skillLevel)
     {
         if (healingAuraEffect != null)
@@ -441,6 +441,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
             healingAuraEffect.transform.localScale = new Vector3(attackRange * 10, attackRange * 10, 1f);
         }
+
         healCheckTimer -= Time.deltaTime;
         if (healCheckTimer <= 0f)
         {
@@ -557,13 +558,11 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) '두발 사격' 스킬 로직을 이 곳으로 이동
     public void FireOneShot()
     {
         SoundManager.instance.PlayAttackSound();
-        Shoot(); // 첫 발 발사
+        Shoot();
 
-        // '두발 사격' 스킬 체크
         int doubleShotLevel = GetSkillLevel("두발 사격");
         if (doubleShotLevel > 0)
         {
@@ -573,21 +572,19 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = doubleShotSkill.values1[doubleShotLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    // 스킬 발동 시, 짧은 시간 후 두 번째 발사
                     StartCoroutine(SecondShotCoroutine());
                 }
             }
         }
     }
     
-    // (추가) '두발 사격'의 두 번째 발사를 위한 코루틴
     private IEnumerator SecondShotCoroutine()
     {
-        yield return new WaitForSeconds(timeBetweenShots); // 짧은 발사 간격
-        if (currentTarget != null) // 타겟이 여전히 유효하면
+        yield return new WaitForSeconds(timeBetweenShots);
+        if (currentTarget != null)
         {
             SoundManager.instance.PlayAttackSound();
-            Shoot(); // 두 번째 발 발사
+            Shoot();
         }
     }
 
@@ -624,12 +621,10 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         burstFireCoroutine = null;
     }
     
-    // (수정) '쌍권총' 스킬만 남겨서 점사 타워 전용으로 만듦
     private IEnumerator BurstFireCoroutine()
     {
         int shotsToFire = bulletsPerBurst;
 
-        // '쌍권총'(미국 총 타워) 스킬을 체크합니다.
         int dualWieldLevel = GetSkillLevel("쌍권총");
         if (dualWieldLevel > 0)
         {
@@ -639,7 +634,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                 float procChance = dualWieldSkill.values1[dualWieldLevel - 1];
                 if (Random.Range(0f, 100f) < procChance)
                 {
-                    shotsToFire *= 2; // 발동 시 발사 수 2배 (총 12발)
+                    shotsToFire *= 2;
                 }
             }
         }
@@ -659,6 +654,32 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
     void Shoot()
     {
+        if (towerType == TowerType.Bomb)
+        {
+            GameObject prefabToSpawn_Bomb = projectilePrefab;
+            GameObject projectileGO_bomb = Instantiate(prefabToSpawn_Bomb, firePoint.position, Quaternion.identity);
+            BombProjectileController bomb = projectileGO_bomb.GetComponent<BombProjectileController>();
+            if (bomb != null)
+            {
+                if (projectileSprite != null) bomb.SetSprite(projectileSprite);
+                
+                int greedyLevel = GetSkillLevel("욕심쟁이!");
+                TowerSkillBlueprint greedySkill = null;
+                if (greedyLevel > 0)
+                {
+                    greedySkill = System.Array.Find(towerSkills, skill => skill.skillName == "욕심쟁이!");
+                }
+                
+                bomb.Setup(lastTargetPosition, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
+            }
+            return;
+        }
+
+        if (currentTarget == null)
+        {
+            return;
+        }
+
         int supplyLevel = GetSkillLevel("빵 보급");
         if (supplyLevel > 0 && !isSupplyBuffActive)
         {
@@ -764,7 +785,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
                         bomb.SetSprite(missileSprite);
                         float missileDamage = missileSkill.values2[missileLevel - 1];
                         float missileRadius = missileSkill.values3[missileLevel - 1];
-                        bomb.Setup(currentTarget.position, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
+                        bomb.Setup(lastTargetPosition, missileDamage, projectileSpeed, missileRadius, towerType, damageType, 0, 0, null, 0);
                     }
                     return;
                 }
@@ -831,32 +852,16 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             }
         }
         GameObject projectileGO_normal = Instantiate(prefabToSpawn, firePoint.position, Quaternion.identity);
-        if (towerType == TowerType.Bomb)
+        
+        // (수정) 변수 이름 충돌을 피하기 위해 'projectileComponent'로 변경
+        ProjectileController projectileComponent = projectileGO_normal.GetComponent<ProjectileController>();
+        if (projectileComponent != null)
         {
-            BombProjectileController bomb = projectileGO_normal.GetComponent<BombProjectileController>();
-            if (bomb != null)
+            if (spriteToUse != null)
             {
-                if (spriteToUse != null) bomb.SetSprite(spriteToUse);
-                int greedyLevel = GetSkillLevel("욕심쟁이!");
-                TowerSkillBlueprint greedySkill = null;
-                if (greedyLevel > 0)
-                {
-                    greedySkill = System.Array.Find(towerSkills, skill => skill.skillName == "욕심쟁이!");
-                }
-                bomb.Setup(currentTarget.position, finalProjectileDamage, projectileSpeed, explosionRadius, towerType, damageType, slowAmount, slowDuration, greedySkill, greedyLevel);
+                projectileComponent.SetSprite(spriteToUse);
             }
-        }
-        else
-        {
-            ProjectileController projectile = projectileGO_normal.GetComponent<ProjectileController>();
-            if (projectile != null)
-            {
-                if (spriteToUse != null)
-                {
-                    projectile.SetSprite(spriteToUse);
-                }
-                projectile.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration, dotDamage, dotDuration);
-            }
+            projectileComponent.Setup(currentTarget, finalProjectileDamage, projectileSpeed, towerType, damageType, slowAmount, slowDuration, dotDamage, dotDuration);
         }
     }
 

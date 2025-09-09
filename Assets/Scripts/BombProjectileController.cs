@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
+// 폭탄 발사체의 이동과 폭발을 담당하는 스크립트입니다.
 public class BombProjectileController : MonoBehaviour
 {
     private float moveSpeed;
@@ -11,26 +12,21 @@ public class BombProjectileController : MonoBehaviour
     private DamageType damageType;
     private float slowAmount;
     private float slowDuration;
+    private SpriteRenderer spriteRenderer;
+
     private TowerSkillBlueprint greedySkill;
     private int greedySkillLevel;
-    
-    private SpriteRenderer spriteRenderer; // (추가) 스프라이트 렌더러 참조
 
     void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>(); // (추가) 컴포넌트 찾기
-        if (spriteRenderer == null)
-        {
-            Debug.LogError("BombProjectileController: Sprite Renderer 컴포넌트를 찾을 수 없습니다!");
-        }
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
-    
-    // (추가) 외부(TowerController)에서 이 발사체의 이미지를 변경할 수 있도록 하는 함수
-    public void SetSprite(Sprite newSprite)
+
+    public void SetSprite(Sprite sprite)
     {
-        if (spriteRenderer != null && newSprite != null)
+        if (spriteRenderer != null)
         {
-            spriteRenderer.sprite = newSprite;
+            spriteRenderer.sprite = sprite;
         }
     }
 
@@ -50,6 +46,13 @@ public class BombProjectileController : MonoBehaviour
 
     void Update()
     {
+        // (추가) 목표 지점을 향해 날아가도록 방향을 계산하고 이미지를 회전시킵니다.
+        if (moveSpeed > 0)
+        {
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            transform.right = direction; // 이미지의 오른쪽이 날아가는 방향을 보도록 설정
+        }
+
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
         if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
@@ -75,7 +78,7 @@ public class BombProjectileController : MonoBehaviour
             }
         }
 
-        float damageToApply = damage; 
+        float damageToApply = damage;
 
         if (greedySkill != null && greedySkillLevel > 0)
         {
@@ -117,3 +120,4 @@ public class BombProjectileController : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 }
+
