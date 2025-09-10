@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using UnityEngine.EventSystems; // (추가) UI 클릭 이벤트를 감지하기 위해 필요합니다.
+using UnityEngine.EventSystems;
 
 public class TowerUpgradeUI : MonoBehaviour
 {
@@ -23,46 +23,81 @@ public class TowerUpgradeUI : MonoBehaviour
     private Transform buttonContainer;
     [SerializeField]
     private Button setRallyPointButton;
+    [SerializeField]
+    private Sprite confirmIcon;
+
+    [Header("Skill Tooltip")]
+    [SerializeField]
+    private GameObject skillTooltipPanel;
+    [SerializeField]
+    private TextMeshProUGUI skillTooltipText;
 
     private TowerController selectedTower;
     private BarracksController selectedBarracks;
-    private Transform selectedTowerTransform; // (추가) 현재 선택된 타워의 Transform을 저장합니다.
+    private Transform selectedTowerTransform;
+    
+    private object pendingUpgrade = null;
+    private GameObject previewTower = null;
+    
+    private Dictionary<Button, Sprite> originalButtonIcons = new Dictionary<Button, Sprite>();
 
     void Start()
     {
         uiPanel.SetActive(false);
+        if (skillTooltipPanel != null)
+        {
+            skillTooltipPanel.SetActive(false);
+        }
     }
-    
-    // (추가) 패널이 활성화되어 있을 때, 매 프레임 실행됩니다.
+
     void Update()
     {
-        // 만약 마우스 왼쪽 버튼을 클릭했고, 그 클릭이 UI 요소(버튼 등) 위가 아니라면
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
-            // 그리고 현재 마우스 위치가 이 패널의 영역 밖이라면
-            if (!RectTransformUtility.RectangleContainsScreenPoint(uiPanel.GetComponent<RectTransform>(), Input.mousePosition))
+            if (pendingUpgrade != null)
             {
-                 Hide(); // 패널을 숨깁니다.
+                CancelPreview();
+            }
+            else if (uiPanel.activeSelf && !RectTransformUtility.RectangleContainsScreenPoint(uiPanel.GetComponent<RectTransform>(), Input.mousePosition))
+            {
+                Hide();
+            }
+        }
+
+        // (수정) World Space Canvas에서 마우스 위치를 올바르게 따라가도록 수정합니다.
+        if (skillTooltipPanel != null && skillTooltipPanel.activeSelf)
+        {
+            // 이 코드는 카메라에서 마우스 위치로 광선을 쏴서 UI 캔버스 평면과 만나는 지점을 계산합니다.
+            Plane canvasPlane = new Plane(transform.forward, transform.position);
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (canvasPlane.Raycast(ray, out float enter))
+            {
+                // 광선이 캔버스 평면과 만나는 정확한 3D 월드 좌표를 툴팁의 위치로 설정합니다.
+                skillTooltipPanel.transform.position = ray.GetPoint(enter);
             }
         }
     }
     
-    // (추가) 모든 렌더링이 끝난 후, 매 프레임 실행됩니다.
     void LateUpdate()
     {
-        // 패널이 활성화되어 있고, 타워가 선택되어 있다면
         if (uiPanel.activeSelf && selectedTowerTransform != null)
         {
-            // UI의 위치를 타워의 월드 위치와 동일하게 계속 업데이트합니다.
             transform.position = selectedTowerTransform.position;
         }
     }
+    
+    // ... (이 아래의 다른 함수들은 변경되지 않았습니다) ...
 
     public void Show(TowerController tower)
     {
+        if (selectedTower != tower)
+        {
+            CancelPreview();
+        }
+        
         selectedTower = tower;
         selectedBarracks = null;
-        selectedTowerTransform = tower.transform; // (추가) 타워의 Transform을 저장합니다.
+        selectedTowerTransform = tower.transform;
         
         setRallyPointButton.gameObject.SetActive(false);
 
@@ -81,9 +116,14 @@ public class TowerUpgradeUI : MonoBehaviour
 
     public void Show(BarracksController barracks)
     {
+        if (selectedBarracks != barracks)
+        {
+            CancelPreview();
+        }
+
         selectedBarracks = barracks;
         selectedTower = null;
-        selectedTowerTransform = barracks.transform; // (추가) 병영의 Transform을 저장합니다.
+        selectedTowerTransform = barracks.transform;
 
         setRallyPointButton.gameObject.SetActive(true);
 
@@ -106,6 +146,7 @@ public class TowerUpgradeUI : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        originalButtonIcons.Clear();
     }
 
     private void UpdateUpgradeButtons(TowerBlueprint[] blueprints)
@@ -117,8 +158,10 @@ public class TowerUpgradeUI : MonoBehaviour
         {
             GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
             Button button = buttonGO.GetComponent<Button>();
-            Image icon = buttonGO.GetComponent<Image>();
-            icon.sprite = blueprint.icon;
+            Image iconImage = button.GetComponent<Image>();
+            iconImage.sprite = blueprint.icon;
+
+            originalButtonIcons[button] = blueprint.icon;
 
             Transform levelTextTransform = buttonGO.transform.Find("LevelText");
             if (levelTextTransform != null)
@@ -127,13 +170,10 @@ public class TowerUpgradeUI : MonoBehaviour
             }
 
             TextMeshProUGUI costText = buttonGO.transform.Find("CostText").GetComponent<TextMeshProUGUI>();
-            if (costText != null)
-            {
-                costText.text = blueprint.cost + "G";
-            }
+            costText.text = blueprint.cost + "G";
             
             button.onClick.AddListener(() => {
-                UpgradeTo(blueprint);
+                RequestUpgrade(blueprint, button);
             });
         }
     }
@@ -147,47 +187,38 @@ public class TowerUpgradeUI : MonoBehaviour
         {
             GameObject buttonGO = Instantiate(upgradeButtonPrefab, buttonContainer);
             Button button = buttonGO.GetComponent<Button>();
-            Image icon = buttonGO.GetComponent<Image>();
-            icon.sprite = skill.icon;
+            Image iconImage = button.GetComponent<Image>();
+            iconImage.sprite = skill.icon;
             
-            Transform levelTextTransform = buttonGO.transform.Find("LevelText");
-            Transform costTextTransform = buttonGO.transform.Find("CostText");
-
-            int currentLevel = 0;
-            if(tower != null) currentLevel = tower.GetSkillLevel(skill.skillName);
-            else if(barracks != null) currentLevel = barracks.GetSkillLevel(skill.skillName);
-
-            if (levelTextTransform != null)
+            originalButtonIcons[button] = skill.icon;
+            
+            SkillButtonHover hoverHandler = buttonGO.AddComponent<SkillButtonHover>();
+            hoverHandler.skillDescription = skill.skillDescription;
+            
+            int currentLevel = (tower != null) ? tower.GetSkillLevel(skill.skillName) : barracks.GetSkillLevel(skill.skillName);
+            buttonGO.transform.Find("LevelText").GetComponent<TextMeshProUGUI>().text = $"{currentLevel}/{skill.maxLevel}";
+            if (currentLevel >= skill.maxLevel)
             {
-                levelTextTransform.gameObject.SetActive(true);
-                levelTextTransform.GetComponent<TextMeshProUGUI>().text = $"{currentLevel}/{skill.maxLevel}";
+                buttonGO.transform.Find("CostText").GetComponent<TextMeshProUGUI>().text = "마스터";
+                button.interactable = false;
             }
-
-            if (costTextTransform != null)
+            else
             {
-                if (currentLevel >= skill.maxLevel)
-                {
-                    costTextTransform.GetComponent<TextMeshProUGUI>().text = "마스터";
-                    button.interactable = false;
-                }
-                else
-                {
-                    costTextTransform.GetComponent<TextMeshProUGUI>().text = skill.costs[currentLevel] + "G";
-                    button.interactable = true;
-                }
+                buttonGO.transform.Find("CostText").GetComponent<TextMeshProUGUI>().text = skill.costs[currentLevel] + "G";
             }
             
             button.onClick.AddListener(() => {
-                if(tower != null) tower.UpgradeSkill(skill);
-                else if(barracks != null) barracks.UpgradeSkill(skill);
+                RequestSkillUpgrade(skill, button);
             });
         }
     }
 
     public void Hide()
     {
+        CancelPreview();
         uiPanel.SetActive(false);
-        selectedTowerTransform = null; // (추가) 패널이 닫힐 때 참조를 비워줍니다.
+        selectedTowerTransform = null;
+        HideSkillTooltip();
     }
 
     public void OnSetRallyPointButton()
@@ -198,18 +229,98 @@ public class TowerUpgradeUI : MonoBehaviour
         }
         Hide();
     }
-
-    private void UpgradeTo(TowerBlueprint blueprint)
+    
+    private void RequestUpgrade(TowerBlueprint blueprint, Button clickedButton)
     {
-        if (selectedTower != null)
+        if (pendingUpgrade as TowerBlueprint == blueprint)
         {
-            selectedTower.Upgrade(blueprint);
+            if (selectedTower != null) selectedTower.Upgrade(blueprint);
+            else if (selectedBarracks != null) selectedBarracks.Upgrade(blueprint);
+            Hide();
         }
-        else if (selectedBarracks != null)
+        else
         {
-            selectedBarracks.Upgrade(blueprint);
+            CancelPreview();
+            pendingUpgrade = blueprint;
+            
+            clickedButton.GetComponent<Image>().sprite = confirmIcon;
+            
+            previewTower = Instantiate(blueprint.prefab, selectedTowerTransform.position, Quaternion.identity);
+            if (previewTower.GetComponent<TowerController>() != null) previewTower.GetComponent<TowerController>().enabled = false;
+            if (previewTower.GetComponent<BarracksController>() != null) previewTower.GetComponent<BarracksController>().enabled = false;
+            SetObjectTransparency(previewTower, 0.5f);
         }
-        Hide();
+    }
+
+    private void RequestSkillUpgrade(TowerSkillBlueprint skill, Button clickedButton)
+    {
+        if (pendingUpgrade as TowerSkillBlueprint == skill)
+        {
+            if(selectedTower != null) selectedTower.UpgradeSkill(skill);
+            else if(selectedBarracks != null) selectedBarracks.UpgradeSkill(skill);
+            
+            CancelPreview();
+            if(selectedTower != null) Show(selectedTower);
+            else if(selectedBarracks != null) Show(selectedBarracks);
+        }
+        else
+        {
+            CancelPreview();
+            pendingUpgrade = skill;
+            clickedButton.GetComponent<Image>().sprite = confirmIcon;
+        }
+    }
+    
+    private void CancelPreview()
+    {
+        if (previewTower != null)
+        {
+            Destroy(previewTower);
+            previewTower = null;
+        }
+        pendingUpgrade = null;
+        ResetAllButtonIcons();
+    }
+    
+    private void ResetAllButtonIcons()
+    {
+        foreach (var entry in originalButtonIcons)
+        {
+            Button button = entry.Key;
+            Sprite originalIcon = entry.Value;
+            if (button != null)
+            {
+                button.GetComponent<Image>().sprite = originalIcon;
+            }
+        }
+    }
+
+    private void SetObjectTransparency(GameObject obj, float alpha)
+    {
+        var renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var renderer in renderers)
+        {
+            Color color = renderer.material.color;
+            color.a = alpha;
+            renderer.material.color = color;
+        }
+    }
+    
+    public void ShowSkillTooltip(string description)
+    {
+        if (skillTooltipPanel != null && skillTooltipText != null)
+        {
+            skillTooltipText.text = description;
+            skillTooltipPanel.SetActive(true);
+        }
+    }
+
+    public void HideSkillTooltip()
+    {
+        if (skillTooltipPanel != null)
+        {
+            skillTooltipPanel.SetActive(false);
+        }
     }
 }
 

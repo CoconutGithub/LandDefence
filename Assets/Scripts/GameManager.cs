@@ -1,22 +1,26 @@
-//GameManager.cs
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections.Generic;
 
+// (추가) 타워 타입에 따른 경험치 구슬 스프라이트를 관리하기 위한 클래스
+[System.Serializable]
+public class ExperienceOrbSprite
+{
+    public TowerType towerType;
+    public Sprite sprite;
+}
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
-    // (추가) 다른 스크립트에서 웨이포인트 정보에 접근할 수 있도록 static 변수로 선언합니다.
     public static Transform WaypointHolder { get; private set; }
 
     void Awake()
     {
         if (instance != null) { return; }
         instance = this;
-
-        // (추가) 이 GameManager가 관리하는 웨이포인트 홀더를 static 변수에 할당합니다.
         WaypointHolder = waypointHolder;
     }
 
@@ -45,6 +49,10 @@ public class GameManager : MonoBehaviour
     private Transform waypointHolder;
     [SerializeField]
     private float timeBetweenWaves = 5f;
+
+    // (추가) 인스펙터에서 설정할 경험치 구슬 스프라이트 목록
+    [Header("경험치 구슬 스프라이트")]
+    public List<ExperienceOrbSprite> experienceOrbSprites;
 
     private int lives;
     private int gold;
@@ -87,6 +95,20 @@ public class GameManager : MonoBehaviour
         {
             timeBetweenWaves -= Time.deltaTime;
         }
+    }
+
+    // (추가) 타워 타입에 맞는 경험치 구슬 스프라이트를 찾아 반환하는 함수
+    public Sprite GetExperienceOrbSprite(TowerType type)
+    {
+        // 목록에서 일치하는 타워 타입을 찾습니다.
+        foreach (var orbSprite in experienceOrbSprites)
+        {
+            if (orbSprite.towerType == type)
+            {
+                return orbSprite.sprite; // 찾았으면 해당 스프라이트를 반환합니다.
+            }
+        }
+        return null; // 맞는 스프라이트가 없으면 null을 반환합니다.
     }
 
     System.Collections.IEnumerator SpawnWave()
@@ -213,8 +235,6 @@ public class GameManager : MonoBehaviour
     {
         livesText.text = "Lives: " + lives;
     }
-
-
 
     void UpdateExperienceUI()
     {

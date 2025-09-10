@@ -1,6 +1,8 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // (추가) UI 클릭 이벤트를 감지하기 위해 필요합니다.
+using UnityEngine.EventSystems;
 using TMPro;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 // 타워 건설 UI를 제어하는 스크립트입니다.
 public class TowerBuildUI : MonoBehaviour
@@ -17,125 +19,196 @@ public class TowerBuildUI : MonoBehaviour
         instance = this;
     }
 
+    [Header("UI 설정")]
     public GameObject uiPanel;
+    public Sprite confirmIcon;
 
+    [Header("타워 설계도")]
     public TowerBlueprint archerBlueprint;
     public TowerBlueprint mageBlueprint;
     public TowerBlueprint barracksBlueprint;
     public TowerBlueprint bombBlueprint;
     public TowerBlueprint gunBlueprint;
 
-    // (수정) 비용 텍스트를 연결할 변수들
-    public TextMeshProUGUI archerCostText;
-    public TextMeshProUGUI mageCostText;
-    public TextMeshProUGUI barracksCostText;
-    public TextMeshProUGUI bombCostText;
-    public TextMeshProUGUI gunCostText;
+    [Header("UI 버튼 연결")]
+    public Button archerButton;
+    public Button mageButton;
+    public Button barracksButton;
+    public Button bombButton;
+    public Button gunButton;
+    
+    private Dictionary<TowerBlueprint, Button> blueprintButtonMap;
+    private Dictionary<Button, Sprite> originalButtonIcons;
 
+    private TowerBlueprint pendingBlueprint = null;
+    private GameObject previewTower = null;
     private TowerSpotController currentSpot;
-    private Transform currentSpotTransform; // (추가) 현재 타워 스팟의 Transform을 저장합니다.
+    private Transform currentSpotTransform;
 
     void Start()
     {
         uiPanel.SetActive(false);
-    }
-    
-    // (추가) 패널이 활성화되어 있을 때, 매 프레임 실행됩니다.
-    void Update()
-    {
-        // 만약 마우스 왼쪽 버튼을 클릭했고, 그 클릭이 UI 요소 위가 아니라면 (즉, 게임 월드를 클릭했다면)
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+
+        blueprintButtonMap = new Dictionary<TowerBlueprint, Button>
         {
-            Hide(); // 패널을 숨깁니다.
+            { archerBlueprint, archerButton },
+            { mageBlueprint, mageButton },
+            { barracksBlueprint, barracksButton },
+            { bombBlueprint, bombButton },
+            { gunBlueprint, gunButton }
+        };
+
+        originalButtonIcons = new Dictionary<Button, Sprite>();
+        foreach (var entry in blueprintButtonMap)
+        {
+            if (entry.Value != null)
+            {
+                // (수정) 버튼의 'Target Graphic'을 직접 참조하여 어떤 구조든 안전하게 아이콘을 가져옵니다.
+                Image targetImage = entry.Value.targetGraphic as Image;
+                if (targetImage != null)
+                {
+                    originalButtonIcons[entry.Value] = targetImage.sprite;
+                }
+            }
         }
     }
-    
-    // (추가) 모든 렌더링이 끝난 후, 매 프레임 실행됩니다.
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        {
+            if (pendingBlueprint != null)
+            {
+                CancelBuildPreview();
+            }
+            else
+            {
+                Hide();
+            }
+        }
+    }
+
     void LateUpdate()
     {
-        // 패널이 활성화되어 있고, 타워 스팟이 지정되어 있다면
         if (uiPanel.activeSelf && currentSpotTransform != null)
         {
-            // UI의 위치를 타워 스팟의 월드 위치와 동일하게 계속 업데이트합니다.
-            // 이렇게 하면 카메라가 움직여도 UI가 타워 스팟에 고정되어 보입니다.
             transform.position = currentSpotTransform.position;
         }
     }
 
     public void Show(TowerSpotController spot)
     {
+        if (currentSpot != spot)
+        {
+            CancelBuildPreview();
+        }
+        
         currentSpot = spot;
-        currentSpotTransform = spot.transform; // (추가) 타워 스팟의 Transform을 저장합니다.
-        
-        // (수정) 각 버튼의 비용 텍스트를 업데이트합니다.
-        UpdateCostText(archerCostText, archerBlueprint);
-        UpdateCostText(mageCostText, mageBlueprint);
-        UpdateCostText(barracksCostText, barracksBlueprint);
-        UpdateCostText(bombCostText, bombBlueprint);
-        UpdateCostText(gunCostText, gunBlueprint);
-        
+        currentSpotTransform = spot.transform;
+
+        UpdateCostText(archerButton, archerBlueprint);
+        UpdateCostText(mageButton, mageBlueprint);
+        UpdateCostText(barracksButton, barracksBlueprint);
+        UpdateCostText(bombButton, bombBlueprint);
+        UpdateCostText(gunButton, gunBlueprint);
+
         transform.position = spot.transform.position;
         uiPanel.SetActive(true);
     }
-    
-    // (추가) 비용 텍스트를 업데이트하는 헬퍼 함수
-    private void UpdateCostText(TextMeshProUGUI textElement, TowerBlueprint blueprint)
+
+    private void UpdateCostText(Button button, TowerBlueprint blueprint)
     {
-        if (textElement != null && blueprint != null)
+        if (button != null && blueprint != null)
         {
-            textElement.text = blueprint.cost + "G";
+            // 버튼의 자식 계층 어디에 있든 TextMeshPro 컴포넌트를 찾아 비용을 업데이트합니다.
+            button.GetComponentInChildren<TextMeshProUGUI>().text = blueprint.cost + "G";
         }
     }
 
     public void Hide()
     {
+        CancelBuildPreview();
         uiPanel.SetActive(false);
-        currentSpotTransform = null; // (추가) 패널이 닫힐 때 참조를 비워줍니다.
-    }
-
-    public void BuildArcherTower()
-    {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(archerBlueprint);
-        }
-        Hide();
-    }
-
-    public void BuildMageTower()
-    {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(mageBlueprint);
-        }
-        Hide();
-    }
-
-    public void BuildBarracksTower()
-    {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(barracksBlueprint);
-        }
-        Hide();
-    }
-
-    public void BuildBombTower()
-    {
-        if (currentSpot != null)
-        {
-            currentSpot.BuildTower(bombBlueprint);
-        }
-        Hide();
+        currentSpotTransform = null;
     }
     
-    public void BuildGunTower()
+    public void RequestBuild(TowerBlueprint blueprint)
     {
-        if (currentSpot != null)
+        Button clickedButton = blueprintButtonMap[blueprint];
+
+        if (pendingBlueprint == blueprint)
         {
-            currentSpot.BuildTower(gunBlueprint);
+            currentSpot.BuildTower(pendingBlueprint);
+            Hide();
         }
-        Hide();
+        else
+        {
+            CancelBuildPreview();
+            pendingBlueprint = blueprint;
+            
+            // (수정) 버튼의 'Target Graphic'을 직접 찾아 아이콘을 변경합니다.
+            if (clickedButton != null && confirmIcon != null)
+            {
+                Image targetImage = clickedButton.targetGraphic as Image;
+                if (targetImage != null)
+                {
+                    targetImage.sprite = confirmIcon;
+                }
+            }
+
+            previewTower = Instantiate(blueprint.prefab, currentSpot.transform.position, Quaternion.identity);
+            
+            if (previewTower.GetComponent<TowerController>() != null) previewTower.GetComponent<TowerController>().enabled = false;
+            if (previewTower.GetComponent<BarracksController>() != null) previewTower.GetComponent<BarracksController>().enabled = false;
+
+            SetObjectTransparency(previewTower, 0.5f);
+        }
     }
+    
+    private void CancelBuildPreview()
+    {
+        if (previewTower != null)
+        {
+            Destroy(previewTower);
+            previewTower = null;
+        }
+        pendingBlueprint = null;
+        ResetAllButtonIcons();
+    }
+    
+    private void ResetAllButtonIcons()
+    {
+        foreach (var entry in originalButtonIcons)
+        {
+            Button button = entry.Key;
+            Sprite originalIcon = entry.Value;
+            if (button != null)
+            {
+                // (수정) 버튼의 'Target Graphic'을 직접 찾아 아이콘을 원래대로 되돌립니다.
+                Image targetImage = button.targetGraphic as Image;
+                if (targetImage != null)
+                {
+                    targetImage.sprite = originalIcon;
+                }
+            }
+        }
+    }
+
+    private void SetObjectTransparency(GameObject obj, float alpha)
+    {
+        var renderers = obj.GetComponentsInChildren<SpriteRenderer>();
+        foreach (var renderer in renderers)
+        {
+            Color color = renderer.material.color;
+            color.a = alpha;
+            renderer.material.color = color;
+        }
+    }
+    
+    public void BuildArcherTower() { RequestBuild(archerBlueprint); }
+    public void BuildMageTower() { RequestBuild(mageBlueprint); }
+    public void BuildBarracksTower() { RequestBuild(barracksBlueprint); }
+    public void BuildBombTower() { RequestBuild(bombBlueprint); }
+    public void BuildGunTower() { RequestBuild(gunBlueprint); }
 }
 

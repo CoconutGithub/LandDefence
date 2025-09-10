@@ -1,23 +1,42 @@
-//ExperienceController.cs
 using UnityEngine;
 
 public class ExperienceController : MonoBehaviour
 {
     private int experienceValue;
     private TowerType towerType;
+    private SpriteRenderer spriteRenderer; // (추가) 스프라이트 렌더러 참조
 
-    // Setup 함수로 경험치 값과 종류를 설정합니다.
+    // (추가) Awake에서 SpriteRenderer 컴포넌트를 미리 찾아둡니다.
+    void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("ExperienceController: SpriteRenderer 컴포넌트를 찾을 수 없습니다! ExperienceOrb 프리팹에 추가해주세요.");
+        }
+    }
+
+    // (수정) Setup 함수에서 스프라이트를 설정하는 로직을 추가합니다.
     public void Setup(int value, TowerType type)
     {
         experienceValue = value;
         towerType = type;
+
+        // GameManager에 해당 타워 타입의 스프라이트를 요청합니다.
+        Sprite orbSprite = GameManager.instance.GetExperienceOrbSprite(type);
+
+        // 찾은 스프라이트가 있고, 렌더러도 있다면
+        if (orbSprite != null && spriteRenderer != null)
+        {
+            // 찾은 스프라이트로 이미지를 변경합니다.
+            spriteRenderer.sprite = orbSprite;
+        }
     }
 
-    // (수정) OnMouseDown을 Collect 함수로 변경하여 영웅이 직접 호출하도록 합니다.
     public void Collect()
     {
-        // GameManager에 경험치를 추가할 때, 종류도 함께 알려줍니다.
         GameManager.instance.AddExperience(experienceValue, towerType);
         Destroy(gameObject);
     }
 }
+
