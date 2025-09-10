@@ -67,7 +67,6 @@ public class SoldierController : MonoBehaviour
     
     private AnimationController animationController;
     
-    // (추가) 병사의 원래 스케일 값을 저장할 변수
     private Vector3 originalScale;
 
     void Awake()
@@ -82,7 +81,6 @@ public class SoldierController : MonoBehaviour
             originalRecognitionRadius = recognitionCollider.radius;
         }
         
-        // (추가) 시작할 때 현재 스케일 값을 저장합니다.
         originalScale = transform.localScale;
     }
 
@@ -114,23 +112,11 @@ public class SoldierController : MonoBehaviour
     {
         HandleReflection();
         
-        // (수정) 방향을 바꿀 때, 저장해 둔 원래 스케일 값을 사용하도록 변경합니다.
-        if (currentTarget != null)
-        {
-            if (currentTarget.transform.position.x < transform.position.x)
-            {
-                transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
-            }
-            else
-            {
-                transform.localScale = new Vector3(originalScale.x, originalScale.y, originalScale.z);
-            }
-        }
-        else
-        {
-            // 타겟이 없을 때는 오른쪽(기본 방향)을 보도록 설정합니다.
-            transform.localScale = originalScale;
-        }
+        // (추가) 현재 상태에 따라 IsMoving 파라미터를 업데이트합니다.
+        UpdateAnimationState();
+
+        // (수정) 이동 및 공격 방향에 따라 스프라이트 방향을 제어하는 새 함수 호출
+        HandleSpriteDirection();
 
         switch (currentState)
         {
@@ -178,6 +164,54 @@ public class SoldierController : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    // (추가) 병사의 이동 및 공격 방향에 따라 스프라이트의 좌우를 결정하는 함수
+    void HandleSpriteDirection()
+    {
+        Vector3 targetPosition = Vector3.zero;
+        bool hasTarget = false;
+
+        // 상태에 따라 목표 위치를 결정합니다.
+        if (currentState == SoldierState.ChasingEnemy && currentTarget != null)
+        {
+            targetPosition = currentTarget.transform.position;
+            hasTarget = true;
+        }
+        else if (currentState == SoldierState.ReturningToRallyPoint)
+        {
+            targetPosition = rallyPointPosition;
+            hasTarget = true;
+        }
+        else if (currentState == SoldierState.Fighting && currentTarget != null)
+        {
+            targetPosition = currentTarget.transform.position;
+            hasTarget = true;
+        }
+
+        // 목표가 있을 경우에만 방향을 바꿉니다.
+        if (hasTarget)
+        {
+            // 목표가 왼쪽에 있으면 왼쪽을, 오른쪽에 있으면 오른쪽을 보도록 합니다.
+            if (targetPosition.x < transform.position.x)
+            {
+                transform.localScale = new Vector3(-originalScale.x, originalScale.y, originalScale.z);
+            }
+            else if (targetPosition.x > transform.position.x)
+            {
+                transform.localScale = new Vector3(originalScale.x, originalScale.y, originalScale.z);
+            }
+            // x좌표가 거의 같으면 방향을 바꾸지 않습니다.
+        }
+    }
+    
+    // (추가) 병사의 상태에 따라 애니메이터의 IsMoving 파라미터를 설정하는 함수
+    void UpdateAnimationState()
+    {
+        if (animationController == null) return;
+
+        bool isMoving = (currentState == SoldierState.ReturningToRallyPoint || currentState == SoldierState.ChasingEnemy);
+        animationController.SetAnimationBool("IsMoving", isMoving);
     }
     
     void StartAttackSequence()
