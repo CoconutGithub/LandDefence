@@ -1,4 +1,3 @@
-//SkillManager.cs
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -19,7 +18,6 @@ public class SkillManager : MonoBehaviour
 {
     public static SkillManager instance;
 
-    // 어떤 스킬이 타겟팅 중인지 구분하기 위해 enum을 사용합니다.
     private enum TargetingSkill
     {
         None,
@@ -40,34 +38,48 @@ public class SkillManager : MonoBehaviour
     private float lightningRadius = 2f;
     [SerializeField]
     private float lightningStunDuration = 2f;
+    [SerializeField]
+    private GameObject lightningEffectPrefab; 
     
     [Header("나무 덩굴 스킬 설정")]
     [SerializeField]
     private float vineRadius = 2.5f;
     [SerializeField]
     private float vineDuration = 4f;
+    [SerializeField]
+    private GameObject vineEffectPrefab; // (추가) 덩굴 이펙트 프리팹
     
     [Header("해골 마법 스킬 설정")]
     [SerializeField]
     private float skullMagicHealthThreshold = 500f;
+    [SerializeField]
+    private GameObject skullMagicEffectPrefab; // (추가) 해골 마법 이펙트 프리팹
 
-    // (추가) 모래 지옥 스킬 설정
     [Header("모래 지옥 스킬 설정")]
     [SerializeField]
-    private float sandHellHealthThreshold = 700f; // 이 체력 이하의 적만 즉사시킬 수 있습니다.
+    private float sandHellHealthThreshold = 700f;
+    [SerializeField]
+    private GameObject sandHellEffectPrefab; // (추가) 모래 지옥 이펙트 프리팹
 
     [Header("공통 설정")]
     [SerializeField]
     private LayerMask enemyLayer;
     [SerializeField]
     private GameObject rangeIndicator;
+    [SerializeField]
+    private Color lightningIndicatorColor = Color.cyan;
+    [SerializeField]
+    private Color vineIndicatorColor = Color.green;
+
+    private SpriteRenderer rangeIndicatorRenderer;
     
-    // (추가) 분신술 구현을 위한 변수들
     [Header("분신술 스킬 설정")]
     [SerializeField]
     private HeroController heroController;
     [SerializeField]
     private float cloneDuration = 10f;
+    [SerializeField]
+    private GameObject cloneEffectPrefab; // (추가) 분신술 이펙트 프리팹
 
 
     void Awake()
@@ -89,12 +101,14 @@ public class SkillManager : MonoBehaviour
 
         if (rangeIndicator != null)
         {
+            rangeIndicatorRenderer = rangeIndicator.GetComponent<SpriteRenderer>();
             rangeIndicator.SetActive(false);
         }
     }
 
     void Update()
     {
+        // ... (Update 함수 내용은 이전과 동일) ...
         foreach (Skill skill in skills)
         {
             if (skill.currentCooldown > 0)
@@ -118,7 +132,7 @@ public class SkillManager : MonoBehaviour
 
         if (currentTargetingSkill != TargetingSkill.None)
         {
-            if (rangeIndicator != null && (currentTargetingSkill == TargetingSkill.Lightning || currentTargetingSkill == TargetingSkill.Vine))
+            if (rangeIndicator != null && rangeIndicator.activeSelf)
             {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 rangeIndicator.transform.position = new Vector3(mousePos.x, mousePos.y, 0);
@@ -148,14 +162,14 @@ public class SkillManager : MonoBehaviour
     }
     
     // --- 각 버튼에 연결될 함수들 ---
-
+    
     public void OnLightningSkillButton()
     {
         Skill lightningSkill = FindSkill("Lightning");
         if (lightningSkill != null && lightningSkill.currentCooldown <= 0)
         {
             currentTargetingSkill = TargetingSkill.Lightning;
-            ShowRangeIndicator(lightningRadius);
+            ShowRangeIndicator(lightningRadius, lightningIndicatorColor);
         }
     }
     
@@ -165,10 +179,43 @@ public class SkillManager : MonoBehaviour
         if (vineSkill != null && vineSkill.currentCooldown <= 0)
         {
             currentTargetingSkill = TargetingSkill.Vine;
-            ShowRangeIndicator(vineRadius);
+            ShowRangeIndicator(vineRadius, vineIndicatorColor);
+        }
+    }
+    
+    public void OnCloneSkillButton()
+    {
+        Skill cloneSkill = FindSkill("Clone");
+        if (cloneSkill != null && cloneSkill.currentCooldown <= 0)
+        {
+            if (heroController != null)
+            {
+                // (수정) 분신술 이펙트 생성
+                if(cloneEffectPrefab != null)
+                {
+                    Instantiate(cloneEffectPrefab, heroController.transform.position, Quaternion.identity);
+                }
+                heroController.ActivateCloneSkill(cloneDuration);
+                StartCooldown(cloneSkill);
+            }
+            else
+            {
+                Debug.LogError("HeroController가 SkillManager에 연결되지 않았습니다!");
+            }
+        }
+    }
+    
+    public void OnSandHellButton()
+    {
+        Skill sandHellSkill = FindSkill("SandHell");
+        if (sandHellSkill != null && sandHellSkill.currentCooldown <= 0)
+        {
+            CastSandHell();
+            StartCooldown(sandHellSkill);
         }
     }
 
+    // ... (Heal, SkullMagic 버튼 함수는 이전과 동일) ...
     public void OnHealLivesButton()
     {
         Skill healSkill = FindSkill("HealLives");
@@ -199,35 +246,6 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // (추가) 분신술 버튼에 연결될 함수입니다.
-    public void OnCloneSkillButton()
-    {
-        Skill cloneSkill = FindSkill("Clone");
-        if (cloneSkill != null && cloneSkill.currentCooldown <= 0)
-        {
-            if (heroController != null)
-            {
-                heroController.ActivateCloneSkill(cloneDuration);
-                StartCooldown(cloneSkill);
-            }
-            else
-            {
-                Debug.LogError("HeroController가 SkillManager에 연결되지 않았습니다!");
-            }
-        }
-    }
-    
-    // (추가) 모래 지옥 버튼에 연결될 함수입니다.
-    public void OnSandHellButton()
-    {
-        Skill sandHellSkill = FindSkill("SandHell");
-        if (sandHellSkill != null && sandHellSkill.currentCooldown <= 0)
-        {
-            CastSandHell();
-            StartCooldown(sandHellSkill);
-        }
-    }
-
     // --- 내부 로직 함수들 ---
 
     void CastLightning(Vector3 mousePosition)
@@ -237,6 +255,11 @@ public class SkillManager : MonoBehaviour
 
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
         worldPosition.z = 0;
+
+        if (lightningEffectPrefab != null)
+        {
+            Instantiate(lightningEffectPrefab, worldPosition, Quaternion.identity);
+        }
 
         Collider2D[] enemiesToDamage = Physics2D.OverlapCircleAll(worldPosition, lightningRadius, enemyLayer);
         foreach (Collider2D enemyCollider in enemiesToDamage)
@@ -256,7 +279,7 @@ public class SkillManager : MonoBehaviour
         
         StartCooldown(lightningSkill);
     }
-
+    
     void CastVines(Vector3 mousePosition)
     {
         Skill vineSkill = FindSkill("Vine");
@@ -264,6 +287,12 @@ public class SkillManager : MonoBehaviour
 
         Vector3 worldPosition = Camera.main.ScreenToWorldPoint(mousePosition);
         worldPosition.z = 0;
+
+        // (추가) 덩굴 이펙트 생성
+        if(vineEffectPrefab != null)
+        {
+            Instantiate(vineEffectPrefab, worldPosition, Quaternion.identity);
+        }
 
         Collider2D[] enemiesToRoot = Physics2D.OverlapCircleAll(worldPosition, vineRadius, enemyLayer);
         foreach (Collider2D enemyCollider in enemiesToRoot)
@@ -292,6 +321,11 @@ public class SkillManager : MonoBehaviour
             {
                 if (enemyHealth.MaxHealth <= skullMagicHealthThreshold)
                 {
+                    // (추가) 해골 마법 이펙트를 적 위치에 생성
+                    if(skullMagicEffectPrefab != null)
+                    {
+                        Instantiate(skullMagicEffectPrefab, hit.transform.position, Quaternion.identity);
+                    }
                     enemyHealth.InstantKill();
                     StartCooldown(skullMagicSkill);
                 }
@@ -303,28 +337,29 @@ public class SkillManager : MonoBehaviour
         }
     }
 
-    // (추가) 모래 지옥 시전 로직입니다.
     void CastSandHell()
     {
-        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
-        int killCount = 0;
+        // (추가) 모래 지옥 이펙트 생성 (맵 중앙에 생성하는 예시)
+        if(sandHellEffectPrefab != null)
+        {
+            Instantiate(sandHellEffectPrefab, Vector3.zero, Quaternion.identity);
+        }
 
+        GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject enemyObject in allEnemies)
         {
             EnemyHealth enemyHealth = enemyObject.GetComponent<EnemyHealth>();
             if (enemyHealth != null)
             {
-                // 적의 최대 체력이 설정된 한계치 이하일 때만 즉사시킵니다.
                 if (enemyHealth.MaxHealth <= sandHellHealthThreshold)
                 {
                     enemyHealth.InstantKill();
-                    killCount++;
                 }
             }
         }
-        Debug.Log($"모래 지옥으로 {killCount}마리의 적을 처치했습니다!");
     }
-
+    
+    // ... (나머지 함수들은 이전과 동일) ...
     private Skill FindSkill(string name)
     {
         return skills.Find(skill => skill.skillName == name);
@@ -339,12 +374,17 @@ public class SkillManager : MonoBehaviour
         }
     }
     
-    private void ShowRangeIndicator(float radius)
+    private void ShowRangeIndicator(float radius, Color color)
     {
         if (rangeIndicator != null)
         {
             rangeIndicator.SetActive(true);
             rangeIndicator.transform.localScale = new Vector3(radius * 2, radius * 2, 1f);
+            
+            if (rangeIndicatorRenderer != null)
+            {
+                rangeIndicatorRenderer.color = color;
+            }
         }
     }
 
