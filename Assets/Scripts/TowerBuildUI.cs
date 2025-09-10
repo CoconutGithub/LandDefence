@@ -161,7 +161,7 @@ public class TowerBuildUI : MonoBehaviour
             if (previewTower.GetComponent<TowerController>() != null) previewTower.GetComponent<TowerController>().enabled = false;
             if (previewTower.GetComponent<BarracksController>() != null) previewTower.GetComponent<BarracksController>().enabled = false;
 
-            SetObjectTransparency(previewTower, 0.5f);
+            SetObjectTransparency(previewTower, 0.7f);
         }
     }
     
