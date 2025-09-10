@@ -293,10 +293,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db827249f2d55cb4c8fff517560b47c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
-  moveSpeed: 5
+  moveSpeed: 4
   knockbackSpeed: 10
   attackDamage: 120
   timeBetweenAttacks: 0.7
+  canBeBlocked: 1
+  isAreaOfEffect: 0
+  aoeRadius: 1.5
+  friendlyLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &7334520908270781745
 MonoBehaviour:
   m_ObjectHideFlags: 0

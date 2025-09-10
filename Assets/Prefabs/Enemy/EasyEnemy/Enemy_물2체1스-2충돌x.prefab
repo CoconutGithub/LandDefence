@@ -297,6 +297,12 @@ MonoBehaviour:
   knockbackSpeed: 7
   attackDamage: 25
   timeBetweenAttacks: 0.7
+  canBeBlocked: 0
+  isAreaOfEffect: 0
+  aoeRadius: 1.5
+  friendlyLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &7334520908270781745
 MonoBehaviour:
   m_ObjectHideFlags: 0
