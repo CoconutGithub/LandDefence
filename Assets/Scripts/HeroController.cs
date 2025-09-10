@@ -1,4 +1,3 @@
-//HeroController.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -41,11 +40,12 @@ public class HeroController : MonoBehaviour
     private EnemyMovement currentTarget;
     private float timeSinceLastCombat = 0f; 
     private List<GameObject> activeClones = new List<GameObject>();
-
+    private AnimationController animationController; // (추가) 애니메이션 컨트롤러 참조
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        animationController = GetComponent<AnimationController>(); // (추가) 컴포넌트 찾기
         currentHealth = maxHealth;
         if (healthBarSlider != null)
         {
@@ -67,6 +67,20 @@ public class HeroController : MonoBehaviour
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
         movementInput = new Vector2(moveX, moveY).normalized;
+
+        // (수정) 애니메이터 파라미터를 업데이트합니다.
+        if (animationController != null)
+        {
+            animationController.SetAnimationBool("IsMoving", movementInput.sqrMagnitude > 0);
+        }
+
+        // (추가) 이동 방향에 따라 캐릭터의 좌우를 뒤집습니다.
+        if (Mathf.Abs(moveX) > 0.01f)
+        {
+            Vector3 newScale = transform.localScale;
+            newScale.x = Mathf.Abs(newScale.x) * Mathf.Sign(moveX);
+            transform.localScale = newScale;
+        }
 
         attackCountdown -= Time.deltaTime;
 
@@ -133,7 +147,6 @@ public class HeroController : MonoBehaviour
         activeClones.Clear();
     }
     
-    // (추가) 외부(EnemyMovement)에서 호출하여 영웅의 타겟을 초기화하는 함수
     public void ResumeMovement()
     {
         currentTarget = null;
@@ -172,6 +185,11 @@ public class HeroController : MonoBehaviour
     {
         if (currentTarget != null)
         {
+            // (추가) 공격 애니메이션을 실행시킵니다.
+            if (animationController != null)
+            {
+                animationController.PlayAttackAnimation(); // "DoAttack" Trigger 발동
+            }
             currentTarget.GetComponent<EnemyHealth>().TakeDamage(attackDamage, TowerType.Hero, DamageType.Physical);
         }
     }
@@ -224,4 +242,3 @@ public class HeroController : MonoBehaviour
         }
     }
 }
-
