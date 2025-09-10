@@ -2743,9 +2743,9 @@ MonoBehaviour:
   vineRadius: 1.5
   vineDuration: 4
   vineEffectPrefab: {fileID: 7583397560936675099, guid: ae90ad9c5547f7a489eb9f471e8c894a, type: 3}
-  skullMagicHealthThreshold: 300
+  skullMagicHealthThreshold: 200
   skullMagicEffectPrefab: {fileID: 6032528964811408136, guid: 4611d277e2283244299102bbcc48e8b3, type: 3}
-  sandHellHealthThreshold: 700
+  sandHellHealthThreshold: 400
   sandHellEffectPrefab: {fileID: 9054092999106488303, guid: 324f3abad56040947b82f05a43e12c8a, type: 3}
   enemyLayer:
     serializedVersion: 2
@@ -6629,6 +6629,20 @@ MonoBehaviour:
   resultText: {fileID: 176283315}
   waves:
   - enemyGroups:
+    - enemyPrefab: {fileID: 3599941311329457413, guid: d4e16ec0a8f75374db697257c1fcc1cc, type: 3}
+      count: 2
+      spawnInterval: 0.5
+    - enemyPrefab: {fileID: 3599941311329457413, guid: 8046a548ce18f5f4fb8be202d66612e5, type: 3}
+      count: 6
+      spawnInterval: 0.3
+    - enemyPrefab: {fileID: 3599941311329457413, guid: 445397d202cc7ab45865d580fa493518, type: 3}
+      count: 6
+      spawnInterval: 0.3
+    - enemyPrefab: {fileID: 3599941311329457413, guid: 3b40695feb9b0024fa6e0c381a84fcf7, type: 3}
+      count: 6
+      spawnInterval: 0.3
+    timeBetweenGroups: 1
+  - enemyGroups:
     - enemyPrefab: {fileID: 3599941311329457413, guid: 36586a28b45fe27459608374e20d15f7, type: 3}
       count: 5
       spawnInterval: 0.5
@@ -6658,7 +6672,7 @@ MonoBehaviour:
       spawnInterval: 0.5
     timeBetweenGroups: 1
   waypointHolder: {fileID: 1889519787}
-  timeBetweenWaves: 5
+  timeBetweenWaves: 3
   experienceOrbSprites:
   - towerType: 1
     sprite: {fileID: -2735798966522470494, guid: 012cc80e51560f34891b27eefc4b2593, type: 3}
