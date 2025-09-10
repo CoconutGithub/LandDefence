@@ -201,7 +201,7 @@ GameObject:
   - component: {fileID: 6333193910153891430}
   - component: {fileID: 5180914001936920742}
   m_Layer: 9
-  m_Name: Enemy
+  m_Name: "Enemy_\uCCB42\uACF53\uC2A4-1\uACF5\uC18D1"
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -271,7 +271,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 1
   m_Sprite: {fileID: -2413806693520163455, guid: b13278790a6bff84dbc30f37f3d89600, type: 3}
-  m_Color: {r: 0.85660374, g: 0.08889274, b: 0.08889274, a: 1}
+  m_Color: {r: 0.8763343, g: 0.3075471, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -294,8 +294,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
   moveSpeed: 2
-  attackDamage: 20
-  timeBetweenAttacks: 0.7
+  knockbackSpeed: 7
+  attackDamage: 120
+  timeBetweenAttacks: 0.5
 --- !u!114 &7334520908270781745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,8 +309,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5731471f630ffb4793446e74b6c8f88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 100
-  goldValue: 10
+  maxHealth: 200
+  goldValue: 15
+  experienceValue: 10
   physicalDefense: 0
   magicalDefense: 0
   experienceOrbPrefab: {fileID: 4162431200698289360, guid: 926623f091a5d6442b9f66deb74f4c61, type: 3}
