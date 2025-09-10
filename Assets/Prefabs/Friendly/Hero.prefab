@@ -319,7 +319,7 @@ MonoBehaviour:
   moveSpeed: 5
   maxHealth: 500
   attackDamage: 30
-  timeBetweenAttacks: 0.5
+  timeBetweenAttacks: 1
   healthRegenRate: 50
   timeToStartRegen: 3
   healthBarSlider: {fileID: 3619236416454428086}

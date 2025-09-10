@@ -9391,11 +9391,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5338282218186973493, guid: 3ef42e9c32a6782439409d83b203464d, type: 3}
       propertyPath: attackDamage
-      value: 50
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 5338282218186973493, guid: 3ef42e9c32a6782439409d83b203464d, type: 3}
       propertyPath: timeBetweenAttacks
-      value: 0.3
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
