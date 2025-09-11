@@ -157,7 +157,7 @@ MonoBehaviour:
   rallyPointRange: 3
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 5065dff084035b242a776c4f68dd995d, type: 3}
-    cost: 50
+    cost: 70
     towerName: "\uBC14\uC774\uD0B9 \uBCD1\uC601 \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: 73e72dca8d7c85e44ab64affd390d87b, type: 3}
   - prefab: {fileID: 266319913433617465, guid: 26e597ebb00f6ec4ab605cccbdfcc315, type: 3}
@@ -165,7 +165,7 @@ MonoBehaviour:
     towerName: "\uC911\uAD6D \uBCD1\uC601 \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: cd0a77aab5c26664abb0e629c6e8a82e, type: 3}
   - prefab: {fileID: 266319913433617465, guid: b52ab24705507244486331c2ceae59fa, type: 3}
-    cost: 60
+    cost: 75
     towerName: "\uC2A4\uC704\uC2A4 \uBCD1\uC601 \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: 1e3c0b40bfea54844b8da0339d3e20a6, type: 3}
   towerSkills: []

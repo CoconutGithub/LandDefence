@@ -162,7 +162,7 @@ MonoBehaviour:
       \uAC10\uC18C\uD558\uACE0 \uACF5\uACA9\uB825\uC774 \uC99D\uAC00\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 35dc91d12e9164b4ba8da9dcfec0c01b, type: 3}
     maxLevel: 3
-    costs: 640000007800000096000000
+    costs: 960000009600000096000000
     values1:
     - 20
     - 15
@@ -179,7 +179,7 @@ MonoBehaviour:
       \uCCB4\uB825\uC73C\uB85C \uD68C\uBCF5\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: b12e31740978f1d49bb6bf77c8383f7d, type: 3}
     maxLevel: 3
-    costs: 96000000aa000000c8000000
+    costs: 9600000096000000aa000000
     values1:
     - 7
     - 10

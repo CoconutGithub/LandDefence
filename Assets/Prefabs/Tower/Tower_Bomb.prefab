@@ -118,7 +118,7 @@ MonoBehaviour:
   projectileSprite: {fileID: 21300000, guid: 1c249e4c7e286f348a89d83a3df3096c, type: 3}
   slowAmount: 0
   slowDuration: 0
-  explosionRadius: 2
+  explosionRadius: 1.5
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 0
@@ -132,7 +132,7 @@ MonoBehaviour:
   iceSlickEffect: {fileID: 0}
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 5d918d782e3049e4cb7187e3cb707379, type: 3}
-    cost: 70
+    cost: 75
     towerName: "\uD504\uB791\uC2A4 \uD3ED\uD0C4 \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: 2da72c4d0b4648d4b9ecde36970c03dc, type: 3}
   - prefab: {fileID: 266319913433617465, guid: b544f5d68e7cf914bac946924f6220b0, type: 3}

@@ -139,9 +139,9 @@ MonoBehaviour:
     maxLevel: 3
     costs: c8000000fa0000002c010000
     values1:
-    - 300
+    - 200
+    - 400
     - 500
-    - 700
     values2: []
     values3: []
     overrideProjectileSprite: {fileID: 21300000, guid: be4b827b9be902b4483775db993ded9d, type: 3}
@@ -151,19 +151,19 @@ MonoBehaviour:
       \uC55E\uC11C\uAC00\uB294 \uC801\uC744 \uD574\uC77C\uB85C \uBC00\uC5B4\uB0C5\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 1d809347d0ca556438dccdad8a71b7b4, type: 3}
     maxLevel: 3
-    costs: c8000000fa0000002c010000
+    costs: c8000000c8000000fa000000
     values1:
     - 3
     - 5
     - 7
     values2:
-    - 1.5
-    - 2
-    - 2.5
-    values3:
-    - 1
     - 1.2
     - 1.5
+    - 2
+    values3:
+    - 0.7
+    - 1
+    - 1.2
     overrideProjectileSprite: {fileID: 21300000, guid: 8de404a6f6661d04ab3183f34da6fc6b, type: 3}
     overrideProjectilePrefab: {fileID: 0}
   projectilePrefab: {fileID: 7474275304273939266, guid: d34faaaae2588d347ad02764811a74ef, type: 3}

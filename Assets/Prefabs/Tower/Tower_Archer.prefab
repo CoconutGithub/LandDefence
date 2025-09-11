@@ -132,11 +132,11 @@ MonoBehaviour:
   iceSlickEffect: {fileID: 0}
   upgradePaths:
   - prefab: {fileID: 266319913433617465, guid: 70fb4f679f1c49c468f063d12f0fd9fc, type: 3}
-    cost: 50
+    cost: 65
     towerName: "\uD55C\uAD6D \uD65C \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: ad8a4e41e46742242a666cb9a6b4e8e5, type: 3}
   - prefab: {fileID: 266319913433617465, guid: 9a53f3383d9e71b4f9eddfc46d1fdec4, type: 3}
-    cost: 75
+    cost: 70
     towerName: "\uC77C\uBCF8 \uD65C \uD0C0\uC6CC"
     icon: {fileID: 21300000, guid: 4083edcabe6ef1045911d926ab715209, type: 3}
   towerSkills: []

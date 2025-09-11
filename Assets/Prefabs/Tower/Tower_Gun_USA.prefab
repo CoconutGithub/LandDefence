@@ -137,11 +137,11 @@ MonoBehaviour:
       \uAC10\uC18C\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: e35011624e5ac5945beff484f68b83ce, type: 3}
     maxLevel: 3
-    costs: 64000000aa000000fa000000
+    costs: 7800000096000000aa000000
     values1:
+    - 0.5
     - 1
-    - 1.7
-    - 2
+    - 1.5
     values2: []
     values3: []
     overrideProjectileSprite: {fileID: 0}
@@ -151,7 +151,7 @@ MonoBehaviour:
       \uCD1D\uC54C\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: ebd3707ac7c74274ca6928356b4dec29, type: 3}
     maxLevel: 3
-    costs: 78000000b4000000e6000000
+    costs: 780000007800000096000000
     values1:
     - 5
     - 7
@@ -165,13 +165,13 @@ MonoBehaviour:
       \uD53C\uD574\uB97C \uC8FC\uB294 \uBBF8\uC0AC\uC77C\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 0c55c97e836b9b24293619ed61efb57b, type: 3}
     maxLevel: 2
-    costs: 9600000096000000
+    costs: 96000000aa000000
     values1:
     - 3
     - 5
     values2:
-    - 100
-    - 150
+    - 50
+    - 70
     values3:
     - 0.7
     - 1

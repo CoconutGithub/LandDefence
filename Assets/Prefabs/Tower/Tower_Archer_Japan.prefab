@@ -138,7 +138,7 @@ MonoBehaviour:
       \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 2678943f52ac9f143acea68a4cda5e7a, type: 3}
     maxLevel: 3
-    costs: 320000003c00000046000000
+    costs: 640000006400000078000000
     values1:
     - 15
     - 20
@@ -155,7 +155,7 @@ MonoBehaviour:
       \uB450 \uBC88 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 7d7cd965828cbe045a98777e453bfcef, type: 3}
     maxLevel: 3
-    costs: 460000006400000064000000
+    costs: 640000006e00000078000000
     values1:
     - 5
     - 10

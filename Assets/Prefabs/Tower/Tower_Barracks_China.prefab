@@ -161,7 +161,7 @@ MonoBehaviour:
     skillDescription: "\uBCD1\uC0AC\uC758 \uCDA9\uC6D0 \uC18D\uB3C4\uAC00 \uAC10\uC18C\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: a3c937f99b8adb6489221292cd2d6da7, type: 3}
     maxLevel: 3
-    costs: aa000000c800000096000000
+    costs: 780000007800000096000000
     values1:
     - 0.5
     - 0.7
@@ -175,7 +175,7 @@ MonoBehaviour:
       \uC99D\uAC00\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 65654373a78bee84b8d9bd4bf3f324ba, type: 3}
     maxLevel: 3
-    costs: 640000009600000096000000
+    costs: 640000007800000078000000
     values1:
     - 0.3
     - 0.5

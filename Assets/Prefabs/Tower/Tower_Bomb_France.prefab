@@ -118,7 +118,7 @@ MonoBehaviour:
   projectileSprite: {fileID: 21300000, guid: 1c249e4c7e286f348a89d83a3df3096c, type: 3}
   slowAmount: 0
   slowDuration: 0
-  explosionRadius: 2
+  explosionRadius: 1.5
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 0
@@ -139,9 +139,9 @@ MonoBehaviour:
     maxLevel: 1
     costs: c8000000
     values1:
-    - 0.4
+    - 0.3
     values2:
-    - 1
+    - 0.7
     values3: []
     overrideProjectileSprite: {fileID: 0}
     overrideProjectilePrefab: {fileID: 0}
@@ -150,7 +150,7 @@ MonoBehaviour:
       \uACF5\uACA9 \uC18D\uB3C4\uAC00 \uB300\uD3ED \uC99D\uAC00\uD569\uB2C8\uB2E4."
     icon: {fileID: 21300000, guid: 54bc9bbe2963ab340ae085a285c790d8, type: 3}
     maxLevel: 3
-    costs: 960000009600000096000000
+    costs: 640000007800000078000000
     values1:
     - 5
     - 7
