@@ -109,7 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
   towerType: 1
   damageType: 0
-  attackRange: 7
+  attackRange: 6
   timeBetweenAttacks: 0.5
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: 12c0a0021f801f94fb926c1ac631ab9d, type: 2}

@@ -110,21 +110,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TowerController
   towerType: 2
   damageType: 1
-  attackRange: 5
+  attackRange: 4
   timeBetweenAttacks: 1
   isRapidFireTower: 0
   attackAnimationClip: {fileID: 7400000, guid: e9ffc945bce01c844adc092b46faa9f0, type: 2}
   baseProjectileDamage: 0
   projectileSpeed: 0
   projectileSprite: {fileID: 0}
-  slowAmount: 0.5
+  slowAmount: 0.4
   slowDuration: 10
   explosionRadius: 0
   bulletsPerBurst: 1
   timeBetweenShots: 0.1
   isLaserTower: 1
-  laserDps: 30
-  laserDpsRamp: 20
+  laserDps: 15
+  laserDpsRamp: 30
   laserColors:
   - {r: 0.6251406, g: 0.8994341, b: 0.97735846, a: 1}
   - {r: 0.45548588, g: 0.70107394, b: 0.97735846, a: 1}

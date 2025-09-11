@@ -336,7 +336,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoldierController
   maxHealth: 250
-  attackDamage: 50
+  attackDamage: 35
   timeBetweenAttacks: 1
   moveSpeed: 3
   healthRegenRate: 50
