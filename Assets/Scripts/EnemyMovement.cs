@@ -22,20 +22,20 @@ public class EnemyMovement : MonoBehaviour
     private float attackDamage = 15f;
     [SerializeField]
     private float timeBetweenAttacks = 1.5f;
-    // (추가) 이 적이 병사/영웅에게 막히는지 여부 (true = 막힘, false = 통과)
-    [SerializeField]
-    private bool canBeBlocked = true;
-
-    [Header("광역 공격 (선택 사항)")]
-    // (추가) 광역 공격을 하는 적인지 여부
+    // (추가) 광역 공격 옵션
     [SerializeField]
     private bool isAreaOfEffect = false;
-    // (추가) 광역 공격의 범위
     [SerializeField]
     private float aoeRadius = 1.5f;
-    // (추가) 공격할 아군을 식별하기 위한 레이어
     [SerializeField]
-    private LayerMask friendlyLayer;
+    private LayerMask friendlyLayer; // (수정) 이제 여러 레이어를 선택할 수 있습니다.
+    [SerializeField]
+    private AnimationClip attackAnimationClip; // (추가) 공격 애니메이션 클립 연결
+
+    // (추가) 충돌 비활성화 옵션
+    [Header("특성")]
+    [SerializeField]
+    private bool canBeBlocked = true;
 
 
     private Transform[] waypoints;
@@ -44,18 +44,32 @@ public class EnemyMovement : MonoBehaviour
 
     private List<SoldierController> blockingSoldiers = new List<SoldierController>();
     private HeroController blockingHero;
-    
+
     private float originalSpeed;
     private List<SlowEffect> activeSlows = new List<SlowEffect>();
-    
+
     private bool isRooted = false;
     private float rootTimer = 0f;
 
     private bool isBeingKnockedBack = false;
 
+    // (수정) 애니메이션 제어를 위한 변수들
+    private AnimationController animationController;
+    private Vector3 originalScale;
+    private float attackAnimLength; 
+
     void Start()
     {
         originalSpeed = moveSpeed;
+        // (수정) 애니메이션 관련 변수 초기화
+        animationController = GetComponent<AnimationController>();
+        originalScale = transform.localScale;
+        
+        // (추가) 공격 애니메이션 길이 가져오기
+        if (attackAnimationClip != null)
+        {
+            attackAnimLength = attackAnimationClip.length;
+        }
     }
 
     public int GetCurrentWaypointIndex()
@@ -79,7 +93,7 @@ public class EnemyMovement : MonoBehaviour
     void Update()
     {
         if (isBeingKnockedBack) return;
-        
+
         if (isRooted)
         {
             rootTimer -= Time.deltaTime;
@@ -87,21 +101,67 @@ public class EnemyMovement : MonoBehaviour
             {
                 isRooted = false;
             }
+            // (수정) 속박 상태일 때는 움직이지 않으므로 IsMoving을 false로 설정
+            if (animationController != null) animationController.SetAnimationBool("IsMoving", false);
             return;
         }
 
         HandleEffects();
         
-        // (수정) canBeBlocked가 false이거나, 막는 유닛이 없으면 이동하고, 아니면 공격합니다.
-        if (!canBeBlocked || (blockingSoldiers.Count == 0 && blockingHero == null))
+        bool isFighting = blockingSoldiers.Count > 0 || blockingHero != null;
+        if (animationController != null)
         {
-            Move();
+            animationController.SetAnimationBool("IsMoving", !isFighting && !isRooted && !isBeingKnockedBack);
         }
-        else
+
+        // (수정) 이동 방향에 따른 스프라이트 좌우 반전 로직 호출
+        HandleSpriteDirection(isFighting);
+
+        if (isFighting)
         {
             Attack();
         }
+        else
+        {
+            Move();
+        }
     }
+
+    // (수정) 스프라이트 방향을 제어하는 새로운 함수
+    private void HandleSpriteDirection(bool isFighting)
+    {
+        Transform currentTargetTransform = null;
+
+        if (isFighting)
+        {
+            // 싸우고 있을 때는 현재 공격 대상을 바라봅니다.
+            if (blockingHero != null)
+            {
+                currentTargetTransform = blockingHero.transform;
+            }
+            else if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
+            {
+                currentTargetTransform = blockingSoldiers[0].transform;
+            }
+        }
+        else if (waypoints != null && currentWaypointIndex < waypoints.Length)
+        {
+            // 이동 중일 때는 다음 웨이포인트를 바라봅니다.
+            currentTargetTransform = waypoints[currentWaypointIndex];
+        }
+
+        // 목표가 있을 경우에만 방향을 계산합니다.
+        if (currentTargetTransform != null)
+        {
+            float directionX = currentTargetTransform.position.x - transform.position.x;
+
+            if (Mathf.Abs(directionX) > 0.01f)
+            {
+                transform.localScale = new Vector3(Mathf.Sign(directionX) * Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+            }
+        }
+    }
+
 
     private void HandleEffects()
     {
@@ -163,15 +223,15 @@ public class EnemyMovement : MonoBehaviour
     private IEnumerator KnockbackCoroutine(float distance)
     {
         isBeingKnockedBack = true;
-        
+
         if (blockingHero != null)
         {
             blockingHero.ResumeMovement();
         }
-        
-        foreach(var soldier in new List<SoldierController>(blockingSoldiers))
+
+        foreach (var soldier in new List<SoldierController>(blockingSoldiers))
         {
-            if(soldier != null)
+            if (soldier != null)
             {
                 soldier.ReleaseEnemyBeforeDeath();
             }
@@ -216,53 +276,70 @@ public class EnemyMovement : MonoBehaviour
         isBeingKnockedBack = false;
     }
 
-    // (수정) 광역 공격과 단일 공격 로직을 분리합니다.
+    // (수정) Attack 함수는 이제 애니메이션 속도를 조절하고 재생만 담당합니다.
     void Attack()
     {
         attackCountdown -= Time.deltaTime;
         if (attackCountdown <= 0f)
         {
-            // isAreaOfEffect가 true이면 광역 공격을 수행합니다.
-            if (isAreaOfEffect)
+            if (animationController != null)
             {
-                // 지정된 범위 내의 friendlyLayer에 속한 모든 콜라이더를 찾습니다.
-                Collider2D[] friendlies = Physics2D.OverlapCircleAll(transform.position, aoeRadius, friendlyLayer);
-                foreach (var friendlyCollider in friendlies)
+                // timeBetweenAttacks에 맞춰 애니메이션 속도를 계산합니다.
+                if (attackAnimLength > 0 && timeBetweenAttacks > 0)
                 {
-                    // 찾은 콜라이더가 병사 컴포넌트를 가지고 있다면 피해를 줍니다.
-                    SoldierController soldier = friendlyCollider.GetComponent<SoldierController>();
-                    if (soldier != null)
-                    {
-                        soldier.TakeDamage(attackDamage, this);
-                    }
-
-                    // 찾은 콜라이더가 영웅 컴포넌트를 가지고 있다면 피해를 줍니다.
-                    HeroController hero = friendlyCollider.GetComponent<HeroController>();
-                    if (hero != null)
-                    {
-                        hero.TakeDamage(attackDamage);
-                    }
+                    float speedMultiplier = attackAnimLength / timeBetweenAttacks;
+                    animationController.SetAnimationSpeed(speedMultiplier);
                 }
+                else
+                {
+                    animationController.SetAnimationSpeed(1f);
+                }
+                
+                animationController.PlayAttackAnimation(); // "DoAttack" Trigger 발동
             }
-            else // isAreaOfEffect가 false이면 기존의 단일 대상 공격을 수행합니다.
+            else
             {
-                if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
-                {
-                    blockingSoldiers[0].TakeDamage(attackDamage, this);
-                }
-                else if (blockingHero != null)
-                {
-                    blockingHero.TakeDamage(attackDamage);
-                }
+                // 애니메이터가 없으면 즉시 데미지를 줍니다.
+                DealDamage();
             }
             
             attackCountdown = timeBetweenAttacks;
         }
     }
-    
+
+    // (추가) 애니메이션 이벤트에서 호출될, 실제 데미지를 주는 함수
+    public void DealDamage()
+    {
+        // (수정) 광역 공격 로직
+        if (isAreaOfEffect)
+        {
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, aoeRadius, friendlyLayer);
+            foreach (var hit in hits)
+            {
+                if (hit.GetComponent<SoldierController>() != null)
+                    hit.GetComponent<SoldierController>().TakeDamage(attackDamage, this);
+                if (hit.GetComponent<HeroController>() != null)
+                    hit.GetComponent<HeroController>().TakeDamage(attackDamage);
+                if (hit.GetComponent<HeroCloneController>() != null)
+                    hit.GetComponent<HeroCloneController>().TakeDamage(attackDamage);
+            }
+        }
+        else // 단일 공격
+        {
+            if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
+            {
+                blockingSoldiers[0].TakeDamage(attackDamage, this);
+            }
+            else if (blockingHero != null)
+            {
+                blockingHero.TakeDamage(attackDamage);
+            }
+        }
+    }
+
     void Move()
     {
-        if (currentWaypointIndex >= waypoints.Length || isRooted)
+        if (waypoints != null && currentWaypointIndex >= waypoints.Length)
         {
             return;
         }
@@ -286,13 +363,11 @@ public class EnemyMovement : MonoBehaviour
         GameManager.instance.EnemyDefeated();
         Destroy(gameObject);
     }
-    
+
     public void BlockMovement(SoldierController soldier, HeroController hero)
     {
-        // (추가) canBeBlocked가 false이면, 아예 막히지 않고 함수를 즉시 종료합니다.
-        if (!canBeBlocked) return;
-
-        if (isBeingKnockedBack) return;
+        // (수정) canBeBlocked가 false이면 함수를 즉시 종료하여 막히지 않도록 합니다.
+        if (!canBeBlocked || isBeingKnockedBack) return;
 
         if (soldier != null)
         {
@@ -314,12 +389,12 @@ public class EnemyMovement : MonoBehaviour
             blockingSoldiers.Remove(soldier);
         }
     }
-    
+
     public void ResumeMovement()
     {
         blockingHero = null;
     }
-    
+
     public int GetBlockerCount()
     {
         int count = blockingSoldiers.Count;
@@ -334,8 +409,8 @@ public class EnemyMovement : MonoBehaviour
     {
         return blockingSoldiers.Count > 0 || blockingHero != null;
     }
-
-    // (추가) 광역 공격 범위를 에디터에서 시각적으로 확인할 수 있도록 Gizmo를 그립니다.
+    
+    // (추가) 광역 공격 범위를 씬 뷰에서 시각적으로 보여주기 위한 기즈모
     private void OnDrawGizmosSelected()
     {
         if (isAreaOfEffect)
@@ -345,3 +420,4 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 }
+

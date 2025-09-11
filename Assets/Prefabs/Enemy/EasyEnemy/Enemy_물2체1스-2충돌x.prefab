@@ -200,6 +200,8 @@ GameObject:
   - component: {fileID: 7334520908270781745}
   - component: {fileID: 6333193910153891430}
   - component: {fileID: 5180914001936920742}
+  - component: {fileID: 6149800968863591060}
+  - component: {fileID: 3681811861598189722}
   m_Layer: 9
   m_Name: "Enemy_\uBB3C2\uCCB41\uC2A4-2\uCDA9\uB3CCx"
   m_TagString: Enemy
@@ -270,8 +272,8 @@ SpriteRenderer:
   m_SortingLayerID: -1506382439
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: -2413806693520163455, guid: b13278790a6bff84dbc30f37f3d89600, type: 3}
-  m_Color: {r: 0.8763343, g: 0.3075471, b: 1, a: 1}
+  m_Sprite: {fileID: -8310989327364841812, guid: 67bcf183ac9fad944bd5a53f468d0c97, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -293,16 +295,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db827249f2d55cb4c8fff517560b47c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMovement
-  moveSpeed: 2
+  moveSpeed: 1
   knockbackSpeed: 7
   attackDamage: 25
   timeBetweenAttacks: 0.7
-  canBeBlocked: 0
   isAreaOfEffect: 0
   aoeRadius: 1.5
   friendlyLayer:
     serializedVersion: 2
     m_Bits: 0
+  attackAnimationClip: {fileID: 0}
+  canBeBlocked: 0
 --- !u!114 &7334520908270781745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +389,40 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!95 &6149800968863591060
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3599941311329457413}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e73d1864fe165e04bb8d03033a96cfc7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3681811861598189722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3599941311329457413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fd34915b4a5b0f4ea9dffa7058e6548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimationController
 --- !u!1 &6746306205770879324
 GameObject:
   m_ObjectHideFlags: 0
