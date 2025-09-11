@@ -155,7 +155,6 @@ GameObject:
   - component: {fileID: 5413921214921425035}
   - component: {fileID: 5837200328265163448}
   - component: {fileID: 5338282218186973493}
-  - component: {fileID: -3344491319371381218}
   - component: {fileID: 7544506478589583519}
   - component: {fileID: 4544216231425658566}
   m_Layer: 6
@@ -175,7 +174,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1644839902085048486}
@@ -319,7 +318,7 @@ MonoBehaviour:
   moveSpeed: 5
   maxHealth: 500
   attackDamage: 30
-  timeBetweenAttacks: 1
+  timeBetweenAttacks: 0.5
   healthRegenRate: 50
   timeToStartRegen: 3
   healthBarSlider: {fileID: 3619236416454428086}
@@ -327,42 +326,6 @@ MonoBehaviour:
   heroClonePrefab: {fileID: 5056428046348673483, guid: e045d84a0a12b3c43951b66196b2de5f, type: 3}
   cloneSpawnPointLeft: {fileID: 8514911278988750768}
   cloneSpawnPointRight: {fileID: 399237736550077336}
---- !u!58 &-3344491319371381218
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3504752534761658920}
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 1.5
 --- !u!114 &7544506478589583519
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -288,8 +288,8 @@ GameObject:
   - component: {fileID: 1594331087870502468}
   - component: {fileID: 4773110090629015965}
   - component: {fileID: 3957708954499238860}
-  - component: {fileID: 2093371749498524497}
-  - component: {fileID: 8358085194689899656}
+  - component: {fileID: -3891868395816507855}
+  - component: {fileID: -6013644578488237825}
   m_Layer: 6
   m_Name: HeroClone
   m_TagString: Untagged
@@ -460,7 +460,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   attackAnimationClip: {fileID: 7400000, guid: 7511c1d8bcb479f4d972c6e7e5db2a7d, type: 2}
---- !u!95 &2093371749498524497
+--- !u!95 &-3891868395816507855
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -482,7 +482,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8358085194689899656
+--- !u!114 &-6013644578488237825
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

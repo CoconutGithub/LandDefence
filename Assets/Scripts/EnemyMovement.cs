@@ -2,7 +2,6 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 
-// (추가) 둔화 효과의 정보(강도, 지속시간)를 담는 클래스
 public class SlowEffect
 {
     public float Amount;
@@ -22,17 +21,15 @@ public class EnemyMovement : MonoBehaviour
     private float attackDamage = 15f;
     [SerializeField]
     private float timeBetweenAttacks = 1.5f;
-    // (추가) 광역 공격 옵션
     [SerializeField]
     private bool isAreaOfEffect = false;
     [SerializeField]
     private float aoeRadius = 1.5f;
     [SerializeField]
-    private LayerMask friendlyLayer; // (수정) 이제 여러 레이어를 선택할 수 있습니다.
+    private LayerMask friendlyLayer;
     [SerializeField]
-    private AnimationClip attackAnimationClip; // (추가) 공격 애니메이션 클립 연결
+    private AnimationClip attackAnimationClip;
 
-    // (추가) 충돌 비활성화 옵션
     [Header("특성")]
     [SerializeField]
     private bool canBeBlocked = true;
@@ -44,6 +41,7 @@ public class EnemyMovement : MonoBehaviour
 
     private List<SoldierController> blockingSoldiers = new List<SoldierController>();
     private HeroController blockingHero;
+    private HeroCloneController blockingClone; // (추가) 분신을 별도로 저장할 변수
 
     private float originalSpeed;
     private List<SlowEffect> activeSlows = new List<SlowEffect>();
@@ -53,7 +51,6 @@ public class EnemyMovement : MonoBehaviour
 
     private bool isBeingKnockedBack = false;
 
-    // (수정) 애니메이션 제어를 위한 변수들
     private AnimationController animationController;
     private Vector3 originalScale;
     private float attackAnimLength; 
@@ -61,11 +58,9 @@ public class EnemyMovement : MonoBehaviour
     void Start()
     {
         originalSpeed = moveSpeed;
-        // (수정) 애니메이션 관련 변수 초기화
         animationController = GetComponent<AnimationController>();
         originalScale = transform.localScale;
         
-        // (추가) 공격 애니메이션 길이 가져오기
         if (attackAnimationClip != null)
         {
             attackAnimLength = attackAnimationClip.length;
@@ -101,20 +96,19 @@ public class EnemyMovement : MonoBehaviour
             {
                 isRooted = false;
             }
-            // (수정) 속박 상태일 때는 움직이지 않으므로 IsMoving을 false로 설정
             if (animationController != null) animationController.SetAnimationBool("IsMoving", false);
             return;
         }
 
         HandleEffects();
         
-        bool isFighting = blockingSoldiers.Count > 0 || blockingHero != null;
+        // (수정) isFighting 조건에 blockingClone 추가
+        bool isFighting = blockingSoldiers.Count > 0 || blockingHero != null || blockingClone != null;
         if (animationController != null)
         {
             animationController.SetAnimationBool("IsMoving", !isFighting && !isRooted && !isBeingKnockedBack);
         }
 
-        // (수정) 이동 방향에 따른 스프라이트 좌우 반전 로직 호출
         HandleSpriteDirection(isFighting);
 
         if (isFighting)
@@ -127,17 +121,20 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    // (수정) 스프라이트 방향을 제어하는 새로운 함수
     private void HandleSpriteDirection(bool isFighting)
     {
         Transform currentTargetTransform = null;
 
         if (isFighting)
         {
-            // 싸우고 있을 때는 현재 공격 대상을 바라봅니다.
             if (blockingHero != null)
             {
                 currentTargetTransform = blockingHero.transform;
+            }
+            // (추가) 분신을 바라보도록 설정
+            else if (blockingClone != null)
+            {
+                currentTargetTransform = blockingClone.transform;
             }
             else if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
             {
@@ -146,11 +143,9 @@ public class EnemyMovement : MonoBehaviour
         }
         else if (waypoints != null && currentWaypointIndex < waypoints.Length)
         {
-            // 이동 중일 때는 다음 웨이포인트를 바라봅니다.
             currentTargetTransform = waypoints[currentWaypointIndex];
         }
 
-        // 목표가 있을 경우에만 방향을 계산합니다.
         if (currentTargetTransform != null)
         {
             float directionX = currentTargetTransform.position.x - transform.position.x;
@@ -224,10 +219,8 @@ public class EnemyMovement : MonoBehaviour
     {
         isBeingKnockedBack = true;
 
-        if (blockingHero != null)
-        {
-            blockingHero.ResumeMovement();
-        }
+        if (blockingHero != null) { blockingHero.ResumeMovement(); }
+        if (blockingClone != null) { blockingClone.ResumeFromBlock(); } // (추가) 분신에게도 알려줌
 
         foreach (var soldier in new List<SoldierController>(blockingSoldiers))
         {
@@ -276,7 +269,6 @@ public class EnemyMovement : MonoBehaviour
         isBeingKnockedBack = false;
     }
 
-    // (수정) Attack 함수는 이제 애니메이션 속도를 조절하고 재생만 담당합니다.
     void Attack()
     {
         attackCountdown -= Time.deltaTime;
@@ -284,7 +276,6 @@ public class EnemyMovement : MonoBehaviour
         {
             if (animationController != null)
             {
-                // timeBetweenAttacks에 맞춰 애니메이션 속도를 계산합니다.
                 if (attackAnimLength > 0 && timeBetweenAttacks > 0)
                 {
                     float speedMultiplier = attackAnimLength / timeBetweenAttacks;
@@ -295,11 +286,10 @@ public class EnemyMovement : MonoBehaviour
                     animationController.SetAnimationSpeed(1f);
                 }
                 
-                animationController.PlayAttackAnimation(); // "DoAttack" Trigger 발동
+                animationController.PlayAttackAnimation();
             }
             else
             {
-                // 애니메이터가 없으면 즉시 데미지를 줍니다.
                 DealDamage();
             }
             
@@ -307,10 +297,8 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
-    // (추가) 애니메이션 이벤트에서 호출될, 실제 데미지를 주는 함수
     public void DealDamage()
     {
-        // (수정) 광역 공격 로직
         if (isAreaOfEffect)
         {
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, aoeRadius, friendlyLayer);
@@ -324,7 +312,7 @@ public class EnemyMovement : MonoBehaviour
                     hit.GetComponent<HeroCloneController>().TakeDamage(attackDamage);
             }
         }
-        else // 단일 공격
+        else
         {
             if (blockingSoldiers.Count > 0 && blockingSoldiers[0] != null)
             {
@@ -334,12 +322,18 @@ public class EnemyMovement : MonoBehaviour
             {
                 blockingHero.TakeDamage(attackDamage);
             }
+            // (핵심 수정) 적이 분신을 공격하도록 로직을 추가합니다.
+            else if (blockingClone != null)
+            {
+                blockingClone.TakeDamage(attackDamage);
+            }
         }
     }
 
     void Move()
     {
-        if (waypoints != null && currentWaypointIndex >= waypoints.Length)
+        // NullReferenceException 방지를 위한 안전장치
+        if (waypoints == null || currentWaypointIndex >= waypoints.Length)
         {
             return;
         }
@@ -366,7 +360,6 @@ public class EnemyMovement : MonoBehaviour
 
     public void BlockMovement(SoldierController soldier, HeroController hero)
     {
-        // (수정) canBeBlocked가 false이면 함수를 즉시 종료하여 막히지 않도록 합니다.
         if (!canBeBlocked || isBeingKnockedBack) return;
 
         if (soldier != null)
@@ -382,6 +375,13 @@ public class EnemyMovement : MonoBehaviour
         }
     }
 
+    // (추가) 분신이 길을 막을 때 호출할 새로운 함수
+    public void BlockMovementByClone(HeroCloneController clone)
+    {
+        if (!canBeBlocked || isBeingKnockedBack) return;
+        blockingClone = clone;
+    }
+
     public void UnblockBySoldier(SoldierController soldier)
     {
         if (blockingSoldiers.Contains(soldier))
@@ -393,24 +393,22 @@ public class EnemyMovement : MonoBehaviour
     public void ResumeMovement()
     {
         blockingHero = null;
+        blockingClone = null; // (추가) 분신 참조도 초기화
     }
 
     public int GetBlockerCount()
     {
         int count = blockingSoldiers.Count;
-        if (blockingHero != null)
-        {
-            count++;
-        }
+        if (blockingHero != null) { count++; }
+        if (blockingClone != null) { count++; }
         return count;
     }
 
     public bool IsBlocked()
     {
-        return blockingSoldiers.Count > 0 || blockingHero != null;
+        return blockingSoldiers.Count > 0 || blockingHero != null || blockingClone != null;
     }
     
-    // (추가) 광역 공격 범위를 씬 뷰에서 시각적으로 보여주기 위한 기즈모
     private void OnDrawGizmosSelected()
     {
         if (isAreaOfEffect)
