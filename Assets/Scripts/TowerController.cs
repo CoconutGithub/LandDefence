@@ -51,7 +51,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private float laserDps = 30f;
     [SerializeField]
     private float laserDpsRamp = 10f;
-    // (수정) LineRenderer 그라데이션 대신, 스프라이트에 적용할 단일 색상 배열로 변경
     [SerializeField]
     private Color[] laserColors = new Color[3]; 
 
@@ -76,9 +75,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     private Transform firePoint;
     [SerializeField]
     private Transform characterSpriteTransform;
-    // (제거) 더 이상 LineRenderer를 직접 참조하지 않습니다.
-    // [SerializeField]
-    // private LineRenderer laserLineRenderer;
     [SerializeField]
     private GameObject haetaePrefab;
     [SerializeField]
@@ -86,10 +82,9 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
     [SerializeField]
     private Sprite missileSprite;
     
-    // (추가) 새로운 스프라이트 레이저 프리팹을 연결할 변수
     [SerializeField]
     private GameObject laserBeamPrefab;
-    private LaserBeamController activeLaserBeam; // 현재 활성화된 레이저를 저장할 변수
+    private LaserBeamController activeLaserBeam;
 
     private float attackAnimLength;
     private Transform currentTarget;
@@ -224,10 +219,7 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
             Debug.Log("골드가 부족합니다!");
         }
     }
-
-    // (제거) LineRenderer 색상 설정 함수는 더 이상 필요 없습니다.
-    // void ApplyLaserColor(int skillLevel) { ... }
-
+    
     void ApplyAllPassiveSkillEffects()
     {
         timeBetweenAttacks = originalTimeBetweenAttacks;
@@ -353,7 +345,6 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         attackCountdown -= Time.deltaTime;
         if (isLaserTower)
         {
-            // (수정) 새로운 스프라이트 레이저 로직으로 변경
             HandleSpriteLaserAttack();
         }
         else
@@ -480,37 +471,32 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // (수정) LineRenderer 대신 새로운 스프라이트 기반 레이저를 제어하는 함수
+    // (수정) 힐 스킬을 배워도 레이저 공격이 멈추지 않도록 수정되었습니다.
     void HandleSpriteLaserAttack()
     {
-        // 타겟이 있고, 힐 스킬을 배우지 않았을 때
-        if (currentTarget != null && GetSkillLevel("힐") <= 0)
+        // 타겟이 있을 때만 레이저를 쏩니다. 힐 스킬 유무와는 상관없습니다.
+        if (currentTarget != null)
         {
-            // 아직 레이저가 생성되지 않았다면, 새로 생성합니다.
             if (activeLaserBeam == null)
             {
                 GameObject laserGO = Instantiate(laserBeamPrefab, transform.position, Quaternion.identity);
                 activeLaserBeam = laserGO.GetComponent<LaserBeamController>();
             }
 
-            // 스킬 레벨에 맞는 색상을 가져옵니다.
             int skillLevel = GetSkillLevel("아브라카다브라!");
-            Color laserColor = Color.white; // 기본값
+            Color laserColor = Color.white;
             if (skillLevel > 0 && skillLevel <= laserColors.Length)
             {
                 laserColor = laserColors[skillLevel - 1];
             }
 
-            // 매 프레임 레이저를 업데이트합니다.
             activeLaserBeam.UpdateLaser(firePoint.position, currentTarget.position, laserColor);
             
-            // 애니메이션을 제어합니다.
             if (animationController != null)
             {
                 animationController.SetAnimationBool("IsCasting", true);
             }
 
-            // 데미지 계산 및 적용 로직은 그대로 유지합니다.
             if (currentTarget == lastTarget)
             {
                 laserTimer += Time.deltaTime;
@@ -532,22 +518,19 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
 
             currentTarget.GetComponent<EnemyHealth>().TakeDamage(damageToSend, towerType, damageType);
         }
-        else // 타겟이 없거나 힐 스킬을 배웠다면
+        else // 타겟이 없으면 레이저를 끕니다.
         {
-            // 활성화된 레이저가 있다면 파괴합니다.
             if (activeLaserBeam != null)
             {
                 Destroy(activeLaserBeam.gameObject);
                 activeLaserBeam = null;
             }
             
-            // 애니메이션을 멈춥니다.
             if (animationController != null)
             {
                 animationController.SetAnimationBool("IsCasting", false);
             }
 
-            // 데미지 관련 변수들을 초기화합니다.
             currentDpsRamp = 0f;
             laserTimer = 0f;
             lastTarget = null;
@@ -1050,4 +1033,3 @@ public class TowerController : MonoBehaviour, IPointerClickHandler
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
-
