@@ -1,0 +1,284 @@
+fileFormatVersion: 2
+guid: 20ed603d2cb1f724288e4b3e81df3e09
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -7617728702753827074
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_0
+  - first:
+      213: 2683612360215768811
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_1
+  - first:
+      213: -7928401331517141542
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_2
+  - first:
+      213: -2895217519775085111
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_3
+  - first:
+      213: -7268941193603296947
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_4
+  - first:
+      213: -8915663224898656407
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_5
+  - first:
+      213: -1229572481455771050
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_6
+  - first:
+      213: -2557112988997463364
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_7
+  - first:
+      213: -6326991011860658125
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_8
+  - first:
+      213: -4315577942087662797
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_9
+  - first:
+      213: -5853164566996588419
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_10
+  - first:
+      213: -74661879513206616
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_11
+  - first:
+      213: -5783235004921717911
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_12
+  - first:
+      213: 7879516248995522801
+    second: Generated Image September 11, 2025 - 3_49PM-Photoroom_13
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 200
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Generated Image September 11, 2025 - 3_49PM-Photoroom_0
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 557
+        width: 276
+        height: 288
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ef69f05fa14684690800000000000000
+      internalID: -7617728702753827074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Generated Image September 11, 2025 - 3_49PM-Photoroom_1
+      rect:
+        serializedVersion: 2
+        x: 549
+        y: 583
+        width: 386
+        height: 257
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bee2285293b1e3520800000000000000
+      internalID: 2683612360215768811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Generated Image September 11, 2025 - 3_49PM-Photoroom_3
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 137
+        width: 279
+        height: 296
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cd815a510f12d7d0800000000000000
+      internalID: -2895217519775085111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Generated Image September 11, 2025 - 3_49PM-Photoroom_4
+      rect:
+        serializedVersion: 2
+        x: 339
+        y: 146
+        width: 337
+        height: 283
+      alignment: 9
+      pivot: {x: 0.39465874, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4152163f788f1b90800000000000000
+      internalID: -7268941193603296947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Generated Image September 11, 2025 - 3_49PM-Photoroom_8
+      rect:
+        serializedVersion: 2
+        x: 676
+        y: 144
+        width: 348
+        height: 285
+      alignment: 9
+      pivot: {x: 0.4224138, y: 0.50526315}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 338c4f052330238a0800000000000000
+      internalID: -6326991011860658125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 911ceb257f313874ba4f8a569710196c
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_0: -7617728702753827074
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_1: 2683612360215768811
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_10: -5853164566996588419
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_11: -74661879513206616
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_12: -5783235004921717911
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_13: 7879516248995522801
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_2: -7928401331517141542
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_3: -2895217519775085111
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_4: -7268941193603296947
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_5: -8915663224898656407
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_6: -1229572481455771050
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_7: -2557112988997463364
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_8: -6326991011860658125
+      Generated Image September 11, 2025 - 3_49PM-Photoroom_9: -4315577942087662797
+      "\uBC34\uC2DC_0": -696314294
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
