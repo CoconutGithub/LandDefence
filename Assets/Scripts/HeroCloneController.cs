@@ -1,4 +1,3 @@
-//HeroCloneController.cs
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -35,6 +34,15 @@ public class HeroCloneController : MonoBehaviour
     [SerializeField]
     private LayerMask enemyLayer;
 
+    // (추가) 애니메이션 관련 변수
+    [Header("애니메이션 정보")]
+    [SerializeField]
+    private AnimationClip attackAnimationClip;
+    private AnimationController animationController;
+    private float attackAnimLength;
+    private Vector3 originalScale;
+
+
     private float currentHealth;
     private float attackCountdown = 0f;
     private EnemyMovement currentTarget;
@@ -44,6 +52,13 @@ public class HeroCloneController : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        // (추가) 애니메이션 관련 변수 초기화
+        animationController = GetComponent<AnimationController>();
+        originalScale = transform.localScale;
+        if (attackAnimationClip != null)
+        {
+            attackAnimLength = attackAnimationClip.length;
+        }
     }
 
     void Start()
@@ -74,13 +89,36 @@ public class HeroCloneController : MonoBehaviour
     {
         if (heroTransform == null) return;
 
+        // (수정) 목표가 죽어서 참조가 사라졌는지 매 프레임 초반에 먼저 확인하여 오류를 방지합니다.
+        if (currentTarget == null && (currentState == CloneState.ChasingEnemy || currentState == CloneState.Fighting))
+        {
+            // 목표가 사라졌다면, 즉시 대기 상태로 돌아가 새로운 행동을 결정합니다.
+            currentState = CloneState.FollowingHero;
+        }
+
+
+        // (추가) 애니메이션 제어
+        if (animationController != null)
+        {
+            bool isMoving = (currentState == CloneState.ChasingEnemy || currentState == CloneState.ReturningToHero);
+            animationController.SetAnimationBool("IsMoving", isMoving);
+        }
+
+        // (추가) 방향 전환
+        HandleSpriteDirection();
+
         // (수정) 본체와 너무 멀어지면, 현재 상태가 '복귀중'이 아닐 경우에만 '복귀' 상태로 강제 전환합니다.
         if (Vector3.Distance(transform.position, heroTransform.position) > leashDistance && currentState != CloneState.ReturningToHero)
         {
-            currentTarget = null;
+            // (추가) 적을 놓아줍니다.
+            if (currentTarget != null)
+            {
+                currentTarget.UnblockBySoldier(null); // 병사가 아니지만, 길막 해제 로직을 재사용합니다.
+                currentTarget = null;
+            }
             currentState = CloneState.ReturningToHero;
         }
-        
+
         switch (currentState)
         {
             case CloneState.FollowingHero:
@@ -103,12 +141,12 @@ public class HeroCloneController : MonoBehaviour
                 break;
         }
     }
-    
+
     void FixedUpdate()
     {
         // (수정) 상태에 따라 이동 로직을 명확히 구분합니다.
         // 기본적으로는 멈춰있도록 설정합니다.
-        rb.linearVelocity = Vector2.zero; 
+        rb.linearVelocity = Vector2.zero;
 
         switch (currentState)
         {
@@ -118,10 +156,37 @@ public class HeroCloneController : MonoBehaviour
             case CloneState.ChasingEnemy:
                 if (currentTarget != null) MoveTowards(currentTarget.transform.position);
                 break;
-            // 'FollowingHero'와 'Fighting' 상태에서는 물리적인 이동을 하지 않습니다.
+                // 'FollowingHero'와 'Fighting' 상태에서는 물리적인 이동을 하지 않습니다.
         }
     }
-    
+
+    // (수정) 목표를 향해 바라보도록 방향을 전환하는 함수 (null 체크 강화)
+    void HandleSpriteDirection()
+    {
+        Transform target = null;
+        if (currentState == CloneState.ChasingEnemy || currentState == CloneState.Fighting)
+        {
+            // currentTarget이 null이 아닐 때만 transform을 참조하도록 명시적으로 확인합니다.
+            if (currentTarget != null)
+            {
+                target = currentTarget.transform;
+            }
+        }
+        else if (currentState == CloneState.ReturningToHero)
+        {
+            target = heroTransform;
+        }
+
+        if (target != null)
+        {
+            float directionX = target.position.x - transform.position.x;
+            if (Mathf.Abs(directionX) > 0.01f)
+            {
+                transform.localScale = new Vector3(Mathf.Sign(directionX) * Mathf.Abs(originalScale.x), originalScale.y, originalScale.z);
+            }
+        }
+    }
+
     // 목표 지점을 향해 이동하는 함수입니다.
     void MoveTowards(Vector3 targetPosition)
     {
@@ -138,7 +203,7 @@ public class HeroCloneController : MonoBehaviour
         foreach (var hitCollider in hitColliders)
         {
             EnemyMovement enemy = hitCollider.GetComponent<EnemyMovement>();
-            if (enemy != null)
+            if (enemy != null && !enemy.IsBlocked())
             {
                 float distance = Vector3.Distance(transform.position, enemy.transform.position);
                 if (distance < minDistance)
@@ -163,10 +228,12 @@ public class HeroCloneController : MonoBehaviour
             currentState = CloneState.FollowingHero;
             return;
         }
-        
+
         if (Vector3.Distance(transform.position, currentTarget.transform.position) <= attackRange)
         {
             currentState = CloneState.Fighting;
+            // (추가) 적의 길을 막습니다.
+            currentTarget.BlockMovement(null, heroTransform.GetComponent<HeroController>()); // 자신 대신 본체 영웅을 기준으로 길을 막습니다.
         }
     }
 
@@ -178,10 +245,12 @@ public class HeroCloneController : MonoBehaviour
             currentState = CloneState.FollowingHero;
             return;
         }
-        
-        if(Vector3.Distance(transform.position, currentTarget.transform.position) > attackRange)
+
+        if (Vector3.Distance(transform.position, currentTarget.transform.position) > attackRange)
         {
             currentState = CloneState.ChasingEnemy;
+            // (추가) 멀어지면 길막을 해제합니다.
+            currentTarget.ResumeMovement();
             return;
         }
 
@@ -192,7 +261,31 @@ public class HeroCloneController : MonoBehaviour
         }
     }
 
+    // (수정) 이제 애니메이션 재생 및 속도 조절만 담당합니다.
     void Attack()
+    {
+        if (currentTarget != null && animationController != null)
+        {
+            if (attackAnimLength > 0 && timeBetweenAttacks > 0)
+            {
+                float speedMultiplier = attackAnimLength / timeBetweenAttacks;
+                animationController.SetAnimationSpeed(speedMultiplier);
+            }
+            else
+            {
+                animationController.SetAnimationSpeed(1f);
+            }
+            animationController.PlayAttackAnimation();
+        }
+        else if (currentTarget != null)
+        {
+            // 애니메이터가 없을 경우를 대비해 직접 데미지를 줍니다.
+            DealDamageToTarget();
+        }
+    }
+
+    // (추가) 애니메이션 이벤트에서 호출될 함수
+    public void DealDamageToTarget()
     {
         if (currentTarget != null)
         {
@@ -215,16 +308,21 @@ public class HeroCloneController : MonoBehaviour
 
     void Die()
     {
+        // (추가) 죽기 전에 적을 놓아줍니다.
+        if (currentTarget != null)
+        {
+            currentTarget.ResumeMovement();
+        }
         Destroy(gameObject);
     }
-    
+
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, recognitionRadius);
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-        if(heroTransform != null)
+        if (heroTransform != null)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(heroTransform.position, leashDistance);

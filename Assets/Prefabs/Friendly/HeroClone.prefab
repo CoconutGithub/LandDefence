@@ -459,6 +459,7 @@ MonoBehaviour:
   enemyLayer:
     serializedVersion: 2
     m_Bits: 512
+  attackAnimationClip: {fileID: 7400000, guid: 7511c1d8bcb479f4d972c6e7e5db2a7d, type: 2}
 --- !u!95 &2093371749498524497
 Animator:
   serializedVersion: 7
